@@ -154,7 +154,7 @@ MonoBehaviour:
   worldManager: {fileID: 2092113648}
   inventory: {fileID: 14225382}
   cropStateResolver: {fileID: 14225383}
-  cropSystem: {fileID: 0}
+  cropSystem: {fileID: 14225384}
   isInitialized: 0
 --- !u!4 &14225381
 Transform:
@@ -353,7 +353,7 @@ MonoBehaviour:
   m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
-    TrackingTarget: {fileID: 1221134440}
+    TrackingTarget: {fileID: 1953733760}
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
@@ -478,15 +478,15 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0
+    x: 0.0013917885
     y: 0
-    width: 1
+    width: 0.9965206
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5.05
+  orthographic size: 6.3125
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -578,7 +578,7 @@ MonoBehaviour:
   m_RefResolutionX: 320
   m_RefResolutionY: 180
   m_CropFrame: 0
-  m_GridSnapping: 0
+  m_GridSnapping: 2
   m_FilterMode: 0
   m_UpscaleRT: 0
   m_PixelSnapping: 0
@@ -664,7 +664,52 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Selector
   sizeOffset: {x: 0.5, y: 0.5}
   selectorRenderer: {fileID: 208326144}
-  movementEnabled: 1
+--- !u!1 &1953733758
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1953733760}
+  - component: {fileID: 1953733759}
+  m_Layer: 0
+  m_Name: Camera Target
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1953733759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1953733758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fcba9ffffc5ba940988d550d2831dc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraTarget
+  selector: {fileID: 1221134441}
+  enableMovement: 0
+--- !u!4 &1953733760
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1953733758}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2092113647
 GameObject:
   m_ObjectHideFlags: 0
@@ -698,6 +743,7 @@ MonoBehaviour:
   worldHeight: 500
   chunkSize: 3
   terrainUnitPrefab: {fileID: 7025223914562458753, guid: 0813c39bdbc442e4fb3eb0ff64abcee2, type: 3}
+  cropPrefab: {fileID: 3631138170149481173, guid: 4a2a2d3c6df03714eba60aba3efd5c0f, type: 3}
 --- !u!4 &2092113649
 Transform:
   m_ObjectHideFlags: 0
@@ -719,6 +765,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 338348482}
   - {fileID: 1174896163}
+  - {fileID: 1953733760}
   - {fileID: 14225381}
   - {fileID: 2092113649}
   - {fileID: 1221134440}

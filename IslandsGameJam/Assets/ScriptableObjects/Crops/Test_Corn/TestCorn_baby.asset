@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: TestCorn_baby
   m_EditorClassIdentifier: Assembly-CSharp::CropProperties
-  cropVisual: {fileID: 0}
+  cropVisual: {fileID: 5064783790253195744, guid: 63e6d16f530d3964990375bd24726b25, type: 3}
   growthTime: 5
   goldGain: 5
   multiBonus: 1

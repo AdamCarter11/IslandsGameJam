@@ -10,10 +10,6 @@ public class Selector : MonoBehaviour
     [SerializeField]
     private SpriteRenderer selectorRenderer;
 
-    [Header("Runtime")]
-    [SerializeField]
-    private bool movementEnabled = true;
-
     private void Awake()
     {
         SetSize(1);
@@ -29,7 +25,7 @@ public class Selector : MonoBehaviour
 
         Vector2 mousePosition = Mouse.current.position.ReadValue();
         var snappedPosition = Camera.main.ScreenToWorldPoint(mousePosition).SnapToGrid();
-        if (movementEnabled) transform.position = snappedPosition;
+        transform.position = snappedPosition;
         Vector2Int worldPosition = snappedPosition.ToInt();
 
         if (GameManager.Main.WorldManager.IsInsideAvailableChunk(worldPosition))
@@ -46,8 +42,6 @@ public class Selector : MonoBehaviour
         {
             OnLeftClicked(worldPosition);
         }
-
-        movementEnabled = Keyboard.current?.spaceKey.wasPressedThisFrame ?? false;
     }
 
     private void SetSize(int size)
@@ -62,14 +56,16 @@ public class Selector : MonoBehaviour
         var cropSystem = GameManager.Main.CropSystem;
         var world = GameManager.Main.WorldManager;
 
-        // temp until cropsystem available
+        if (cropSystem == null || world == null)
+        {
+            return;
+        }
+
         if (world.IsInsideAvailableChunk(cell))
         {
             world.UnlockChunk(chunk);
-        }
-
-        if (cropSystem == null || world == null)
             return;
+        }
 
         if (world.TryGetCrop(cell, out CropCell crop) && crop != null)
         {

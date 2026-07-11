@@ -1,5 +1,6 @@
 using ColorMak3r.Utility;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class Selector : MonoBehaviour
@@ -20,6 +21,10 @@ public class Selector : MonoBehaviour
     private void Update()
     {
         if (GameManager.Main == null || !GameManager.Main.IsInitialized)
+            return;
+
+        // Pause world interaction while the shop is open.
+        if (ShopController.Main != null && ShopController.Main.IsOpen)
             return;
 
         if (Mouse.current == null)
@@ -48,9 +53,24 @@ public class Selector : MonoBehaviour
 
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
+            if (IsPointerOverUi())
+                return;
             OnLeftClicked(worldPosition);
         }
     }
+
+    static bool IsPointerOverUi()
+    {
+        if (EventSystem.current == null)
+            return false;
+
+        // Input System: pass the active pointer device id when available.
+        if (Pointer.current != null)
+            return EventSystem.current.IsPointerOverGameObject(Pointer.current.deviceId);
+
+        return EventSystem.current.IsPointerOverGameObject();
+    }
+
 
     private void SetSize(int size)
     {
@@ -82,10 +102,15 @@ public class Selector : MonoBehaviour
             return;
         }
 
-        if (cropSystem.DebugCropToPlant != null)
-        {
-            cropSystem.PlantCrop(cell, cropSystem.DebugCropToPlant);
+        var inventory = GameManager.Main.Inventory;
+        if (inventory == null)
             return;
-        }
+
+        var selected = inventory.GetSlot(inventory.SelectedSlot);
+        if (selected == null || selected.IsEmpty)
+            return;
+
+        if (cropSystem.PlantCrop(cell, selected.crop))
+            inventory.TryConsumeSelected(out _);
     }
 }

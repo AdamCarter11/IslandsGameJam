@@ -17,3 +17,6 @@ MonoBehaviour:
   stages:
   - {fileID: 11400000, guid: 38b4da6cd2a6d2547ad96c6eb2587c2a, type: 2}
   - {fileID: 11400000, guid: 78af733f58c66e64eaa2c047bda88f78, type: 2}
+  shopIcon: {fileID: 737859076552439139, guid: 63e6d16f530d3964990375bd24726b25, type: 3}
+  seedPrice: 10
+  unlockedByDefault: 1

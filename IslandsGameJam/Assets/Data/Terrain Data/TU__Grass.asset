@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20f5429b746d79d4ba3eae0b1837fb8c, type: 3}
+  m_Name: TU__Grass
+  m_EditorClassIdentifier: Assembly-CSharp::TerrainData
+  baseSprite: {fileID: -940734972957952075, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  underlaySprite: {fileID: 6874031185403104410, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  overlayChance: 0.5
+  overlaySprites:
+  - {fileID: -6400664361080092691, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  - {fileID: -1384291044056463679, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  - {fileID: -9010937559744409786, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  - {fileID: -708208305306161255, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  - {fileID: 6088218445924519806, guid: fe55ede08226be749a4b47a25a92a303, type: 3}

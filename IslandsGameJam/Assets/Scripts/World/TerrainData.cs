@@ -29,6 +29,7 @@ public class TerrainData : ScriptableObject
     [SerializeField]
     private Sprite[] overlaySprites;
 
+    public TerrainType Type => type;
     public Sprite BaseSprite => baseSprite;
     public Sprite OverlaySprite => Random.value < overlayChance ? overlaySprites.Random() : null;
     public Sprite UnderlaySprite => underlaySprite;

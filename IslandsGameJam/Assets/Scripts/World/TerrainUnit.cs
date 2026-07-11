@@ -16,6 +16,8 @@ public class TerrainUnit : MonoBehaviour
     [SerializeField]
     private TerrainData mockData;
 
+    public TerrainType Type => terrainData.Type;
+
     private Sprite terrainOverlaySprite;
 
     private void Awake()

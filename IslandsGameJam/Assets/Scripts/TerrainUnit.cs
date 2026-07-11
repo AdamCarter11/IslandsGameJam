@@ -16,6 +16,8 @@ public class TerrainUnit : MonoBehaviour
     [SerializeField]
     private TerrainData mockData;
 
+    private Sprite terrainOverlaySprite;
+
     private void Awake()
     {
         if (mockData != null) Initialize(mockData);
@@ -25,7 +27,18 @@ public class TerrainUnit : MonoBehaviour
     {
         terrainData = data;
         baseRenderer.sprite = terrainData.BaseSprite;
-        overlayRenderer.sprite = terrainData.OverlaySprite;
+        terrainOverlaySprite = terrainData.OverlaySprite;
+        overlayRenderer.sprite = terrainOverlaySprite;
         underlayRenderer.sprite = terrainData.UnderlaySprite;
+    }
+
+    public void SetCropVisual(Sprite sprite)
+    {
+        overlayRenderer.sprite = sprite;
+    }
+
+    public void ClearCropVisual()
+    {
+        overlayRenderer.sprite = terrainOverlaySprite;
     }
 }

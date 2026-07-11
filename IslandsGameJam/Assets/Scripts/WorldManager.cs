@@ -21,15 +21,83 @@ public class WorldManager : MonoBehaviour
     private GameObject terrainUnitPrefab;
 
     private OffsetArray2D<TerrainUnit> terrainUnits;
+    private OffsetArray2D<CropCell> crops;
     private Dictionary<Vector2Int, TerrainChunk> currentChunks = new Dictionary<Vector2Int, TerrainChunk>();
     private Dictionary<Vector2Int, TerrainChunk> availableChunks = new Dictionary<Vector2Int, TerrainChunk>();
 
     public void Initialize()
     {
-        terrainUnits = new OffsetArray2D<TerrainUnit>(-worldWidth / 2, worldWidth / 2, -worldHeight / 2, worldHeight);
+        int minX = -worldWidth / 2;
+        int maxX = worldWidth / 2;
+        int minY = -worldHeight / 2;
+        int maxY = worldHeight;
+        terrainUnits = new OffsetArray2D<TerrainUnit>(minX, maxX, minY, maxY);
+        crops = new OffsetArray2D<CropCell>(minX, maxX, minY, maxY);
 
         var firstChunk = new TerrainChunk(Vector2Int.zero);
         GenerateChunk(Vector2Int.zero); //temp
+    }
+
+    public bool TryGetCrop(Vector2Int position, out CropCell cell)
+    {
+        if (crops == null || !crops.Contains(position.x, position.y))
+        {
+            cell = null;
+            return false;
+        }
+
+        cell = crops[position.x, position.y];
+        return cell != null;
+    }
+
+    public void SetCrop(Vector2Int position, CropCell cell)
+    {
+        if (crops == null || !crops.Contains(position.x, position.y))
+            return;
+
+        crops[position.x, position.y] = cell;
+    }
+
+    public void ClearCrop(Vector2Int position)
+    {
+        if (crops == null || !crops.Contains(position.x, position.y))
+            return;
+
+        crops[position.x, position.y] = null;
+
+        if (terrainUnits != null &&
+            terrainUnits.Contains(position.x, position.y) &&
+            terrainUnits[position.x, position.y] != null)
+        {
+            terrainUnits[position.x, position.y].ClearCropVisual();
+        }
+    }
+
+    /// <summary>
+    /// Plants a crop at the given cell. Fails if out of bounds, no terrain, or cell occupied.
+    /// </summary>
+    public bool PlantCrop(Vector2Int position, CropGrowthSO crop)
+    {
+        if (crop == null || crops == null || terrainUnits == null)
+            return false;
+        if (!crops.Contains(position.x, position.y))
+            return false;
+        if (!terrainUnits.Contains(position.x, position.y) || terrainUnits[position.x, position.y] == null)
+            return false;
+        if (crops[position.x, position.y] != null)
+            return false;
+
+        var cell = new CropCell
+        {
+            crop = crop,
+            stageIndex = 0,
+            stageElapsed = 0f
+        };
+        crops[position.x, position.y] = cell;
+
+        var stage = cell.CurrentStage;
+        terrainUnits[position.x, position.y].SetCropVisual(stage != null ? stage.cropVisual : null);
+        return true;
     }
 
     public List<TerrainChunk> GetAvailableChunksFromPosition(Vector2Int position)

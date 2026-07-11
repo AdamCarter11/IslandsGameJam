@@ -29,6 +29,7 @@ public class WorldManager : MonoBehaviour
         terrainUnits = new OffsetArray2D<TerrainUnit>(-worldWidth / 2, worldWidth / 2, -worldHeight / 2, worldHeight);
 
         var firstChunk = new TerrainChunk(Vector2Int.zero);
+        GenerateChunk(Vector2Int.zero); //temp
     }
 
     public List<TerrainChunk> GetAvailableChunksFromPosition(Vector2Int position)

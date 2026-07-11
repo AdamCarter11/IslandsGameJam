@@ -19,6 +19,12 @@ public class RelicSO : ScriptableObject
     public string relicName;
     [TextArea(2, 6)] public string desc;
     public RelicEffect[] effects;
+
+    [Tooltip("If true, this relic can appear in the shop again after purchase and stack via multiple AddRelic calls.")]
+    public bool allowMultiplePurchases;
+
+    [Tooltip("Optional icon shown on relic choice cards.")]
+    public Sprite shopIcon;
 }
 
 [System.Serializable]

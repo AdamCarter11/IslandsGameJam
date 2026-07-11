@@ -16,8 +16,14 @@ public class ShopController : MonoBehaviour
     [SerializeField] GoldHUD goldHud;
     [SerializeField] HotbarUI hotbarUi;
     [SerializeField] ShopPanelUI shopPanelUi;
+    [SerializeField] RelicChoicePanelUI relicChoicePanelUi;
 
     public bool IsOpen { get; private set; }
+
+    public bool IsRelicChoiceOpen =>
+        relicChoicePanelUi != null
+            ? relicChoicePanelUi.IsOpen
+            : shopPanelUi != null && shopPanelUi.IsRelicChoiceOpen;
 
     Inventory inventory;
 
@@ -36,6 +42,7 @@ public class ShopController : MonoBehaviour
         EnsureEventSystem();
 
         inventory = GameManager.Main != null ? GameManager.Main.Inventory : FindFirstObjectByType<Inventory>();
+        var relicShop = GameManager.Main != null ? GameManager.Main.RelicShopService : FindFirstObjectByType<RelicShopService>();
 
         if (shopOpenButton != null)
         {
@@ -45,7 +52,13 @@ public class ShopController : MonoBehaviour
 
         goldHud?.Initialize(inventory);
         hotbarUi?.Initialize(inventory);
-        shopPanelUi?.Initialize(inventory, CloseShop);
+
+        if (relicChoicePanelUi == null && shopPanelUi != null)
+            relicChoicePanelUi = shopPanelUi.GetComponentInChildren<RelicChoicePanelUI>(true);
+        if (relicChoicePanelUi == null)
+            relicChoicePanelUi = GetComponentInChildren<RelicChoicePanelUI>(true);
+
+        shopPanelUi?.Initialize(inventory, CloseShop, relicShop, relicChoicePanelUi);
 
         if (shopPanelRoot != null)
             shopPanelRoot.SetActive(false);
@@ -63,12 +76,19 @@ public class ShopController : MonoBehaviour
         if (Keyboard.current == null)
             return;
 
+        // Must pick a relic — Escape cannot dismiss the choice or close the seed shop.
+        if (IsRelicChoiceOpen)
+            return;
+
         if (IsOpen && Keyboard.current.escapeKey.wasPressedThisFrame)
             CloseShop();
     }
 
     public void ToggleShop()
     {
+        if (IsRelicChoiceOpen)
+            return;
+
         if (IsOpen)
             CloseShop();
         else
@@ -86,11 +106,13 @@ public class ShopController : MonoBehaviour
         IsOpen = true;
         if (shopPanelRoot != null)
             shopPanelRoot.SetActive(true);
+
+        shopPanelUi?.RefreshRelicRollButton();
     }
 
     public void CloseShop()
     {
-        if (!IsOpen)
+        if (!IsOpen || IsRelicChoiceOpen)
             return;
         IsOpen = false;
         if (shopPanelRoot != null)
@@ -118,13 +140,15 @@ public class ShopController : MonoBehaviour
         Button openButton,
         GoldHUD gold,
         HotbarUI hotbar,
-        ShopPanelUI shopPanel)
+        ShopPanelUI shopPanel,
+        RelicChoicePanelUI choicePanel = null)
     {
         shopPanelRoot = panelRoot;
         shopOpenButton = openButton;
         goldHud = gold;
         hotbarUi = hotbar;
         shopPanelUi = shopPanel;
+        relicChoicePanelUi = choicePanel;
     }
 #endif
 }

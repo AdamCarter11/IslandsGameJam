@@ -11,8 +11,12 @@ public static class GameHudPrefabBuilder
     const string PrefabFolder = "Assets/Prefabs/UI";
     const string HotbarSlotPath = PrefabFolder + "/HotbarSlot.prefab";
     const string ShopRowPath = PrefabFolder + "/ShopRow.prefab";
+    const string RelicChoiceCardPath = PrefabFolder + "/RelicChoiceCard.prefab";
     const string GameHudPath = PrefabFolder + "/GameHUD.prefab";
     const string MainGamePath = "Assets/Scenes/MainGame.unity";
+
+    const string RelicsFolder = "Assets/ScriptableObjects/Relics";
+    const string RelicShopCatalogPath = RelicsFolder + "/RelicShopCatalog.asset";
 
     const int SlotCount = 10;
     const float SlotSize = 56f;
@@ -22,26 +26,31 @@ public static class GameHudPrefabBuilder
     static readonly Color PanelColor = new(0.08f, 0.09f, 0.12f, 0.96f);
     static readonly Color RowColor = new(0.16f, 0.17f, 0.22f, 1f);
     static readonly Color BuyColor = new(0.25f, 0.55f, 0.3f, 1f);
+    static readonly Color RelicRollColor = new(0.45f, 0.32f, 0.15f, 1f);
+    static readonly Color RelicCardColor = new(0.14f, 0.15f, 0.2f, 1f);
 
     [MenuItem("Tools/UI/Build Game HUD Prefabs")]
     public static void BuildAll()
     {
         EnsureFolder();
+        EnsureRelicShopCatalog();
 
         var hotbarSlot = BuildHotbarSlotPrefab();
         var shopRow = BuildShopRowPrefab();
-        BuildGameHudPrefab(hotbarSlot, shopRow);
+        var relicCard = BuildRelicChoiceCardPrefab();
+        BuildGameHudPrefab(hotbarSlot, shopRow, relicCard);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[GameHudPrefabBuilder] Wrote:\n  {HotbarSlotPath}\n  {ShopRowPath}\n  {GameHudPath}");
+        Debug.Log($"[GameHudPrefabBuilder] Wrote:\n  {HotbarSlotPath}\n  {ShopRowPath}\n  {RelicChoiceCardPath}\n  {GameHudPath}\n  {RelicShopCatalogPath}");
     }
 
     [MenuItem("Tools/UI/Wire Game HUD Into MainGame")]
     public static void WireMainGame()
     {
         BuildAll();
+        var catalog = EnsureRelicShopCatalog();
 
         var scene = EditorSceneManager.OpenScene(MainGamePath);
         var shopController = Object.FindFirstObjectByType<ShopController>();
@@ -66,6 +75,7 @@ public static class GameHudPrefabBuilder
         var goldHud = hudInstance.GetComponentInChildren<GoldHUD>(true);
         var hotbarUi = hudInstance.GetComponentInChildren<HotbarUI>(true);
         var shopPanelUi = hudInstance.GetComponentInChildren<ShopPanelUI>(true);
+        var relicChoicePanelUi = hudInstance.GetComponentInChildren<RelicChoicePanelUI>(true);
         var shopPanelRoot = shopPanelUi != null ? shopPanelUi.gameObject : null;
 
         Button openButton = null;
@@ -78,12 +88,15 @@ public static class GameHudPrefabBuilder
             }
         }
 
-        shopController.EditorAssign(shopPanelRoot, openButton, goldHud, hotbarUi, shopPanelUi);
+        shopController.EditorAssign(shopPanelRoot, openButton, goldHud, hotbarUi, shopPanelUi, relicChoicePanelUi);
         EditorUtility.SetDirty(shopController);
+
+        WireRelicShopIntoGameManager(catalog);
+
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
 
-        Debug.Log("[GameHudPrefabBuilder] Wired GameHUD into MainGame under Game HUD / ShopController.");
+        Debug.Log("[GameHudPrefabBuilder] Wired GameHUD + RelicShopCatalog into MainGame.");
     }
 
     public static void BuildAllBatch()
@@ -106,6 +119,126 @@ public static class GameHudPrefabBuilder
             AssetDatabase.CreateFolder("Assets", "Prefabs");
         if (!AssetDatabase.IsValidFolder(PrefabFolder))
             AssetDatabase.CreateFolder("Assets/Prefabs", "UI");
+    }
+
+    static void EnsureScriptableObjectsFolders()
+    {
+        if (!AssetDatabase.IsValidFolder("Assets/ScriptableObjects"))
+            AssetDatabase.CreateFolder("Assets", "ScriptableObjects");
+        if (!AssetDatabase.IsValidFolder(RelicsFolder))
+            AssetDatabase.CreateFolder("Assets/ScriptableObjects", "Relics");
+    }
+
+    static RelicShopCatalog EnsureRelicShopCatalog()
+    {
+        EnsureScriptableObjectsFolders();
+
+        var relics = new[]
+        {
+            EnsureRelicAsset(
+                "Relic_GoldenTouch",
+                "Golden Touch",
+                "Harvested crops yield a bit more gold.",
+                allowMultiple: false,
+                RelicEffectType.ModifyGold,
+                2f,
+                multiplicative: false),
+            EnsureRelicAsset(
+                "Relic_GrowthCharm",
+                "Growth Charm",
+                "Crops grow slightly faster. Stacks.",
+                allowMultiple: true,
+                RelicEffectType.ModifyGrowthTime,
+                0.9f,
+                multiplicative: true),
+            EnsureRelicAsset(
+                "Relic_BountifulYield",
+                "Bountiful Yield",
+                "Increases harvest multiplier. Stacks.",
+                allowMultiple: true,
+                RelicEffectType.ModifyMulti,
+                0.15f,
+                multiplicative: false),
+            EnsureRelicAsset(
+                "Relic_DryEndurance",
+                "Dry Endurance",
+                "Crops survive dry soil longer.",
+                allowMultiple: false,
+                RelicEffectType.ModifyDryDeathTime,
+                5f,
+                multiplicative: false),
+        };
+
+        var catalog = AssetDatabase.LoadAssetAtPath<RelicShopCatalog>(RelicShopCatalogPath);
+        if (catalog == null)
+        {
+            catalog = ScriptableObject.CreateInstance<RelicShopCatalog>();
+            AssetDatabase.CreateAsset(catalog, RelicShopCatalogPath);
+        }
+
+        catalog.allRelics = new System.Collections.Generic.List<RelicSO>(relics);
+        catalog.baseRollCost = 25;
+        catalog.costMultiplierPerPurchase = 1.5f;
+        catalog.skipRefundBasePercent = 0.10f;
+        catalog.skipRefundIncreasePerSkip = 0.05f;
+        catalog.skipRefundMaxPercent = 0.50f;
+        EditorUtility.SetDirty(catalog);
+        AssetDatabase.SaveAssets();
+        return catalog;
+    }
+
+    static RelicSO EnsureRelicAsset(
+        string fileName,
+        string displayName,
+        string description,
+        bool allowMultiple,
+        RelicEffectType effectType,
+        float amount,
+        bool multiplicative)
+    {
+        string path = $"{RelicsFolder}/{fileName}.asset";
+        var relic = AssetDatabase.LoadAssetAtPath<RelicSO>(path);
+        if (relic == null)
+        {
+            relic = ScriptableObject.CreateInstance<RelicSO>();
+            AssetDatabase.CreateAsset(relic, path);
+        }
+
+        relic.relicName = displayName;
+        relic.desc = description;
+        relic.allowMultiplePurchases = allowMultiple;
+        relic.effects = new[]
+        {
+            new RelicEffect
+            {
+                type = effectType,
+                amount = amount,
+                multiplicative = multiplicative,
+            }
+        };
+        EditorUtility.SetDirty(relic);
+        return relic;
+    }
+
+    static void WireRelicShopIntoGameManager(RelicShopCatalog catalog)
+    {
+        var gameManager = Object.FindFirstObjectByType<GameManager>();
+        if (gameManager == null)
+        {
+            Debug.LogError("[GameHudPrefabBuilder] No GameManager in MainGame.");
+            return;
+        }
+
+        var relicShop = gameManager.GetComponent<RelicShopService>();
+        if (relicShop == null)
+            relicShop = Undo.AddComponent<RelicShopService>(gameManager.gameObject);
+
+        var inventory = gameManager.Inventory ?? gameManager.GetComponent<Inventory>();
+        relicShop.EditorAssign(inventory, catalog);
+        gameManager.EditorAssign(relicShop, catalog);
+
+        EditorUtility.SetDirty(relicShop);
+        EditorUtility.SetDirty(gameManager);
     }
 
     static GameObject BuildHotbarSlotPrefab()
@@ -204,7 +337,62 @@ public static class GameHudPrefabBuilder
         return prefab.GetComponent<ShopRowView>();
     }
 
-    static void BuildGameHudPrefab(GameObject hotbarSlotPrefab, ShopRowView shopRowPrefab)
+    static RelicChoiceCardView BuildRelicChoiceCardPrefab()
+    {
+        var root = new GameObject("RelicChoiceCard", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+        var rootRt = root.GetComponent<RectTransform>();
+        rootRt.sizeDelta = new Vector2(200f, 280f);
+
+        var le = root.GetComponent<LayoutElement>();
+        le.minWidth = 200f;
+        le.preferredWidth = 200f;
+        le.minHeight = 280f;
+        le.preferredHeight = 280f;
+
+        var bg = root.GetComponent<Image>();
+        bg.color = RelicCardColor;
+        bg.raycastTarget = true;
+
+        var selectBtn = root.GetComponent<Button>();
+        selectBtn.targetGraphic = bg;
+        ApplyButtonColors(selectBtn, RelicCardColor);
+
+        var iconRt = CreateRect("Icon", rootRt);
+        SetAnchored(iconRt, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -16f), new Vector2(72f, 72f));
+        var icon = iconRt.gameObject.AddComponent<Image>();
+        icon.color = Color.white;
+        icon.raycastTarget = false;
+        icon.preserveAspect = true;
+        icon.enabled = false;
+
+        var nameRt = CreateRect("Name", rootRt);
+        SetAnchored(nameRt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -96f), new Vector2(-16f, 28f));
+        var nameText = AddText(nameRt, "Relic", 18, TextAnchor.MiddleCenter, Color.white);
+
+        var descRt = CreateRect("Desc", rootRt);
+        SetAnchored(descRt, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
+            new Vector2(0f, -20f), new Vector2(-20f, -160f));
+        var descText = AddText(descRt, "Description", 13, TextAnchor.UpperCenter, new Color(0.85f, 0.85f, 0.9f));
+        descText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        descText.verticalOverflow = VerticalWrapMode.Truncate;
+
+        var refundRt = CreateRect("Refund", rootRt);
+        SetAnchored(refundRt, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f),
+            new Vector2(0f, 12f), new Vector2(-16f, 28f));
+        var refundText = AddText(refundRt, "Refund: 0 gold", 14, TextAnchor.MiddleCenter, new Color(0.55f, 0.95f, 0.55f));
+        refundText.gameObject.SetActive(false);
+
+        var view = root.AddComponent<RelicChoiceCardView>();
+        view.EditorAssign(icon, nameText, descText, refundText, selectBtn);
+
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, RelicChoiceCardPath);
+        Object.DestroyImmediate(root);
+        return prefab.GetComponent<RelicChoiceCardView>();
+    }
+
+    static void BuildGameHudPrefab(GameObject hotbarSlotPrefab, ShopRowView shopRowPrefab, RelicChoiceCardView relicCardPrefab)
     {
         var canvasGo = new GameObject("GameHUD", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         var canvasRt = (RectTransform)canvasGo.transform;
@@ -303,7 +491,7 @@ public static class GameHudPrefabBuilder
         // Shop panel
         var shopPanelRt = CreateRect("ShopPanel", canvasRt);
         SetAnchored(shopPanelRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            Vector2.zero, new Vector2(420f, 420f));
+            Vector2.zero, new Vector2(420f, 480f));
         var panelImg = shopPanelRt.gameObject.AddComponent<Image>();
         panelImg.color = PanelColor;
         var shopPanel = shopPanelRt.gameObject.AddComponent<ShopPanelUI>();
@@ -328,7 +516,7 @@ public static class GameHudPrefabBuilder
 
         var listRt = CreateRect("List", shopPanelRt);
         SetAnchored(listRt, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
-            new Vector2(0f, -18f), new Vector2(-24f, -70f));
+            new Vector2(0f, 10f), new Vector2(-24f, -130f));
         var layout = listRt.gameObject.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 8f;
         layout.padding = new RectOffset(4, 4, 4, 4);
@@ -340,7 +528,54 @@ public static class GameHudPrefabBuilder
         var fitter = listRt.gameObject.AddComponent<ContentSizeFitter>();
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        shopPanel.EditorAssign(closeBtn, listRt, shopRowPrefab);
+        var relicRollRt = CreateRect("RelicRollButton", shopPanelRt);
+        SetAnchored(relicRollRt, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f),
+            new Vector2(0f, 12f), new Vector2(-24f, 44f));
+        var relicRollImg = relicRollRt.gameObject.AddComponent<Image>();
+        relicRollImg.color = RelicRollColor;
+        var relicRollBtn = relicRollRt.gameObject.AddComponent<Button>();
+        relicRollBtn.targetGraphic = relicRollImg;
+        ApplyButtonColors(relicRollBtn, RelicRollColor);
+        var relicRollLabelRt = CreateRect("Label", relicRollRt);
+        Stretch(relicRollLabelRt);
+        var relicRollLabel = AddText(relicRollLabelRt, "Buy Relic (25 gold)", 16, TextAnchor.MiddleCenter, Color.white);
+
+        // Relic choice panel (must-pick overlay; no close button)
+        var choiceRt = CreateRect("RelicChoicePanel", canvasRt);
+        Stretch(choiceRt);
+        var choiceBg = choiceRt.gameObject.AddComponent<Image>();
+        choiceBg.color = new Color(0f, 0f, 0f, 0.55f);
+        choiceBg.raycastTarget = true;
+        var choicePanel = choiceRt.gameObject.AddComponent<RelicChoicePanelUI>();
+
+        var choiceTitleRt = CreateRect("Title", choiceRt);
+        SetAnchored(choiceTitleRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(0f, 180f), new Vector2(480f, 40f));
+        AddText(choiceTitleRt, "Choose a Relic", 28, TextAnchor.MiddleCenter, Color.white);
+
+        var cardsRt = CreateRect("Cards", choiceRt);
+        SetAnchored(cardsRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(0f, -10f), new Vector2(680f, 300f));
+        var cardsLayout = cardsRt.gameObject.AddComponent<HorizontalLayoutGroup>();
+        cardsLayout.spacing = 20f;
+        cardsLayout.padding = new RectOffset(10, 10, 10, 10);
+        cardsLayout.childAlignment = TextAnchor.MiddleCenter;
+        cardsLayout.childControlHeight = true;
+        cardsLayout.childControlWidth = true;
+        cardsLayout.childForceExpandHeight = true;
+        cardsLayout.childForceExpandWidth = false;
+
+        var choiceCards = new RelicChoiceCardView[3];
+        for (int i = 0; i < 3; i++)
+        {
+            var cardInstance = (GameObject)PrefabUtility.InstantiatePrefab(relicCardPrefab.gameObject, cardsRt);
+            cardInstance.name = $"RelicCard_{i}";
+            choiceCards[i] = cardInstance.GetComponent<RelicChoiceCardView>();
+        }
+        choicePanel.EditorAssign(choiceCards);
+        choiceRt.gameObject.SetActive(false);
+
+        shopPanel.EditorAssign(closeBtn, listRt, shopRowPrefab, relicRollBtn, relicRollLabel, choicePanel);
 
         var sync = shopPanelRt.gameObject.AddComponent<ShopBackdropSync>();
         sync.SetBackdrop(backdropRt.gameObject);
@@ -348,6 +583,8 @@ public static class GameHudPrefabBuilder
         shopPanelRt.gameObject.SetActive(false);
         // Panel must render above the full-screen backdrop so buttons remain clickable.
         shopPanelRt.SetSiblingIndex(backdropRt.GetSiblingIndex() + 1);
+        // Choice overlay sits above the seed shop.
+        choiceRt.SetSiblingIndex(shopPanelRt.GetSiblingIndex() + 1);
 
         // Hotbar
         float totalWidth = SlotCount * SlotSize + (SlotCount - 1) * SlotGap;

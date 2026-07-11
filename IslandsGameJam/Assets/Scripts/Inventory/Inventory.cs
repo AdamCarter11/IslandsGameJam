@@ -10,6 +10,31 @@ public class Inventory : MonoBehaviour
     public List<RelicSO> ownedRelics = new();
     public void AddRelic(RelicSO relic) => ownedRelics.Add(relic);
 
+    public bool OwnsRelic(RelicSO relic)
+    {
+        if (relic == null)
+            return false;
+        for (int i = 0; i < ownedRelics.Count; i++)
+        {
+            if (ownedRelics[i] == relic)
+                return true;
+        }
+        return false;
+    }
+
+    public int CountOwned(RelicSO relic)
+    {
+        if (relic == null)
+            return 0;
+        int count = 0;
+        for (int i = 0; i < ownedRelics.Count; i++)
+        {
+            if (ownedRelics[i] == relic)
+                count++;
+        }
+        return count;
+    }
+
     // --- Gold ---
     public int gold;
 

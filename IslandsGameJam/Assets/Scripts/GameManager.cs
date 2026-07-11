@@ -24,9 +24,15 @@ public class GameManager : MonoBehaviour
     [SerializeField] private CropSystem cropSystem;
     public CropSystem CropSystem => cropSystem;
 
+    [SerializeField] private RelicShopService relicShopService;
+    public RelicShopService RelicShopService => relicShopService;
+
     [Header("Shop")]
     [SerializeField] private SeedShopCatalog seedShopCatalog;
     public SeedShopCatalog SeedShopCatalog => seedShopCatalog;
+
+    [SerializeField] private RelicShopCatalog relicShopCatalog;
+    public RelicShopCatalog RelicShopCatalog => relicShopCatalog;
 
     [Header("Runtime")]
     [SerializeField]
@@ -47,4 +53,12 @@ public class GameManager : MonoBehaviour
         worldManager.Initialize();
         isInitialized = true;
     }
+
+#if UNITY_EDITOR
+    public void EditorAssign(RelicShopService shopService, RelicShopCatalog shopCatalog)
+    {
+        relicShopService = shopService;
+        relicShopCatalog = shopCatalog;
+    }
+#endif
 }

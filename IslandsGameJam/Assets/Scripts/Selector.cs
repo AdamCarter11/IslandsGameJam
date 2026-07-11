@@ -89,18 +89,43 @@ public class Selector : MonoBehaviour
             return;
         }
 
+        if (cropSystem.IsHarvestBusy)
+            return;
+
         if (world.IsInsideAvailableChunk(cell))
         {
             world.UnlockChunk(chunk);
             return;
         }
 
-        if (world.TryGetCrop(cell, out CropCell crop) && crop != null)
+        var toolMode = ToolModeController.Main;
+        if (toolMode != null)
         {
-            if (crop.IsReady)
-                cropSystem.HarvestAt(cell);
-            return;
+            if (toolMode.IsWateringMode)
+            {
+                if (world.TryGetCrop(cell, out var wateredCrop) && wateredCrop != null)
+                    cropSystem.WaterAt(cell);
+                return;
+            }
+
+            if (toolMode.IsHarvestMode)
+            {
+                if (world.TryGetCrop(cell, out var harvestCrop) && harvestCrop != null && harvestCrop.IsReady)
+                    cropSystem.HarvestAt(cell);
+                return;
+            }
+
+            if (toolMode.IsDestroyMode)
+            {
+                if (world.TryGetCrop(cell, out var destroyCrop) && destroyCrop != null)
+                    cropSystem.DestroyAt(cell);
+                return;
+            }
         }
+
+        // No tool mode: plant from hotbar on empty cells only.
+        if (world.TryGetCrop(cell, out CropCell existing) && existing != null)
+            return;
 
         var inventory = GameManager.Main.Inventory;
         if (inventory == null)

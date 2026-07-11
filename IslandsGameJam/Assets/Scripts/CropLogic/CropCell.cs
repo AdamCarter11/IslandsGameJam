@@ -8,6 +8,8 @@ public class CropCell
     public CropGrowthSO crop;
     public int stageIndex;
     public float stageElapsed;
+    public bool isWatered;
+    public float dryElapsed;
     public CropView view;
 
     /// <summary>
@@ -29,6 +31,12 @@ public class CropCell
                 return null;
             return crop.stages[stageIndex];
         }
+    }
+
+    public void Water()
+    {
+        isWatered = true;
+        view?.SetWatered(true);
     }
 
     public void AdvanceStage()

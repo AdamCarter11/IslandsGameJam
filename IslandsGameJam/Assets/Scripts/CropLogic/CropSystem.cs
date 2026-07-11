@@ -1,13 +1,21 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Owns crop growth ticks, planted-cell tracking, and chain harvest.
+/// Owns crop growth ticks, planted-cell tracking, drought death, and chain harvest.
 /// </summary>
 public class CropSystem : MonoBehaviour
 {
     [SerializeField] private CropGrowthSO debugCropToPlant;
     [SerializeField] private CoinDropService coinDropService;
+
+    [Header("Harvest hop")]
+    [SerializeField] private float popDuration = 0.12f;
+    [SerializeField] private float hopDuration = 0.22f;
+    [SerializeField] private float hopHeight = 0.5f;
+    [SerializeField] private int flyerSortingOrder = 10;
+    [SerializeField] private string flyerSortingLayer = "Overlay";
 
     readonly List<Vector2Int> plantedPositions = new List<Vector2Int>();
     readonly Queue<Vector2Int> harvestQueue = new Queue<Vector2Int>();
@@ -16,6 +24,7 @@ public class CropSystem : MonoBehaviour
 
     public CropGrowthSO DebugCropToPlant => debugCropToPlant;
     public IReadOnlyList<Vector2Int> PlantedPositions => plantedPositions;
+    public bool IsHarvestBusy { get; private set; }
 
     /// <summary>
     /// Plants via WorldManager and registers the cell for growth updates
@@ -41,14 +50,74 @@ public class CropSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// BFS chain harvest from a ready crop. Each harvested crop immediately spawns
-    /// coin drops for gold * multi, then multi += that crop's multi bonus.
+    /// Waters a planted crop at the given cell. One water lasts until harvest/death.
+    /// </summary>
+    public void WaterAt(Vector2Int position)
+    {
+        var world = GameManager.Main.WorldManager;
+        if (world == null)
+            return;
+
+        if (!world.TryGetCrop(position, out CropCell cell) || cell == null)
+            return;
+
+        if (cell.isWatered)
+            return;
+
+        cell.Water();
+    }
+
+    /// <summary>
+    /// Removes a plant from a single cell with no coin drops and no death/harvest relics.
+    /// </summary>
+    public void DestroyAt(Vector2Int position)
+    {
+        var world = GameManager.Main.WorldManager;
+        if (world == null)
+            return;
+
+        if (!world.TryGetCrop(position, out CropCell cell) || cell == null)
+            return;
+
+        world.ClearCrop(position);
+        UnregisterPlanted(position);
+    }
+
+    /// <summary>
+    /// Drought-kills a crop: death gold drops, OnCropDeath relic side-effects, then clear.
+    /// No harvest chain / multi.
+    /// </summary>
+    public void KillAt(Vector2Int position)
+    {
+        var world = GameManager.Main.WorldManager;
+        var resolver = GameManager.Main.CropStateResolver;
+        if (world == null || resolver == null)
+            return;
+
+        if (!world.TryGetCrop(position, out CropCell cell) || cell == null || cell.crop == null)
+            return;
+
+        CropGrowthSO crop = cell.crop;
+        int deathGold = resolver.GetDeathGold(crop);
+        if (coinDropService != null && deathGold > 0)
+            coinDropService.SpawnDrops(new Vector2(position.x, position.y), deathGold);
+
+        world.ClearCrop(position);
+        UnregisterPlanted(position);
+        ApplyCropDeathSpawnTile(position, crop, world);
+    }
+
+    /// <summary>
+    /// BFS chain harvest from a ready crop. A flyer pops at the origin then hops
+    /// cell-to-cell; each landing runs gold * multi, coin drops, pattern enqueue, and clear.
     /// Immature pattern targets are skipped (not cleared) - might want to change this, design decision
     /// empty cells stop rays
     /// </summary>
     public void HarvestAt(Vector2Int origin)
     {
-        #region Grab managers and crop
+        if (IsHarvestBusy)
+            return;
+
         var world = GameManager.Main.WorldManager;
         var resolver = GameManager.Main.CropStateResolver;
         if (world == null || resolver == null || coinDropService == null)
@@ -56,51 +125,108 @@ public class CropSystem : MonoBehaviour
 
         if (!world.TryGetCrop(origin, out CropCell originCell) || originCell == null || !originCell.IsReady)
             return;
-        #endregion
 
-        float multi = 1f;
-        harvestQueue.Clear();
-        harvestVisited.Clear();
-        harvestQueue.Enqueue(origin);
+        StartCoroutine(HarvestChainRoutine(origin));
+    }
 
-        // 1. While there are still cells to be affected
-        // 2. Dequeue next cell to affect and grab its crop
-        // 3. Do drops/harvest logic for that crop
-        // 4. Enque that crops (modified by relics) harvest cells to chain to
-        // 5. Remove crop from grid
-        while (harvestQueue.Count > 0)
+    IEnumerator HarvestChainRoutine(Vector2Int origin)
+    {
+        var world = GameManager.Main.WorldManager;
+        var resolver = GameManager.Main.CropStateResolver;
+        if (world == null || resolver == null || coinDropService == null)
+            yield break;
+
+        IsHarvestBusy = true;
+        HarvestHopVisual flyer = null;
+
+        try
         {
-            Vector2Int pos = harvestQueue.Dequeue();
-            if (harvestVisited.Contains(pos))
-                continue;
+            float multi = 1f;
+            harvestQueue.Clear();
+            harvestVisited.Clear();
 
-            if (!world.TryGetCrop(pos, out CropCell cell) || cell == null || !cell.IsReady)
-                continue;
+            Sprite originSprite = null;
+            if (world.TryGetCrop(origin, out CropCell originCell) && originCell?.crop != null)
+                originSprite = originCell.crop.GetHarvestBounceVisual();
 
-            CropPropertiesSO stage = cell.CurrentStage;
-            CropGrowthSO crop = cell.crop;
-            if (stage == null || crop == null)
-                continue;
+            flyer = HarvestHopVisual.Spawn(
+                transform,
+                CellToWorld(origin),
+                originSprite,
+                flyerSortingOrder,
+                flyerSortingLayer);
 
-            harvestVisited.Add(pos);
+            yield return flyer.Pop(popDuration);
 
-            int gold = resolver.GetGold(stage, crop);
-            float multiBonus = resolver.GetMulti(stage, crop);
+            if (!HarvestOneCell(origin, world, resolver, ref multi))
+                yield break;
 
-            // Spawn coin drops for this crop's payout, then grow the chain multiplier
-            int payout = Mathf.RoundToInt(gold * multi);
-            coinDropService.SpawnDrops(new Vector2(pos.x, pos.y), payout);
-            multi += multiBonus;
+            Vector2Int current = origin;
 
-            // Enqueue stage pattern + relic extra patterns before clearing
-            EnqueuePattern(stage.harvestPattern, pos, world);
-            EnqueueExtraPatternsFromRelics(pos, crop, world);
+            while (harvestQueue.Count > 0)
+            {
+                Vector2Int pos = harvestQueue.Dequeue();
+                if (harvestVisited.Contains(pos))
+                    continue;
 
-            world.ClearCrop(pos);
-            UnregisterPlanted(pos);
-            ApplyHarvestSpawnTile(pos, crop, world);
+                if (!world.TryGetCrop(pos, out CropCell cell) || cell == null || !cell.IsReady)
+                    continue;
+
+                if (cell.crop == null || cell.CurrentStage == null)
+                    continue;
+
+                flyer.SetSprite(cell.crop.GetHarvestBounceVisual());
+                yield return flyer.Hop(CellToWorld(current), CellToWorld(pos), hopDuration, hopHeight);
+
+                if (!HarvestOneCell(pos, world, resolver, ref multi))
+                    continue;
+
+                current = pos;
+            }
+        }
+        finally
+        {
+            if (flyer != null)
+                Destroy(flyer.gameObject);
+            IsHarvestBusy = false;
         }
     }
+
+    /// <summary>
+    /// Harvests one ready cell: payout, multi growth, pattern enqueue, clear, spawn-tile relics.
+    /// </summary>
+    bool HarvestOneCell(Vector2Int pos, WorldManager world, CropStateResolver resolver, ref float multi)
+    {
+        if (harvestVisited.Contains(pos))
+            return false;
+
+        if (!world.TryGetCrop(pos, out CropCell cell) || cell == null || !cell.IsReady)
+            return false;
+
+        CropPropertiesSO stage = cell.CurrentStage;
+        CropGrowthSO crop = cell.crop;
+        if (stage == null || crop == null)
+            return false;
+
+        harvestVisited.Add(pos);
+
+        int gold = resolver.GetGold(stage, crop);
+        float multiBonus = resolver.GetMulti(stage, crop);
+
+        int payout = Mathf.RoundToInt(gold * multi);
+        coinDropService.SpawnDrops(new Vector2(pos.x, pos.y), payout);
+        multi += multiBonus;
+
+        EnqueuePattern(stage.harvestPattern, pos, world);
+        EnqueueExtraPatternsFromRelics(pos, crop, world);
+
+        world.ClearCrop(pos);
+        UnregisterPlanted(pos);
+        ApplyHarvestSpawnTile(pos, crop, world);
+        return true;
+    }
+
+    static Vector3 CellToWorld(Vector2Int cell) => new Vector3(cell.x, cell.y, 0f);
 
     void EnqueuePattern(HarvestPattern pattern, Vector2Int origin, WorldManager world)
     {
@@ -149,6 +275,16 @@ public class CropSystem : MonoBehaviour
 
     void ApplyHarvestSpawnTile(Vector2Int pos, CropGrowthSO harvestedCrop, WorldManager world)
     {
+        ApplySpawnTileRelics(pos, harvestedCrop, world, RelicEffectType.OnHarvestSpawnTile);
+    }
+
+    void ApplyCropDeathSpawnTile(Vector2Int pos, CropGrowthSO deadCrop, WorldManager world)
+    {
+        ApplySpawnTileRelics(pos, deadCrop, world, RelicEffectType.OnCropDeathSpawnTile);
+    }
+
+    void ApplySpawnTileRelics(Vector2Int pos, CropGrowthSO crop, WorldManager world, RelicEffectType effectType)
+    {
         var relics = GameManager.Main.Inventory?.ownedRelics;
         if (relics == null)
             return;
@@ -165,9 +301,9 @@ public class CropSystem : MonoBehaviour
             for (int e = 0; e < relic.effects.Length; e++)
             {
                 RelicEffect effect = relic.effects[e];
-                if (effect == null || effect.type != RelicEffectType.OnHarvestSpawnTile)
+                if (effect == null || effect.type != effectType)
                     continue;
-                if (effect.onlyCrop != null && effect.onlyCrop != harvestedCrop)
+                if (effect.onlyCrop != null && effect.onlyCrop != crop)
                     continue;
                 if (effect.tileToSpawn == null)
                     continue;
@@ -199,15 +335,30 @@ public class CropSystem : MonoBehaviour
                 continue;
             }
 
+            if (cell.crop == null)
+                continue;
+
+            // Drought tick: ready crops still die if left dry (frozen during harvest chain anim)
+            if (!IsHarvestBusy && !cell.isWatered)
+            {
+                cell.dryElapsed += dt;
+                if (cell.dryElapsed >= resolver.GetDryDeathTime(cell.crop))
+                {
+                    KillAt(pos);
+                    i--;
+                    continue;
+                }
+            }
+
             if (cell.IsReady)
                 continue;
 
             CropPropertiesSO stage = cell.CurrentStage;
-            if (stage == null || cell.crop == null)
+            if (stage == null)
                 continue;
 
             cell.stageElapsed += dt;
-            float duration = resolver.GetGrowthTime(stage, cell.crop);
+            float duration = resolver.GetGrowthTime(stage, cell.crop, cell.isWatered);
             if (cell.stageElapsed < duration)
                 continue;
 

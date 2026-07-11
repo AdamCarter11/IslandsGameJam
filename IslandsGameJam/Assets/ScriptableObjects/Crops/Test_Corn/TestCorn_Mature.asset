@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CropProperties
   cropVisual: {fileID: 737859076552439139, guid: 63e6d16f530d3964990375bd24726b25, type: 3}
   growthTime: 5
+  dryGrowthMultiplier: 1
   goldGain: 10
   multiBonus: 1
   harvestPattern:

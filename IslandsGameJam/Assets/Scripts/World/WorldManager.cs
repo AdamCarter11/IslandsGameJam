@@ -140,7 +140,9 @@ public class WorldManager : MonoBehaviour
         {
             crop = crop,
             stageIndex = 0,
-            stageElapsed = 0f
+            stageElapsed = 0f,
+            isWatered = false,
+            dryElapsed = 0f
         };
         crops[position.x, position.y] = cell;
 
@@ -149,7 +151,10 @@ public class WorldManager : MonoBehaviour
         var view = cropObject.GetComponent<CropView>();
         var stage = cell.CurrentStage;
         if (view != null)
+        {
             view.SetVisual(stage != null ? stage.cropVisual : null);
+            view.SetWatered(false);
+        }
         cell.view = view;
         return true;
     }

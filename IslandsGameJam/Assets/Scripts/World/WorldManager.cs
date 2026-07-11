@@ -14,10 +14,10 @@ public class WorldManager : MonoBehaviour
     private int worldWidth = 500;
     [SerializeField]
     private int worldHeight = 500;
-
-    [Header("Chunk Settings")]
     [SerializeField]
     private int chunkSize = 3;
+    [SerializeField]
+    private Vector2Int noObstacleChunkZone = new Vector2Int(5, 5);
 
     [Header("Generation Settings")]
     [SerializeField]
@@ -49,9 +49,9 @@ public class WorldManager : MonoBehaviour
     [SerializeField]
     private GameObject cropPrefab;
 
-    private OffsetArray2D<GameObject> obstacles;
     private OffsetArray2D<TerrainUnit> terrainUnits;
     private OffsetArray2D<CropCell> crops;
+    private Dictionary<Vector2Int, GameObject> obstacles = new Dictionary<Vector2Int, GameObject>();
     private Dictionary<Vector2Int, TerrainChunk> currentChunks = new Dictionary<Vector2Int, TerrainChunk>();
     private Dictionary<Vector2Int, TerrainChunk> availableChunks = new Dictionary<Vector2Int, TerrainChunk>();
 
@@ -132,6 +132,8 @@ public class WorldManager : MonoBehaviour
         if (!crops.Contains(position.x, position.y))
             return false;
         if (!terrainUnits.Contains(position.x, position.y) || terrainUnits[position.x, position.y] == null)
+            return false;
+        if (obstacles.ContainsKey(position))
             return false;
         if (crops[position.x, position.y] != null)
             return false;
@@ -226,7 +228,6 @@ public class WorldManager : MonoBehaviour
             if (!currentChunks.ContainsKey(pos) && !availableChunks.ContainsKey(pos))
             {
                 availableChunks.Add(pos, new TerrainChunk(pos));
-                Debug.Log($"Added available chunk at {pos}");
             }
         }
     }
@@ -247,11 +248,34 @@ public class WorldManager : MonoBehaviour
                 if (terrainUnits[x, y] != null)
                     continue;
                 var spawnPosition = new Vector2(x, y);
-                GameObject terrainUnitObject = Instantiate(terrainUnitPrefab, spawnPosition, Quaternion.identity, transform);
+                GameObject terrainUnitObject = Instantiate(terrainUnitPrefab, spawnPosition,
+                    Quaternion.identity, transform);
                 TerrainUnit terrainUnit = terrainUnitObject.GetComponent<TerrainUnit>();
-                terrainUnit.Initialize(GeRawTerrainData(spawnPosition.ToInt()));
+                var data = GeRawTerrainData(spawnPosition.ToInt());
+                terrainUnit.Initialize(data);
                 terrainUnits[x, y] = terrainUnit;
+
+                if (x < -noObstacleChunkZone.x || x > noObstacleChunkZone.x ||
+                    y < -noObstacleChunkZone.y || y > noObstacleChunkZone.y)
+                {
+                    if (worldGenDataSet.TryGetObstacleData(data, out var sprte))
+                    {
+                        GameObject obstacleObject = Instantiate(obstaclePrefab, spawnPosition,
+                            Quaternion.identity, terrainUnit.transform);
+                        obstacleObject.GetComponentInChildren<SpriteRenderer>().sprite = sprte;
+                        obstacles.Add(new Vector2Int(x, y), obstacleObject);
+                    }
+                }
             }
+        }
+    }
+
+    public void RemoveObstacle(Vector2Int position)
+    {
+        if (obstacles.TryGetValue(position, out var obstacle))
+        {
+            Destroy(obstacle);
+            obstacles.Remove(position);
         }
     }
 

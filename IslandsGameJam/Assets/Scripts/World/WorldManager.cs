@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static UnityEngine.UI.Image;
 
 public class WorldManager : MonoBehaviour
@@ -32,6 +33,8 @@ public class WorldManager : MonoBehaviour
     [SerializeField]
     private float exponent = 1f;
     [SerializeField]
+    private TerrainData voidTerrainData;
+    [SerializeField]
     private WorldGenDataSet worldGenDataSet;
 
     [Header("Prefabs")]
@@ -40,7 +43,6 @@ public class WorldManager : MonoBehaviour
     [SerializeField]
     private GameObject cropPrefab;
 
-    private OffsetArray2D<TerrainData> terrainDataSet;
     private OffsetArray2D<TerrainUnit> terrainUnits;
     private OffsetArray2D<CropCell> crops;
     private Dictionary<Vector2Int, TerrainChunk> currentChunks = new Dictionary<Vector2Int, TerrainChunk>();
@@ -52,11 +54,8 @@ public class WorldManager : MonoBehaviour
         int maxX = worldWidth / 2;
         int minY = -worldHeight / 2;
         int maxY = worldHeight / 2;
-        terrainDataSet = new OffsetArray2D<TerrainData>(minX, maxX, minY, maxY);
         terrainUnits = new OffsetArray2D<TerrainUnit>(minX, maxX, minY, maxY);
         crops = new OffsetArray2D<CropCell>(minX, maxX, minY, maxY);
-
-        GenerateWorld();
 
         var firstChunk = new TerrainChunk(Vector2Int.zero);
         currentChunks.Add(firstChunk.Position, firstChunk);
@@ -149,28 +148,6 @@ public class WorldManager : MonoBehaviour
     #endregion
 
     #region Terrain Management
-
-    public void GenerateWorld()
-    {
-        for (int i = terrainDataSet.MinX; i < terrainDataSet.MaxX; ++i)
-        {
-            for (int j = terrainDataSet.MinY; j < terrainDataSet.MaxY; ++j)
-            {
-                var position = new Vector2Int(i, j);
-                var elevation = GetValue(i, j);
-                var data = worldGenDataSet.Match(elevation);
-                if (data != null)
-                {
-                    terrainDataSet[i, j] = data;
-                }
-                else
-                {
-                    Debug.LogError($"No terrain data found for elevation {elevation} at position {position}");
-                }
-            }
-        }
-    }
-
     protected virtual float GetValue(float x, float y)
     {
         return GetNoise(x + worldWidth / 2, y + worldHeight / 2, Vector2.zero, dimension, scale, octaves, persistence, frequencyBase, exponent);
@@ -260,13 +237,21 @@ public class WorldManager : MonoBehaviour
                 if (terrainUnits[x, y] != null)
                     continue;
                 var spawnPosition = new Vector2(x, y);
-                var data = terrainDataSet[x, y];
                 GameObject terrainUnitObject = Instantiate(terrainUnitPrefab, spawnPosition, Quaternion.identity, transform);
                 TerrainUnit terrainUnit = terrainUnitObject.GetComponent<TerrainUnit>();
-                terrainUnit.Initialize(data);
+                terrainUnit.Initialize(GeRawTerrainData(spawnPosition.ToInt()));
                 terrainUnits[x, y] = terrainUnit;
             }
         }
+    }
+
+    public TerrainData GeRawTerrainData(Vector2Int position)
+    {
+        var elevation = GetValue(position.x, position.y);
+        var data = worldGenDataSet.Match(elevation);
+        if (data == null) data = voidTerrainData;
+
+        return data;
     }
 
     [Button]

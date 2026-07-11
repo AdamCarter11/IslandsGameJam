@@ -211,7 +211,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CropSystem
   debugCropToPlant: {fileID: 11400000, guid: 6f5e785a4c90f5340a7385fc17cb565c, type: 2}
-  coinDropService: {fileID: 0}
+  coinDropService: {fileID: 2082189033}
 --- !u!1 &208326142
 GameObject:
   m_ObjectHideFlags: 0
@@ -515,15 +515,15 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0
+    x: 0.0013917885
     y: 0
-    width: 1
+    width: 0.9965206
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5.625
+  orthographic size: 6.3125
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -740,6 +740,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3424872521111105179, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
       propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3424872521111105179, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3424872521111105179, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3424872521111105179, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
+      propertyPath: m_LocalScale.z
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3424872521111105179, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
@@ -1060,6 +1072,14 @@ MonoBehaviour:
   worldWidth: 500
   worldHeight: 500
   chunkSize: 3
+  dimension: {x: 50, y: 50}
+  scale: 1
+  octaves: 3
+  persistence: 0.5
+  frequencyBase: 2
+  exponent: 1
+  voidTerrainData: {fileID: 11400000, guid: cc3ebec9e0fbf29459a807b681d6cc1b, type: 2}
+  worldGenDataSet: {fileID: 11400000, guid: 938f408b235db7845aa551b40db47f00, type: 2}
   terrainUnitPrefab: {fileID: 7025223914562458753, guid: 0813c39bdbc442e4fb3eb0ff64abcee2, type: 3}
   cropPrefab: {fileID: 3631138170149481173, guid: 4a2a2d3c6df03714eba60aba3efd5c0f, type: 3}
 --- !u!4 &2092113649

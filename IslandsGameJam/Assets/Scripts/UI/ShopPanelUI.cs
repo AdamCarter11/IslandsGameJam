@@ -7,12 +7,18 @@ public class ShopPanelUI : MonoBehaviour
     [SerializeField] Button closeButton;
     [SerializeField] RectTransform listRoot;
     [SerializeField] ShopRowView shopRowPrefab;
+    [SerializeField] Button relicRollButton;
+    [SerializeField] Text relicRollLabel;
+    [SerializeField] RelicChoicePanelUI relicChoicePanel;
 
     Inventory inventory;
+    RelicShopService relicShop;
     System.Action onClose;
     readonly List<ShopRowView> rows = new();
 
-    public void Initialize(Inventory inv, System.Action closeCallback)
+    public bool IsRelicChoiceOpen => relicChoicePanel != null && relicChoicePanel.IsOpen;
+
+    public void Initialize(Inventory inv, System.Action closeCallback, RelicShopService shopService = null, RelicChoicePanelUI choicePanel = null)
     {
         if (inventory != null)
         {
@@ -23,12 +29,30 @@ public class ShopPanelUI : MonoBehaviour
 
         inventory = inv;
         onClose = closeCallback;
+        if (shopService != null)
+            relicShop = shopService;
+        if (choicePanel != null)
+            relicChoicePanel = choicePanel;
 
         if (closeButton != null)
         {
             closeButton.onClick.RemoveAllListeners();
-            closeButton.onClick.AddListener(() => onClose?.Invoke());
+            closeButton.onClick.AddListener(() =>
+            {
+                if (IsRelicChoiceOpen)
+                    return;
+                onClose?.Invoke();
+            });
         }
+
+        if (relicRollButton != null)
+        {
+            relicRollButton.onClick.RemoveAllListeners();
+            relicRollButton.onClick.AddListener(OnRelicRollClicked);
+        }
+
+        if (relicChoicePanel != null)
+            relicChoicePanel.Initialize(relicShop, RefreshRelicRollButton);
 
         if (inventory == null)
             return;
@@ -37,6 +61,7 @@ public class ShopPanelUI : MonoBehaviour
         inventory.OnGoldChanged += OnGoldChanged;
         inventory.OnHotbarChanged += RefreshBuyStates;
         Rebuild();
+        RefreshRelicRollButton();
     }
 
     void OnDestroy()
@@ -48,7 +73,26 @@ public class ShopPanelUI : MonoBehaviour
         inventory.OnHotbarChanged -= RefreshBuyStates;
     }
 
-    void OnGoldChanged(int _) => RefreshBuyStates();
+    void OnGoldChanged(int _)
+    {
+        RefreshBuyStates();
+        RefreshRelicRollButton();
+    }
+
+    void OnRelicRollClicked()
+    {
+        if (relicShop == null || IsRelicChoiceOpen)
+            return;
+        if (!relicShop.TryBeginRoll())
+        {
+            RefreshRelicRollButton();
+            return;
+        }
+
+        RefreshRelicRollButton();
+        relicChoicePanel?.ShowOffers();
+        SetCloseInteractable(false);
+    }
 
     void Rebuild()
     {
@@ -70,6 +114,7 @@ public class ShopPanelUI : MonoBehaviour
         }
 
         RefreshBuyStates();
+        RefreshRelicRollButton();
     }
 
     ShopRowView CreateRow(CropGrowthSO crop)
@@ -101,12 +146,41 @@ public class ShopPanelUI : MonoBehaviour
         }
     }
 
+    public void RefreshRelicRollButton()
+    {
+        SetCloseInteractable(!IsRelicChoiceOpen);
+
+        if (relicRollLabel != null)
+        {
+            int cost = relicShop != null ? relicShop.GetCurrentRollCost() : 0;
+            relicRollLabel.text = $"Buy Relic ({cost} gold)";
+        }
+
+        if (relicRollButton != null)
+            relicRollButton.interactable = relicShop != null && relicShop.CanRoll() && !IsRelicChoiceOpen;
+    }
+
+    void SetCloseInteractable(bool interactable)
+    {
+        if (closeButton != null)
+            closeButton.interactable = interactable;
+    }
+
 #if UNITY_EDITOR
-    public void EditorAssign(Button close, RectTransform list, ShopRowView rowPrefab)
+    public void EditorAssign(
+        Button close,
+        RectTransform list,
+        ShopRowView rowPrefab,
+        Button rollButton = null,
+        Text rollLabel = null,
+        RelicChoicePanelUI choicePanel = null)
     {
         closeButton = close;
         listRoot = list;
         shopRowPrefab = rowPrefab;
+        relicRollButton = rollButton;
+        relicRollLabel = rollLabel;
+        relicChoicePanel = choicePanel;
     }
 #endif
 }

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55ba736ceff09a54cba70813fb62263f, type: 3}
+  m_Name: Relic_BountifulYield
+  m_EditorClassIdentifier: Assembly-CSharp::RelicSO
+  relicName: Bountiful Yield
+  desc: Increases harvest multiplier. Stacks.
+  effects:
+  - type: 1
+    amount: 0.15
+    multiplicative: 0
+    onlyCrop: {fileID: 0}
+    tileToSpawn: {fileID: 0}
+    extraPattern:
+      kind: 0
+      offsets: []
+      direction: {x: 0, y: 0}
+      maxSteps: -1
+  allowMultiplePurchases: 1
+  shopIcon: {fileID: 0}

@@ -211,7 +211,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CropSystem
   debugCropToPlant: {fileID: 11400000, guid: 6f5e785a4c90f5340a7385fc17cb565c, type: 2}
-  coinDropService: {fileID: 0}
+  coinDropService: {fileID: 2082189033}
 --- !u!1 &208326142
 GameObject:
   m_ObjectHideFlags: 0
@@ -517,8 +517,8 @@ Camera:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1
-    height: 1
+    width: 0.33333334
+    height: 0.44444445
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
@@ -702,7 +702,7 @@ MonoBehaviour:
   sizeOffset: {x: 0.5, y: 0.5}
   selectorRenderer: {fileID: 208326144}
   cameraTarget: {fileID: 1953733759}
---- !u!1001 &1418268755
+--- !u!1001 &1643820647
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -799,15 +799,15 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
---- !u!224 &1418268756 stripped
+--- !u!224 &1643820648 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3424872521111105179, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
-  m_PrefabInstance: {fileID: 1418268755}
+  m_PrefabInstance: {fileID: 1643820647}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1418268757 stripped
+--- !u!114 &1643820649 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4556906953371575216, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
-  m_PrefabInstance: {fileID: 1418268755}
+  m_PrefabInstance: {fileID: 1643820647}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
@@ -815,26 +815,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c0f5e7a9b146d2f1b8c4e6f0a2d3c57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HotbarUI
---- !u!1 &1418268759 stripped
+--- !u!1 &1643820650 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2485634758815876154, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
-  m_PrefabInstance: {fileID: 1418268755}
+  m_PrefabInstance: {fileID: 1643820647}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1418268760 stripped
+--- !u!114 &1643820651 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5669711882889212749, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
-  m_PrefabInstance: {fileID: 1418268755}
+  m_PrefabInstance: {fileID: 1643820647}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1418268759}
+  m_GameObject: {fileID: 1643820650}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4d1a6f8b0c257e3a2c9d5f7a1b3e4d68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopPanelUI
---- !u!114 &1418268761 stripped
+--- !u!114 &1643820652 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4662790949304858192, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
-  m_PrefabInstance: {fileID: 1418268755}
+  m_PrefabInstance: {fileID: 1643820647}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
@@ -842,10 +842,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
---- !u!114 &1418268762 stripped
+--- !u!114 &1643820653 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 9184701020097448095, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
-  m_PrefabInstance: {fileID: 1418268755}
+  m_PrefabInstance: {fileID: 1643820647}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
@@ -883,7 +883,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1418268756}
+  - {fileID: 1643820648}
   m_Father: {fileID: 215916258}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1850000003
@@ -898,11 +898,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e2b7a9c1d368f4b3d0e6a8b2c4f5e79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopController
-  shopPanelRoot: {fileID: 1418268759}
-  shopOpenButton: {fileID: 1418268761}
-  goldHud: {fileID: 1418268762}
-  hotbarUi: {fileID: 1418268757}
-  shopPanelUi: {fileID: 1418268760}
+  shopPanelRoot: {fileID: 1643820650}
+  shopOpenButton: {fileID: 1643820652}
+  goldHud: {fileID: 1643820653}
+  hotbarUi: {fileID: 1643820649}
+  shopPanelUi: {fileID: 1643820651}
 --- !u!1 &1953733758
 GameObject:
   m_ObjectHideFlags: 0

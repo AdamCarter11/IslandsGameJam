@@ -5,6 +5,8 @@ public class CropPropertiesSO : ScriptableObject
 {
     public Sprite cropVisual;
     public float growthTime = 5.0f;
+    [Tooltip("Dry growth speed vs watered (0 = no growth while dry, 1 = same as watered, 2 = twice as fast while dry).")]
+    public float dryGrowthMultiplier = 1f;
 
     // I think we will pull this info into the UI (ie, don't put it in the desc)
     public int goldGain = 10;

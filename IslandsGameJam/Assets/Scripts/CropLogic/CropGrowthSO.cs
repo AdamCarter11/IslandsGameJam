@@ -7,6 +7,12 @@ public class CropGrowthSO : ScriptableObject
     [TextArea(3, 10)] public string desc;
     public CropPropertiesSO[] stages;
 
+    [Header("Drought")]
+    [Tooltip("Seconds of continuous dry time before the crop dies.")]
+    public float dryDeathTime = 30f;
+    [Tooltip("Base gold dropped when the crop dies from drought.")]
+    public int deathGold = 1;
+
     [Header("Shop")]
     [Tooltip("Shown in the shop/hotbar. Falls back to the first stage visual if unset.")]
     public Sprite shopIcon;

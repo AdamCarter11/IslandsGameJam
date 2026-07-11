@@ -5,9 +5,12 @@ public enum RelicEffectType
     ModifyGold,
     ModifyMulti,
     ModifyGrowthTime,
+    ModifyDryGrowthMultiplier,
+    ModifyDryDeathTime,
+    ModifyDeathGold,
     OnHarvestSpawnTile,
     OnHarvestExtraPattern,
-
+    OnCropDeathSpawnTile,
 }
 
 [CreateAssetMenu(fileName = "Relic", menuName = "Scriptable Objects/Relics")]

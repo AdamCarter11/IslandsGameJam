@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Owns crop growth ticks, planted-cell tracking, and chain harvest.
+/// Owns crop growth ticks, planted-cell tracking, drought death, and chain harvest.
 /// </summary>
 public class CropSystem : MonoBehaviour
 {
@@ -38,6 +38,48 @@ public class CropSystem : MonoBehaviour
     public void UnregisterPlanted(Vector2Int position)
     {
         plantedPositions.Remove(position);
+    }
+
+    /// <summary>
+    /// Waters a planted crop at the given cell. One water lasts until harvest/death.
+    /// </summary>
+    public void WaterAt(Vector2Int position)
+    {
+        var world = GameManager.Main.WorldManager;
+        if (world == null)
+            return;
+
+        if (!world.TryGetCrop(position, out CropCell cell) || cell == null)
+            return;
+
+        if (cell.isWatered)
+            return;
+
+        cell.Water();
+    }
+
+    /// <summary>
+    /// Drought-kills a crop: death gold drops, OnCropDeath relic side-effects, then clear.
+    /// No harvest chain / multi.
+    /// </summary>
+    public void KillAt(Vector2Int position)
+    {
+        var world = GameManager.Main.WorldManager;
+        var resolver = GameManager.Main.CropStateResolver;
+        if (world == null || resolver == null)
+            return;
+
+        if (!world.TryGetCrop(position, out CropCell cell) || cell == null || cell.crop == null)
+            return;
+
+        CropGrowthSO crop = cell.crop;
+        int deathGold = resolver.GetDeathGold(crop);
+        if (coinDropService != null && deathGold > 0)
+            coinDropService.SpawnDrops(new Vector2(position.x, position.y), deathGold);
+
+        world.ClearCrop(position);
+        UnregisterPlanted(position);
+        ApplyCropDeathSpawnTile(position, crop, world);
     }
 
     /// <summary>
@@ -149,6 +191,16 @@ public class CropSystem : MonoBehaviour
 
     void ApplyHarvestSpawnTile(Vector2Int pos, CropGrowthSO harvestedCrop, WorldManager world)
     {
+        ApplySpawnTileRelics(pos, harvestedCrop, world, RelicEffectType.OnHarvestSpawnTile);
+    }
+
+    void ApplyCropDeathSpawnTile(Vector2Int pos, CropGrowthSO deadCrop, WorldManager world)
+    {
+        ApplySpawnTileRelics(pos, deadCrop, world, RelicEffectType.OnCropDeathSpawnTile);
+    }
+
+    void ApplySpawnTileRelics(Vector2Int pos, CropGrowthSO crop, WorldManager world, RelicEffectType effectType)
+    {
         var relics = GameManager.Main.Inventory?.ownedRelics;
         if (relics == null)
             return;
@@ -165,9 +217,9 @@ public class CropSystem : MonoBehaviour
             for (int e = 0; e < relic.effects.Length; e++)
             {
                 RelicEffect effect = relic.effects[e];
-                if (effect == null || effect.type != RelicEffectType.OnHarvestSpawnTile)
+                if (effect == null || effect.type != effectType)
                     continue;
-                if (effect.onlyCrop != null && effect.onlyCrop != harvestedCrop)
+                if (effect.onlyCrop != null && effect.onlyCrop != crop)
                     continue;
                 if (effect.tileToSpawn == null)
                     continue;
@@ -199,15 +251,30 @@ public class CropSystem : MonoBehaviour
                 continue;
             }
 
+            if (cell.crop == null)
+                continue;
+
+            // Drought tick: ready crops still die if left dry
+            if (!cell.isWatered)
+            {
+                cell.dryElapsed += dt;
+                if (cell.dryElapsed >= resolver.GetDryDeathTime(cell.crop))
+                {
+                    KillAt(pos);
+                    i--;
+                    continue;
+                }
+            }
+
             if (cell.IsReady)
                 continue;
 
             CropPropertiesSO stage = cell.CurrentStage;
-            if (stage == null || cell.crop == null)
+            if (stage == null)
                 continue;
 
             cell.stageElapsed += dt;
-            float duration = resolver.GetGrowthTime(stage, cell.crop);
+            float duration = resolver.GetGrowthTime(stage, cell.crop, cell.isWatered);
             if (cell.stageElapsed < duration)
                 continue;
 

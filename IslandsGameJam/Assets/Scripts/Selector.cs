@@ -95,6 +95,13 @@ public class Selector : MonoBehaviour
             return;
         }
 
+        if (ToolModeController.Main != null && ToolModeController.Main.IsWateringMode)
+        {
+            if (world.TryGetCrop(cell, out var wateredCrop) && wateredCrop != null)
+                cropSystem.WaterAt(cell);
+            return;
+        }
+
         if (world.TryGetCrop(cell, out CropCell crop) && crop != null)
         {
             if (crop.IsReady)

@@ -249,6 +249,23 @@ public static class GameHudPrefabBuilder
         Stretch(shopLabelRt);
         AddText(shopLabelRt, "Shop", 20, TextAnchor.MiddleCenter, Color.white);
 
+        // Water button (left of Shop)
+        var waterBtnRt = CreateRect("WaterButton", canvasRt);
+        SetAnchored(waterBtnRt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
+            new Vector2(-144f, -16f), new Vector2(120f, 44f));
+        var waterBtnColor = new Color(0.2f, 0.45f, 0.55f, 0.95f);
+        var waterBtnImg = waterBtnRt.gameObject.AddComponent<Image>();
+        waterBtnImg.color = waterBtnColor;
+        var waterBtn = waterBtnRt.gameObject.AddComponent<Button>();
+        waterBtn.targetGraphic = waterBtnImg;
+        ApplyButtonColors(waterBtn, waterBtnColor);
+        var waterLabelRt = CreateRect("Label", waterBtnRt);
+        Stretch(waterLabelRt);
+        AddText(waterLabelRt, "Water", 20, TextAnchor.MiddleCenter, Color.white);
+
+        var toolMode = canvasGo.AddComponent<ToolModeController>();
+        toolMode.EditorAssign(waterBtn, waterBtnImg);
+
         // Backdrop (visual dim + raycast absorb only — does not close the shop)
         var backdropRt = CreateRect("ShopBackdrop", canvasRt);
         Stretch(backdropRt);

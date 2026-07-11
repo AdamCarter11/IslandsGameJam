@@ -1,9 +1,9 @@
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GoldHUD : MonoBehaviour
 {
-    [SerializeField] Text goldText;
+    [SerializeField] TextMeshProUGUI goldText;
 
     Inventory inventory;
 
@@ -33,6 +33,6 @@ public class GoldHUD : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    public void EditorAssign(Text text) => goldText = text;
+    public void EditorAssign(TextMeshProUGUI text) => goldText = text;
 #endif
 }

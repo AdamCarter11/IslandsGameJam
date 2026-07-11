@@ -79,6 +79,7 @@ public class ToolModeController : MonoBehaviour
 
         CurrentMode = mode;
         RefreshVisual();
+        GameManager.Main?.AudioService?.PlayUiClick();
     }
 
     /// <summary>Clears Water / Harvest / Destroy so planting can resume.</summary>

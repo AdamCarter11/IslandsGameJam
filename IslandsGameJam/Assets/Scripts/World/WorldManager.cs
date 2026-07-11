@@ -201,8 +201,12 @@ public class WorldManager : MonoBehaviour
         currentChunks.Add(p, chunk);
         GenerateAvailableChunksFromPosition(p);
 
-        if (GameManager.Main != null)
-            SeedUnlockService.TryUnlockRandom(GameManager.Main.Inventory, GameManager.Main.SeedShopCatalog);
+        GameManager.Main?.AudioService?.PlayChunkUnlock();
+
+        if (GameManager.Main != null && SeedUnlockService.TryUnlockRandom(GameManager.Main.Inventory, GameManager.Main.SeedShopCatalog))
+        {
+            GameManager.Main.AudioService?.PlaySeedUnlock();
+        }
     }
 
     public bool IsInsideAvailableChunk(Vector2 position)

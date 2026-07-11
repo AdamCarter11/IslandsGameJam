@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -14,6 +15,7 @@ public static class GameHudPrefabBuilder
     const string RelicChoiceCardPath = PrefabFolder + "/RelicChoiceCard.prefab";
     const string GameHudPath = PrefabFolder + "/GameHUD.prefab";
     const string MainGamePath = "Assets/Scenes/MainGame.unity";
+    const string DefaultTmpFontPath = "Assets/slapduck SDF.asset";
 
     const string RelicsFolder = "Assets/ScriptableObjects/Relics";
     const string RelicShopCatalogPath = RelicsFolder + "/RelicShopCatalog.asset";
@@ -375,8 +377,8 @@ public static class GameHudPrefabBuilder
         SetAnchored(descRt, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
             new Vector2(0f, -20f), new Vector2(-20f, -160f));
         var descText = AddText(descRt, "Description", 13, TextAnchor.UpperCenter, new Color(0.85f, 0.85f, 0.9f));
-        descText.horizontalOverflow = HorizontalWrapMode.Wrap;
-        descText.verticalOverflow = VerticalWrapMode.Truncate;
+        descText.textWrappingMode = TextWrappingModes.Normal;
+        descText.overflowMode = TextOverflowModes.Truncate;
 
         var refundRt = CreateRect("Refund", rootRt);
         SetAnchored(refundRt, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f),
@@ -620,21 +622,37 @@ public static class GameHudPrefabBuilder
         return (RectTransform)go.transform;
     }
 
-    static Text AddText(RectTransform rt, string content, int fontSize, TextAnchor alignment, Color color)
+    static TextMeshProUGUI AddText(RectTransform rt, string content, int fontSize, TextAnchor alignment, Color color)
     {
-        var text = rt.gameObject.AddComponent<Text>();
-        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        if (text.font == null)
-            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        var text = rt.gameObject.AddComponent<TextMeshProUGUI>();
+        var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(DefaultTmpFontPath);
+        if (font == null)
+            font = TMP_Settings.defaultFontAsset;
+        if (font != null)
+            text.font = font;
         text.text = content;
         text.fontSize = fontSize;
-        text.alignment = alignment;
+        text.alignment = ToTmpAlignment(alignment);
         text.color = color;
         text.raycastTarget = false;
-        text.horizontalOverflow = HorizontalWrapMode.Overflow;
-        text.verticalOverflow = VerticalWrapMode.Overflow;
+        text.textWrappingMode = TextWrappingModes.NoWrap;
+        text.overflowMode = TextOverflowModes.Overflow;
         return text;
     }
+
+    static TextAlignmentOptions ToTmpAlignment(TextAnchor alignment) => alignment switch
+    {
+        TextAnchor.UpperLeft => TextAlignmentOptions.TopLeft,
+        TextAnchor.UpperCenter => TextAlignmentOptions.Top,
+        TextAnchor.UpperRight => TextAlignmentOptions.TopRight,
+        TextAnchor.MiddleLeft => TextAlignmentOptions.Left,
+        TextAnchor.MiddleCenter => TextAlignmentOptions.Center,
+        TextAnchor.MiddleRight => TextAlignmentOptions.Right,
+        TextAnchor.LowerLeft => TextAlignmentOptions.BottomLeft,
+        TextAnchor.LowerCenter => TextAlignmentOptions.Bottom,
+        TextAnchor.LowerRight => TextAlignmentOptions.BottomRight,
+        _ => TextAlignmentOptions.Center
+    };
 
     static void ApplyButtonColors(Button button, Color normalColor)
     {

@@ -38,6 +38,7 @@ public class CropSystem : MonoBehaviour
         if (!plantedPositions.Contains(position))
             plantedPositions.Add(position);
 
+        GameManager.Main?.AudioService?.PlayPlant();
         return true;
     }
 
@@ -65,6 +66,7 @@ public class CropSystem : MonoBehaviour
             return;
 
         cell.Water();
+        GameManager.Main?.AudioService?.PlayWater();
     }
 
     /// <summary>
@@ -81,6 +83,7 @@ public class CropSystem : MonoBehaviour
 
         world.ClearCrop(position);
         UnregisterPlanted(position);
+        GameManager.Main?.AudioService?.PlayDestroy();
     }
 
     /// <summary>
@@ -105,6 +108,7 @@ public class CropSystem : MonoBehaviour
         world.ClearCrop(position);
         UnregisterPlanted(position);
         ApplyCropDeathSpawnTile(position, crop, world);
+        GameManager.Main?.AudioService?.PlayKill();
     }
 
     /// <summary>
@@ -126,6 +130,7 @@ public class CropSystem : MonoBehaviour
         if (!world.TryGetCrop(origin, out CropCell originCell) || originCell == null || !originCell.IsReady)
             return;
 
+        GameManager.Main?.AudioService?.PlayHarvest();
         StartCoroutine(HarvestChainRoutine(origin));
     }
 

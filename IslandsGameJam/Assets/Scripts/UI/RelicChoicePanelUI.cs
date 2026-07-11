@@ -57,6 +57,7 @@ public class RelicChoicePanelUI : MonoBehaviour
         if (relicShop == null || !relicShop.TrySelectOffer(index))
             return;
 
+        GameManager.Main?.AudioService?.PlayRelicSelect();
         Hide();
         onChoiceComplete?.Invoke();
     }

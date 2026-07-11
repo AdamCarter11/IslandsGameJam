@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +9,7 @@ public class ShopPanelUI : MonoBehaviour
     [SerializeField] RectTransform listRoot;
     [SerializeField] ShopRowView shopRowPrefab;
     [SerializeField] Button relicRollButton;
-    [SerializeField] Text relicRollLabel;
+    [SerializeField] TextMeshProUGUI relicRollLabel;
     [SerializeField] RelicChoicePanelUI relicChoicePanel;
 
     Inventory inventory;
@@ -89,6 +90,7 @@ public class ShopPanelUI : MonoBehaviour
             return;
         }
 
+        GameManager.Main?.AudioService?.PlayRelicRoll();
         RefreshRelicRollButton();
         relicChoicePanel?.ShowOffers();
         SetCloseInteractable(false);
@@ -124,7 +126,10 @@ public class ShopPanelUI : MonoBehaviour
         row.Bind(crop, () =>
         {
             if (inventory != null && inventory.TryBuySeed(crop))
+            {
+                GameManager.Main?.AudioService?.PlayBuySeed();
                 RefreshBuyStates();
+            }
         });
         return row;
     }
@@ -172,7 +177,7 @@ public class ShopPanelUI : MonoBehaviour
         RectTransform list,
         ShopRowView rowPrefab,
         Button rollButton = null,
-        Text rollLabel = null,
+        TextMeshProUGUI rollLabel = null,
         RelicChoicePanelUI choicePanel = null)
     {
         closeButton = close;

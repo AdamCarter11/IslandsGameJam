@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,17 +10,17 @@ public class HotbarSlotView : MonoBehaviour
     [SerializeField] Image background;
     [SerializeField] Image highlight;
     [SerializeField] Image icon;
-    [SerializeField] Text count;
+    [SerializeField] TextMeshProUGUI count;
     [SerializeField] Button button;
 
     public Image Background => background;
     public Image Highlight => highlight;
     public Image Icon => icon;
-    public Text Count => count;
+    public TextMeshProUGUI Count => count;
     public Button Button => button;
 
 #if UNITY_EDITOR
-    public void EditorAssign(Image bg, Image hl, Image ic, Text ct, Button btn)
+    public void EditorAssign(Image bg, Image hl, Image ic, TextMeshProUGUI ct, Button btn)
     {
         background = bg;
         highlight = hl;

@@ -27,6 +27,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private RelicShopService relicShopService;
     public RelicShopService RelicShopService => relicShopService;
 
+    [SerializeField] private AudioService audioService;
+    public AudioService AudioService => audioService;
+
     [Header("Shop")]
     [SerializeField] private SeedShopCatalog seedShopCatalog;
     public SeedShopCatalog SeedShopCatalog => seedShopCatalog;

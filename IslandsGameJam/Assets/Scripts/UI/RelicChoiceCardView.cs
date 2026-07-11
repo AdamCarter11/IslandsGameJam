@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,9 +8,9 @@ using UnityEngine.UI;
 public class RelicChoiceCardView : MonoBehaviour
 {
     [SerializeField] Image icon;
-    [SerializeField] Text nameText;
-    [SerializeField] Text descText;
-    [SerializeField] Text refundText;
+    [SerializeField] TextMeshProUGUI nameText;
+    [SerializeField] TextMeshProUGUI descText;
+    [SerializeField] TextMeshProUGUI refundText;
     [SerializeField] Button selectButton;
 
     public void Bind(RelicSO relic, int refundGold, System.Action onSelect)
@@ -59,7 +60,7 @@ public class RelicChoiceCardView : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    public void EditorAssign(Image iconImage, Text name, Text desc, Text refund, Button select)
+    public void EditorAssign(Image iconImage, TextMeshProUGUI name, TextMeshProUGUI desc, TextMeshProUGUI refund, Button select)
     {
         icon = iconImage;
         nameText = name;

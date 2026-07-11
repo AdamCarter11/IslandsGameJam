@@ -108,6 +108,7 @@ public class ShopController : MonoBehaviour
             shopPanelRoot.SetActive(true);
 
         shopPanelUi?.RefreshRelicRollButton();
+        GameManager.Main?.AudioService?.PlayShopOpen();
     }
 
     public void CloseShop()
@@ -117,6 +118,7 @@ public class ShopController : MonoBehaviour
         IsOpen = false;
         if (shopPanelRoot != null)
             shopPanelRoot.SetActive(false);
+        GameManager.Main?.AudioService?.PlayShopClose();
     }
 
     static void EnsureEventSystem()

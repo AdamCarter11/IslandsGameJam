@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,8 +8,8 @@ using UnityEngine.UI;
 public class ShopRowView : MonoBehaviour
 {
     [SerializeField] Image icon;
-    [SerializeField] Text nameText;
-    [SerializeField] Text priceText;
+    [SerializeField] TextMeshProUGUI nameText;
+    [SerializeField] TextMeshProUGUI priceText;
     [SerializeField] Button buyButton;
 
     public CropGrowthSO Crop { get; private set; }
@@ -48,7 +49,7 @@ public class ShopRowView : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    public void EditorAssign(Image iconImage, Text name, Text price, Button buy)
+    public void EditorAssign(Image iconImage, TextMeshProUGUI name, TextMeshProUGUI price, Button buy)
     {
         icon = iconImage;
         nameText = name;

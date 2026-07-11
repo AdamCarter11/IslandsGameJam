@@ -147,6 +147,8 @@ public class HotbarUI : MonoBehaviour
                     ? Color.Lerp(SlotColor, SelectedColor, 0.25f)
                     : SlotColor;
             }
+            if (slot.Count != null)
+                slot.Count.color = selected ? Color.black : Color.white;
         }
     }
 

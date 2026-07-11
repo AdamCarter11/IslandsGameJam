@@ -89,6 +89,9 @@ public class Selector : MonoBehaviour
             return;
         }
 
+        if (cropSystem.IsHarvestBusy)
+            return;
+
         if (world.IsInsideAvailableChunk(cell))
         {
             world.UnlockChunk(chunk);

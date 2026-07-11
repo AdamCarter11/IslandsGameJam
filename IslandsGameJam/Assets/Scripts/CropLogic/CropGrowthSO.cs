@@ -19,12 +19,32 @@ public class CropGrowthSO : ScriptableObject
     public int seedPrice = 10;
     public bool unlockedByDefault;
 
+    [Header("Harvest")]
+    [Tooltip("Sprite used by the harvest hop flyer. Falls back to the ready (final) stage visual if unset.")]
+    public Sprite harvestBounceVisual;
+
     public Sprite GetShopIcon()
     {
         if (shopIcon != null)
             return shopIcon;
         if (stages != null && stages.Length > 0 && stages[0] != null)
             return stages[0].cropVisual;
+        return null;
+    }
+
+    /// <summary>
+    /// Visual for the bouncing harvest flyer (not the planted growth sprite).
+    /// </summary>
+    public Sprite GetHarvestBounceVisual()
+    {
+        if (harvestBounceVisual != null)
+            return harvestBounceVisual;
+        if (stages != null && stages.Length > 0)
+        {
+            CropPropertiesSO ready = stages[stages.Length - 1];
+            if (ready != null)
+                return ready.cropVisual;
+        }
         return null;
     }
 }

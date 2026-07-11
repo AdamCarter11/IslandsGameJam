@@ -8,6 +8,7 @@ public class CropCell
     public CropGrowthSO crop;
     public int stageIndex;
     public float stageElapsed;
+    public CropView view;
 
     /// <summary>
     /// True once the crop has entered its final stage (harvestable).

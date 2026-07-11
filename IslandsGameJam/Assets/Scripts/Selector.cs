@@ -82,10 +82,15 @@ public class Selector : MonoBehaviour
             return;
         }
 
-        if (cropSystem.DebugCropToPlant != null)
-        {
-            cropSystem.PlantCrop(cell, cropSystem.DebugCropToPlant);
+        var inventory = GameManager.Main.Inventory;
+        if (inventory == null)
             return;
-        }
+
+        var selected = inventory.GetSlot(inventory.SelectedSlot);
+        if (selected == null || selected.IsEmpty)
+            return;
+
+        if (cropSystem.PlantCrop(cell, selected.crop))
+            inventory.TryConsumeSelected(out _);
     }
 }

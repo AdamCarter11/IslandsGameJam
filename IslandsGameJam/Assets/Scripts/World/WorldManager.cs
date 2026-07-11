@@ -142,6 +142,9 @@ public class WorldManager : MonoBehaviour
         GenerateChunk(p);
         currentChunks.Add(p, chunk);
         GenerateAvailableChunksFromPosition(p);
+
+        if (GameManager.Main != null)
+            SeedUnlockService.TryUnlockRandom(GameManager.Main.Inventory, GameManager.Main.SeedShopCatalog);
     }
 
     public bool IsInsideAvailableChunk(Vector2 position)

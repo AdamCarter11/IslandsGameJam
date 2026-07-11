@@ -155,6 +155,7 @@ MonoBehaviour:
   inventory: {fileID: 14225382}
   cropStateResolver: {fileID: 14225383}
   cropSystem: {fileID: 14225384}
+  seedShopCatalog: {fileID: 11400000, guid: 3d9e1a7c5b824f0e9a6c4d2f1b8e7a05, type: 2}
   isInitialized: 0
 --- !u!4 &14225381
 Transform:

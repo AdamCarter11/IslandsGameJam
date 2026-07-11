@@ -24,6 +24,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private CropSystem cropSystem;
     public CropSystem CropSystem => cropSystem;
 
+    [Header("Shop")]
+    [SerializeField] private SeedShopCatalog seedShopCatalog;
+    public SeedShopCatalog SeedShopCatalog => seedShopCatalog;
+
     [Header("Runtime")]
     [SerializeField]
     private bool isInitialized = false;
@@ -37,6 +41,9 @@ public class GameManager : MonoBehaviour
 
     private void Initialize()
     {
+        if (inventory != null)
+            inventory.InitializeFromCatalog(seedShopCatalog);
+
         worldManager.Initialize();
         isInitialized = true;
     }

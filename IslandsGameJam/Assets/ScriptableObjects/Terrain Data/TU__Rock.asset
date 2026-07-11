@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20f5429b746d79d4ba3eae0b1837fb8c, type: 3}
+  m_Name: TU__Rock
+  m_EditorClassIdentifier: Assembly-CSharp::TerrainData
+  type: 4
+  baseSprite: {fileID: 4630050771243728058, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  underlaySprite: {fileID: -2784614813856362461, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  overlayChance: 0.5
+  overlaySprites:
+  - {fileID: -7553748574775669509, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  - {fileID: -4676033447007004567, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  - {fileID: 6800610415195598734, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  - {fileID: -2865273742331759626, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  - {fileID: -1840258601337140656, guid: fe55ede08226be749a4b47a25a92a303, type: 3}

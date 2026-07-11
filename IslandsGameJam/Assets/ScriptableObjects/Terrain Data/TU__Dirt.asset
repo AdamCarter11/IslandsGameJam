@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20f5429b746d79d4ba3eae0b1837fb8c, type: 3}
+  m_Name: TU__Dirt
+  m_EditorClassIdentifier: Assembly-CSharp::TerrainData
+  type: 1
+  baseSprite: {fileID: -1300763398, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  underlaySprite: {fileID: 1200240192, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  overlayChance: 0.5
+  overlaySprites:
+  - {fileID: -1621058516, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  - {fileID: -1690285456, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  - {fileID: 1389395803, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  - {fileID: -1254270243, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  - {fileID: 789030430, guid: fe55ede08226be749a4b47a25a92a303, type: 3}

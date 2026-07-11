@@ -14,26 +14,44 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WorldGenDataSet
   dataSet:
   - elevation:
-      min: 0.95
+      min: 0.9
       max: 1
     data: {fileID: 11400000, guid: 85190691bd857894da5d5f442fa78268, type: 2}
+    obstacleChance: 0.01
+    obstacleSprites:
+    - {fileID: -1754285261, guid: 4fdacd21b9e382c47a18cfac64f337f5, type: 3}
   - elevation:
-      min: 0.9
-      max: 0.95
+      min: 0.8
+      max: 0.9
     data: {fileID: 11400000, guid: f3de358e36800b044b7ef9deb09feef9, type: 2}
+    obstacleChance: 0.1
+    obstacleSprites:
+    - {fileID: -1754285261, guid: 4fdacd21b9e382c47a18cfac64f337f5, type: 3}
   - elevation:
       min: 0.5
-      max: 0.9
+      max: 0.8
     data: {fileID: 11400000, guid: ee6667a5f98d43340819980e322536b6, type: 2}
+    obstacleChance: 0.1
+    obstacleSprites:
+    - {fileID: -581488636, guid: 4fdacd21b9e382c47a18cfac64f337f5, type: 3}
   - elevation:
       min: 0.4
       max: 0.5
     data: {fileID: 11400000, guid: 8ed1c833b08006644a5c08a753451c79, type: 2}
+    obstacleChance: 0.1
+    obstacleSprites:
+    - {fileID: -581488636, guid: 4fdacd21b9e382c47a18cfac64f337f5, type: 3}
+    - {fileID: -1754285261, guid: 4fdacd21b9e382c47a18cfac64f337f5, type: 3}
   - elevation:
       min: 0.3
       max: 0.4
     data: {fileID: 11400000, guid: 690c9a64a3bc1464abb3c9c7f6cf3f17, type: 2}
+    obstacleChance: 0.01
+    obstacleSprites:
+    - {fileID: -1754285261, guid: 4fdacd21b9e382c47a18cfac64f337f5, type: 3}
   - elevation:
       min: 0
       max: 0.3
     data: {fileID: 11400000, guid: cc3ebec9e0fbf29459a807b681d6cc1b, type: 2}
+    obstacleChance: 0
+    obstacleSprites: []

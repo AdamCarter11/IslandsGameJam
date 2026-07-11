@@ -7,6 +7,7 @@ using UnityEngine;
 public class CropSystem : MonoBehaviour
 {
     [SerializeField] private CropGrowthSO debugCropToPlant;
+    [SerializeField] private CoinDropService coinDropService;
 
     readonly List<Vector2Int> plantedPositions = new List<Vector2Int>();
     readonly Queue<Vector2Int> harvestQueue = new Queue<Vector2Int>();
@@ -40,8 +41,8 @@ public class CropSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// BFS chain harvest from a ready crop. Each harvested crop immediately drops
-    /// gold * multi, then multi += that crop's multi bonus. 
+    /// BFS chain harvest from a ready crop. Each harvested crop immediately spawns
+    /// coin drops for gold * multi, then multi += that crop's multi bonus.
     /// Immature pattern targets are skipped (not cleared) - might want to change this, design decision
     /// empty cells stop rays
     /// </summary>
@@ -50,8 +51,7 @@ public class CropSystem : MonoBehaviour
         #region Grab managers and crop
         var world = GameManager.Main.WorldManager;
         var resolver = GameManager.Main.CropStateResolver;
-        var inventory = GameManager.Main.Inventory;
-        if (world == null || resolver == null || inventory == null)
+        if (world == null || resolver == null || coinDropService == null)
             return;
 
         if (!world.TryGetCrop(origin, out CropCell originCell) || originCell == null || !originCell.IsReady)
@@ -87,8 +87,9 @@ public class CropSystem : MonoBehaviour
             int gold = resolver.GetGold(stage, crop);
             float multiBonus = resolver.GetMulti(stage, crop);
 
-            // Drop this crop's payout immediately, then grow the chain multiplier
-            inventory.AddGold(Mathf.RoundToInt(gold * multi));
+            // Spawn coin drops for this crop's payout, then grow the chain multiplier
+            int payout = Mathf.RoundToInt(gold * multi);
+            coinDropService.SpawnDrops(new Vector2(pos.x, pos.y), payout);
             multi += multiBonus;
 
             // Enqueue stage pattern + relic extra patterns before clearing

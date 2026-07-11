@@ -19,6 +19,8 @@ public class WorldManager : MonoBehaviour
     [Header("World Settings")]
     [SerializeField]
     private GameObject terrainUnitPrefab;
+    [SerializeField]
+    private GameObject cropPrefab;
 
     private OffsetArray2D<TerrainUnit> terrainUnits;
     private OffsetArray2D<CropCell> crops;
@@ -72,26 +74,22 @@ public class WorldManager : MonoBehaviour
         if (crops == null || !crops.Contains(position.x, position.y))
             return;
 
-        crops[position.x, position.y] = null;
-
-        if (terrainUnits != null &&
-            terrainUnits.Contains(position.x, position.y) &&
-            terrainUnits[position.x, position.y] != null)
+        var cell = crops[position.x, position.y];
+        if (cell != null && cell.view != null)
         {
-            terrainUnits[position.x, position.y].ClearCropVisual();
+            Destroy(cell.view.gameObject);
+            cell.view = null;
         }
+
+        crops[position.x, position.y] = null;
     }
 
     public void SetCropVisualAt(Vector2Int position, Sprite sprite)
     {
-        if (terrainUnits == null || !terrainUnits.Contains(position.x, position.y))
+        if (!TryGetCrop(position, out var cell) || cell.view == null)
             return;
 
-        var unit = terrainUnits[position.x, position.y];
-        if (unit == null)
-            return;
-
-        unit.SetCropVisual(sprite);
+        cell.view.SetVisual(sprite);
     }
 
     /// <summary>
@@ -99,7 +97,7 @@ public class WorldManager : MonoBehaviour
     /// </summary>
     public bool PlantCrop(Vector2Int position, CropGrowthSO crop)
     {
-        if (crop == null || crops == null || terrainUnits == null)
+        if (crop == null || cropPrefab == null || crops == null || terrainUnits == null)
             return false;
         if (!crops.Contains(position.x, position.y))
             return false;
@@ -116,8 +114,13 @@ public class WorldManager : MonoBehaviour
         };
         crops[position.x, position.y] = cell;
 
+        var spawnPosition = new Vector2(position.x, position.y);
+        var cropObject = Instantiate(cropPrefab, spawnPosition, Quaternion.identity, transform);
+        var view = cropObject.GetComponent<CropView>();
         var stage = cell.CurrentStage;
-        terrainUnits[position.x, position.y].SetCropVisual(stage != null ? stage.cropVisual : null);
+        if (view != null)
+            view.SetVisual(stage != null ? stage.cropVisual : null);
+        cell.view = view;
         return true;
     }
 

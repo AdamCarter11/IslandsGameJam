@@ -21,6 +21,10 @@ public class WorldManager : MonoBehaviour
 
     [Header("Generation Settings")]
     [SerializeField]
+    private bool randomizeOrigin = false;
+    [HideIf("randomizeOrigin"), SerializeField]
+    private Vector2 origin = Vector2.zero;
+    [SerializeField]
     private Vector2Int dimension = new Vector2Int(50, 50);
     [SerializeField]
     private float scale = 1.0f;
@@ -39,10 +43,13 @@ public class WorldManager : MonoBehaviour
 
     [Header("Prefabs")]
     [SerializeField]
+    private GameObject obstaclePrefab;
+    [SerializeField]
     private GameObject terrainUnitPrefab;
     [SerializeField]
     private GameObject cropPrefab;
 
+    private OffsetArray2D<GameObject> obstacles;
     private OffsetArray2D<TerrainUnit> terrainUnits;
     private OffsetArray2D<CropCell> crops;
     private Dictionary<Vector2Int, TerrainChunk> currentChunks = new Dictionary<Vector2Int, TerrainChunk>();
@@ -56,6 +63,8 @@ public class WorldManager : MonoBehaviour
         int maxY = worldHeight / 2;
         terrainUnits = new OffsetArray2D<TerrainUnit>(minX, maxX, minY, maxY);
         crops = new OffsetArray2D<CropCell>(minX, maxX, minY, maxY);
+
+        origin = randomizeOrigin ? UnityEngine.Random.insideUnitCircle * (worldHeight + worldWidth) / 2 : origin;
 
         var firstChunk = new TerrainChunk(Vector2Int.zero);
         currentChunks.Add(firstChunk.Position, firstChunk);
@@ -148,10 +157,6 @@ public class WorldManager : MonoBehaviour
     #endregion
 
     #region Terrain Management
-    protected virtual float GetValue(float x, float y)
-    {
-        return GetNoise(x + worldWidth / 2, y + worldHeight / 2, Vector2.zero, dimension, scale, octaves, persistence, frequencyBase, exponent);
-    }
 
     private float GetNoise(float x, float y, Vector2 origin, Vector2 dimension,
         float scale, int octaves, float persistence, float frequencyBase, float exponent)
@@ -247,7 +252,9 @@ public class WorldManager : MonoBehaviour
 
     public TerrainData GeRawTerrainData(Vector2Int position)
     {
-        var elevation = GetValue(position.x, position.y);
+        var elevation = GetNoise(position.x + worldWidth / 2,
+            position.y + worldHeight / 2,
+            origin, dimension, scale, octaves, persistence, frequencyBase, exponent);
         var data = worldGenDataSet.Match(elevation);
         if (data == null) data = voidTerrainData;
 

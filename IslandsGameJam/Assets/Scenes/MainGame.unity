@@ -129,6 +129,9 @@ GameObject:
   m_Component:
   - component: {fileID: 14225381}
   - component: {fileID: 14225380}
+  - component: {fileID: 14225382}
+  - component: {fileID: 14225383}
+  - component: {fileID: 14225384}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -149,6 +152,48 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   worldManager: {fileID: 2092113648}
+  inventory: {fileID: 14225382}
+  cropStateResolver: {fileID: 14225383}
+  cropSystem: {fileID: 14225384}
+--- !u!114 &14225382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 14225379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e48d4fdf1ac64d44b8c3a2383ff369b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory
+  ownedRelics: []
+  gold: 0
+--- !u!114 &14225383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 14225379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f36ab0fbc75b6a44a9a4d60dc3db0bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CropStateResolver
+--- !u!114 &14225384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 14225379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c7bcd8efbc912a4980e4c648f9631ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CropSystem
+  debugCropToPlant: {fileID: 11400000, guid: 6f5e785a4c90f5340a7385fc17cb565c, type: 2}
 --- !u!4 &14225381
 Transform:
   m_ObjectHideFlags: 0

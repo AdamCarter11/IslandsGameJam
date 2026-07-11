@@ -38,6 +38,11 @@ public class WorldManager : MonoBehaviour
         GenerateChunk(Vector2Int.zero); //temp
     }
 
+    public bool IsInWorldBounds(Vector2Int position)
+    {
+        return crops != null && crops.Contains(position.x, position.y);
+    }
+
     public bool TryGetCrop(Vector2Int position, out CropCell cell)
     {
         if (crops == null || !crops.Contains(position.x, position.y))
@@ -71,6 +76,18 @@ public class WorldManager : MonoBehaviour
         {
             terrainUnits[position.x, position.y].ClearCropVisual();
         }
+    }
+
+    public void SetCropVisualAt(Vector2Int position, Sprite sprite)
+    {
+        if (terrainUnits == null || !terrainUnits.Contains(position.x, position.y))
+            return;
+
+        var unit = terrainUnits[position.x, position.y];
+        if (unit == null)
+            return;
+
+        unit.SetCropVisual(sprite);
     }
 
     /// <summary>
@@ -133,13 +150,24 @@ public class WorldManager : MonoBehaviour
     [Button]
     public TerrainUnit GetTerrainUnit(Vector2Int position)
     {
-        var x = position.x;
-        var y = position.y;
-        if (!terrainUnits.Contains(x, y))
+        if (!TryGetTerrainUnit(position, out TerrainUnit unit))
+        {
+            Debug.Log($"GetTerrainUnit({position.x}, {position.y}) = null");
             return null;
-        var unit = terrainUnits[x, y];
-        Debug.Log($"GetTerrainUnit({x}, {y}) = {unit}", unit);
+        }
+
+        Debug.Log($"GetTerrainUnit({position.x}, {position.y}) = {unit}", unit);
         return unit;
+    }
+
+    public bool TryGetTerrainUnit(Vector2Int position, out TerrainUnit unit)
+    {
+        unit = null;
+        if (terrainUnits == null || !terrainUnits.Contains(position.x, position.y))
+            return false;
+
+        unit = terrainUnits[position.x, position.y];
+        return unit != null;
     }
 
     [Button]

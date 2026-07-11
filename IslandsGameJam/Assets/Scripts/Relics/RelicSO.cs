@@ -30,4 +30,6 @@ public class RelicEffect
     public CropGrowthSO onlyCrop;
     [Tooltip("If we want spawn-tile effects (we might not care about this)")]
     public TerrainData tileToSpawn;
+    [Tooltip("Optional extra harvest pattern for OnHarvestExtraPattern relics")]
+    public HarvestPattern extraPattern;
 }

@@ -21,6 +21,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private CropStateResolver cropStateResolver;
     public CropStateResolver CropStateResolver => cropStateResolver;
 
+    [SerializeField] private CropSystem cropSystem;
+    public CropSystem CropSystem => cropSystem;
+
 
     private void Start()
     {

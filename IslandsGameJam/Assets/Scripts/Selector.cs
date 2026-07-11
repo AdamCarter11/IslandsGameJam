@@ -30,6 +30,24 @@ public class Selector : MonoBehaviour
 
     private void OnLeftClicked(Vector2 mousePosition)
     {
-        GameManager.Main.WorldManager.GetTerrainUnit(mousePosition.SnapToGrid().ToInt());
+        // GameManager.Main.WorldManager.GetTerrainUnit(mousePosition.SnapToGrid().ToInt());
+        Vector2Int cell = mousePosition.SnapToGrid().ToInt();
+        var cropSystem = GameManager.Main.CropSystem;
+        var world = GameManager.Main.WorldManager;
+        if (cropSystem == null || world == null)
+            return;
+
+        if (world.TryGetCrop(cell, out CropCell crop) && crop != null)
+        {
+            if (crop.IsReady)
+                cropSystem.HarvestAt(cell);
+            return;
+        }
+
+        if (cropSystem.DebugCropToPlant != null)
+        {
+            cropSystem.PlantCrop(cell, cropSystem.DebugCropToPlant);
+            return;
+        }
     }
 }

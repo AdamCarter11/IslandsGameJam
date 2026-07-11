@@ -9,6 +9,8 @@ public class Selector : MonoBehaviour
     private Vector2 sizeOffset = Vector2.one * 0.5f;
     [SerializeField]
     private SpriteRenderer selectorRenderer;
+    [SerializeField]
+    private CameraTarget cameraTarget;
 
     private void Awake()
     {
@@ -25,9 +27,15 @@ public class Selector : MonoBehaviour
 
         Vector2 mousePosition = Mouse.current.position.ReadValue();
         var snappedPosition = Camera.main.ScreenToWorldPoint(mousePosition).SnapToGrid();
-        transform.position = snappedPosition;
         Vector2Int worldPosition = snappedPosition.ToInt();
 
+        // Camera movement reset to center on space bar
+        if (Keyboard.current?.spaceKey.isPressed ?? false)
+            cameraTarget.transform.position = transform.position;
+        else
+            transform.position = snappedPosition;
+
+        // Set selector size
         if (GameManager.Main.WorldManager.IsInsideAvailableChunk(worldPosition))
         {
             SetSize(3);

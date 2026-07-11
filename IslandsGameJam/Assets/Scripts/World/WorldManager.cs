@@ -2,7 +2,10 @@ using ColorMak3r.Utility;
 using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
+using UnityEngine.UIElements;
+using static UnityEngine.UI.Image;
 
 public class WorldManager : MonoBehaviour
 {
@@ -16,7 +19,25 @@ public class WorldManager : MonoBehaviour
     [SerializeField]
     private int chunkSize = 3;
 
-    [Header("World Settings")]
+    [Header("Generation Settings")]
+    [SerializeField]
+    private Vector2Int dimension = new Vector2Int(50, 50);
+    [SerializeField]
+    private float scale = 1.0f;
+    [SerializeField]
+    private int octaves = 3;
+    [SerializeField]
+    private float persistence = 0.5f;
+    [SerializeField]
+    private float frequencyBase = 2f;
+    [SerializeField]
+    private float exponent = 1f;
+    [SerializeField]
+    private TerrainData voidTerrainData;
+    [SerializeField]
+    private WorldGenDataSet worldGenDataSet;
+
+    [Header("Prefabs")]
     [SerializeField]
     private GameObject terrainUnitPrefab;
     [SerializeField]
@@ -39,7 +60,7 @@ public class WorldManager : MonoBehaviour
         var firstChunk = new TerrainChunk(Vector2Int.zero);
         currentChunks.Add(firstChunk.Position, firstChunk);
         GenerateAvailableChunksFromPosition(firstChunk.Position);
-        GenerateChunk(firstChunk.Position);
+        BuildChunk(firstChunk.Position);
     }
 
     #region Crop Management
@@ -132,6 +153,33 @@ public class WorldManager : MonoBehaviour
     #endregion
 
     #region Terrain Management
+    protected virtual float GetValue(float x, float y)
+    {
+        return GetNoise(x + worldWidth / 2, y + worldHeight / 2, Vector2.zero, dimension, scale, octaves, persistence, frequencyBase, exponent);
+    }
+
+    private float GetNoise(float x, float y, Vector2 origin, Vector2 dimension,
+        float scale, int octaves, float persistence, float frequencyBase, float exponent)
+    {
+        float xCoord = origin.x + x / dimension.x * scale;
+        float yCoord = origin.y + y / dimension.y * scale;
+
+        var total = 0f;
+        var frequency = 1f;
+        var amplitude = 1f;
+        var maxValue = 0f;
+        for (int i = 0; i < octaves; i++)
+        {
+            total += Mathf.PerlinNoise(xCoord * frequency, yCoord * frequency) * amplitude;
+
+            maxValue += amplitude;
+            amplitude *= persistence;
+            frequency *= frequencyBase;
+        }
+
+        return Mathf.Pow(total / maxValue, exponent);
+    }
+
 
     public void UnlockChunk(Vector2 position)
     {
@@ -144,7 +192,7 @@ public class WorldManager : MonoBehaviour
 
         var chunk = availableChunks[p];
         availableChunks.Remove(p);
-        GenerateChunk(p);
+        BuildChunk(p);
         currentChunks.Add(p, chunk);
         GenerateAvailableChunksFromPosition(p);
 
@@ -179,7 +227,7 @@ public class WorldManager : MonoBehaviour
     }
 
     [Button]
-    public void GenerateChunk(Vector2Int position)
+    public void BuildChunk(Vector2Int position)
     {
         var halfChunk = Mathf.FloorToInt(chunkSize / 2);
 
@@ -196,9 +244,19 @@ public class WorldManager : MonoBehaviour
                 var spawnPosition = new Vector2(x, y);
                 GameObject terrainUnitObject = Instantiate(terrainUnitPrefab, spawnPosition, Quaternion.identity, transform);
                 TerrainUnit terrainUnit = terrainUnitObject.GetComponent<TerrainUnit>();
+                terrainUnit.Initialize(GeRawTerrainData(spawnPosition.ToInt()));
                 terrainUnits[x, y] = terrainUnit;
             }
         }
+    }
+
+    public TerrainData GeRawTerrainData(Vector2Int position)
+    {
+        var elevation = GetValue(position.x, position.y);
+        var data = worldGenDataSet.Match(elevation);
+        if (data == null) data = voidTerrainData;
+
+        return data;
     }
 
     [Button]
@@ -308,6 +366,4 @@ public sealed class OffsetArray2D<T>
 
         return y - MinY;
     }
-
-    
 }

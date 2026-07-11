@@ -11,7 +11,7 @@ public struct MinMaxFloat
         this.max = max;
     }
 
-    public bool IsInRange(float value)
+    public bool InRange(float value)
     {
         return value > min && value <= max;
     }

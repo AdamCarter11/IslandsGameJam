@@ -24,6 +24,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private CropSystem cropSystem;
     public CropSystem CropSystem => cropSystem;
 
+    [Header("Runtime")]
+    [SerializeField]
+    private bool isInitialized = false;
+    public bool IsInitialized => isInitialized;
+
 
     private void Start()
     {
@@ -33,5 +38,6 @@ public class GameManager : MonoBehaviour
     private void Initialize()
     {
         worldManager.Initialize();
+        isInitialized = true;
     }
 }

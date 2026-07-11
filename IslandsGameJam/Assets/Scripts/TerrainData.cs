@@ -1,10 +1,24 @@
 using ColorMak3r.Utility;
 using UnityEngine;
 
+public enum TerrainType
+{
+    Grass,
+    Dirt,
+    Water,
+    Sand,
+    Rock,
+    Snow,
+}
+
 [CreateAssetMenu(fileName = "TU__", menuName = "Island/Terrain Unit")]
 public class TerrainData : ScriptableObject
 {
     [Header("Terrain Unit Settings")]
+    [SerializeField]
+    private TerrainType type;
+
+    [Header("Graphic Settings")]
     [SerializeField]
     private Sprite baseSprite;
     [SerializeField]

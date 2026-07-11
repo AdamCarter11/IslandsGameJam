@@ -30,13 +30,17 @@ public class WorldManager : MonoBehaviour
         int minX = -worldWidth / 2;
         int maxX = worldWidth / 2;
         int minY = -worldHeight / 2;
-        int maxY = worldHeight;
+        int maxY = worldHeight / 2;
         terrainUnits = new OffsetArray2D<TerrainUnit>(minX, maxX, minY, maxY);
         crops = new OffsetArray2D<CropCell>(minX, maxX, minY, maxY);
 
         var firstChunk = new TerrainChunk(Vector2Int.zero);
-        GenerateChunk(Vector2Int.zero); //temp
+        currentChunks.Add(firstChunk.Position, firstChunk);
+        GenerateAvailableChunksFromPosition(firstChunk.Position);
+        GenerateChunk(firstChunk.Position);
     }
+
+    #region Crop Management
 
     public bool IsInWorldBounds(Vector2Int position)
     {
@@ -117,11 +121,50 @@ public class WorldManager : MonoBehaviour
         return true;
     }
 
-    public List<TerrainChunk> GetAvailableChunksFromPosition(Vector2Int position)
+    #endregion
+
+    #region Terrain Management
+
+    public void UnlockChunk(Vector2 position)
+    {
+        var p = position.SnapToGrid(chunkSize, true).ToInt();
+        if (!availableChunks.ContainsKey(p))
+        {
+            Debug.LogWarning($"Attempted to unlock chunk at {p} but it is not available.");
+            return;
+        }
+
+        var chunk = availableChunks[p];
+        availableChunks.Remove(p);
+        GenerateChunk(p);
+        currentChunks.Add(p, chunk);
+        GenerateAvailableChunksFromPosition(p);
+    }
+
+    public bool IsInsideAvailableChunk(Vector2 position)
+    {
+        var p = position.SnapToGrid(chunkSize, true).ToInt();
+        return availableChunks.ContainsKey(p);
+    }
+
+    public void GenerateAvailableChunksFromPosition(Vector2Int position)
     {
         position = position.SnapToGrid(chunkSize, true).ToInt();
+        var chunks = new List<TerrainChunk>();
+        var toCheck = new Vector2Int[] {
+            position + Vector2Int.up * chunkSize,
+            position + Vector2Int.down * chunkSize,
+            position + Vector2Int.left * chunkSize,
+            position + Vector2Int.right * chunkSize };
 
-        return null;
+        foreach (var pos in toCheck)
+        {
+            if (!currentChunks.ContainsKey(pos) && !availableChunks.ContainsKey(pos))
+            {
+                availableChunks.Add(pos, new TerrainChunk(pos));
+                Debug.Log($"Added available chunk at {pos}");
+            }
+        }
     }
 
     [Button]
@@ -189,6 +232,8 @@ public class WorldManager : MonoBehaviour
             }
         }
     }
+
+    #endregion
 }
 
 public class TerrainChunk

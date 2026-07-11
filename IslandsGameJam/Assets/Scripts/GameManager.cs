@@ -15,6 +15,13 @@ public class GameManager : MonoBehaviour
     private WorldManager worldManager;
     public WorldManager WorldManager => worldManager;
 
+    [SerializeField] private Inventory inventory;
+    public Inventory Inventory => inventory;
+
+    [SerializeField] private CropStateResolver cropStateResolver;
+    public CropStateResolver CropStateResolver => cropStateResolver;
+
+
     private void Start()
     {
         Initialize();

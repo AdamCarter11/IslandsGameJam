@@ -59,6 +59,22 @@ public class CropSystem : MonoBehaviour
     }
 
     /// <summary>
+    /// Removes a plant from a single cell with no coin drops and no death/harvest relics.
+    /// </summary>
+    public void DestroyAt(Vector2Int position)
+    {
+        var world = GameManager.Main.WorldManager;
+        if (world == null)
+            return;
+
+        if (!world.TryGetCrop(position, out CropCell cell) || cell == null)
+            return;
+
+        world.ClearCrop(position);
+        UnregisterPlanted(position);
+    }
+
+    /// <summary>
     /// Drought-kills a crop: death gold drops, OnCropDeath relic side-effects, then clear.
     /// No harvest chain / multi.
     /// </summary>

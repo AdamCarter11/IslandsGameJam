@@ -47,16 +47,16 @@ public class HotbarUI : MonoBehaviour
             slot.Button.onClick.RemoveAllListeners();
             slot.Button.onClick.AddListener(() =>
             {
-                ClearWateringMode();
+                ClearAllToolModes();
                 inventory?.SelectSlot(index);
             });
         }
     }
 
-    static void ClearWateringMode()
+    static void ClearAllToolModes()
     {
         if (ToolModeController.Main != null)
-            ToolModeController.Main.SetWatering(false);
+            ToolModeController.Main.ClearAllModes();
     }
 
     void OnDestroy()
@@ -127,7 +127,7 @@ public class HotbarUI : MonoBehaviour
 
     void OnSelectedChanged(int index)
     {
-        ClearWateringMode();
+        ClearAllToolModes();
 
         if (slots == null)
             return;

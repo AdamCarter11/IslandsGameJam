@@ -95,19 +95,34 @@ public class Selector : MonoBehaviour
             return;
         }
 
-        if (ToolModeController.Main != null && ToolModeController.Main.IsWateringMode)
+        var toolMode = ToolModeController.Main;
+        if (toolMode != null)
         {
-            if (world.TryGetCrop(cell, out var wateredCrop) && wateredCrop != null)
-                cropSystem.WaterAt(cell);
-            return;
+            if (toolMode.IsWateringMode)
+            {
+                if (world.TryGetCrop(cell, out var wateredCrop) && wateredCrop != null)
+                    cropSystem.WaterAt(cell);
+                return;
+            }
+
+            if (toolMode.IsHarvestMode)
+            {
+                if (world.TryGetCrop(cell, out var harvestCrop) && harvestCrop != null && harvestCrop.IsReady)
+                    cropSystem.HarvestAt(cell);
+                return;
+            }
+
+            if (toolMode.IsDestroyMode)
+            {
+                if (world.TryGetCrop(cell, out var destroyCrop) && destroyCrop != null)
+                    cropSystem.DestroyAt(cell);
+                return;
+            }
         }
 
-        if (world.TryGetCrop(cell, out CropCell crop) && crop != null)
-        {
-            if (crop.IsReady)
-                cropSystem.HarvestAt(cell);
+        // No tool mode: plant from hotbar on empty cells only.
+        if (world.TryGetCrop(cell, out CropCell existing) && existing != null)
             return;
-        }
 
         var inventory = GameManager.Main.Inventory;
         if (inventory == null)

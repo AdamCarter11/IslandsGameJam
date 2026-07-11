@@ -81,7 +81,7 @@ public class ShopController : MonoBehaviour
             return;
 
         if (ToolModeController.Main != null)
-            ToolModeController.Main.SetWatering(false);
+            ToolModeController.Main.ClearAllModes();
 
         IsOpen = true;
         if (shopPanelRoot != null)

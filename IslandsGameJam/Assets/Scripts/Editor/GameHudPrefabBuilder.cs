@@ -249,7 +249,33 @@ public static class GameHudPrefabBuilder
         Stretch(shopLabelRt);
         AddText(shopLabelRt, "Shop", 20, TextAnchor.MiddleCenter, Color.white);
 
-        // Water button (left of Shop)
+        // Tool buttons (top-right, left of Shop): Destroy, Harvest, Water
+        var destroyBtnRt = CreateRect("DestroyButton", canvasRt);
+        SetAnchored(destroyBtnRt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
+            new Vector2(-400f, -16f), new Vector2(120f, 44f));
+        var destroyBtnColor = new Color(0.5f, 0.2f, 0.2f, 0.95f);
+        var destroyBtnImg = destroyBtnRt.gameObject.AddComponent<Image>();
+        destroyBtnImg.color = destroyBtnColor;
+        var destroyBtn = destroyBtnRt.gameObject.AddComponent<Button>();
+        destroyBtn.targetGraphic = destroyBtnImg;
+        ApplyButtonColors(destroyBtn, destroyBtnColor);
+        var destroyLabelRt = CreateRect("Label", destroyBtnRt);
+        Stretch(destroyLabelRt);
+        AddText(destroyLabelRt, "Destroy", 20, TextAnchor.MiddleCenter, Color.white);
+
+        var harvestBtnRt = CreateRect("HarvestButton", canvasRt);
+        SetAnchored(harvestBtnRt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
+            new Vector2(-272f, -16f), new Vector2(120f, 44f));
+        var harvestBtnColor = new Color(0.2f, 0.45f, 0.25f, 0.95f);
+        var harvestBtnImg = harvestBtnRt.gameObject.AddComponent<Image>();
+        harvestBtnImg.color = harvestBtnColor;
+        var harvestBtn = harvestBtnRt.gameObject.AddComponent<Button>();
+        harvestBtn.targetGraphic = harvestBtnImg;
+        ApplyButtonColors(harvestBtn, harvestBtnColor);
+        var harvestLabelRt = CreateRect("Label", harvestBtnRt);
+        Stretch(harvestLabelRt);
+        AddText(harvestLabelRt, "Harvest", 20, TextAnchor.MiddleCenter, Color.white);
+
         var waterBtnRt = CreateRect("WaterButton", canvasRt);
         SetAnchored(waterBtnRt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
             new Vector2(-144f, -16f), new Vector2(120f, 44f));
@@ -264,7 +290,7 @@ public static class GameHudPrefabBuilder
         AddText(waterLabelRt, "Water", 20, TextAnchor.MiddleCenter, Color.white);
 
         var toolMode = canvasGo.AddComponent<ToolModeController>();
-        toolMode.EditorAssign(waterBtn, waterBtnImg);
+        toolMode.EditorAssign(waterBtn, waterBtnImg, harvestBtn, harvestBtnImg, destroyBtn, destroyBtnImg);
 
         // Backdrop (visual dim + raycast absorb only — does not close the shop)
         var backdropRt = CreateRect("ShopBackdrop", canvasRt);

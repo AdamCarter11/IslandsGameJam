@@ -25,5 +25,6 @@ MonoBehaviour:
       offsets: []
       direction: {x: 0, y: 0}
       maxSteps: -1
+  rarity: 0
   allowMultiplePurchases: 0
   shopIcon: {fileID: 0}

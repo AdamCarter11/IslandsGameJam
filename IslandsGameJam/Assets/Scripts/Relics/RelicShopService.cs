@@ -83,9 +83,9 @@ public class RelicShopService : MonoBehaviour
         int offerCount = Mathf.Min(OfferSlotCount, eligible.Count);
         for (int i = 0; i < offerCount; i++)
         {
-            int pick = UnityEngine.Random.Range(i, eligible.Count);
-            (eligible[i], eligible[pick]) = (eligible[pick], eligible[i]);
-            offers[i] = eligible[i];
+            int pick = PickWeightedIndex(eligible);
+            offers[i] = eligible[pick];
+            eligible.RemoveAt(pick);
         }
 
         rollActive = true;
@@ -186,6 +186,31 @@ public class RelicShopService : MonoBehaviour
         if (!relic.allowMultiplePurchases && Inventory.OwnsRelic(relic))
             return false;
         return true;
+    }
+
+    /// <summary>
+    /// Weighted without-replacement pick: chance ≈ weight(rarity) / sum(weights).
+    /// Falls back to uniform if total weight is 0.
+    /// </summary>
+    int PickWeightedIndex(List<RelicSO> pool)
+    {
+        float totalWeight = 0f;
+        for (int i = 0; i < pool.Count; i++)
+            totalWeight += Catalog.GetWeight(pool[i].rarity);
+
+        if (totalWeight <= 0f)
+            return UnityEngine.Random.Range(0, pool.Count);
+
+        float roll = UnityEngine.Random.Range(0f, totalWeight);
+        float cumulative = 0f;
+        for (int i = 0; i < pool.Count; i++)
+        {
+            cumulative += Catalog.GetWeight(pool[i].rarity);
+            if (roll < cumulative)
+                return i;
+        }
+
+        return pool.Count - 1;
     }
 
     void ClearOffers()

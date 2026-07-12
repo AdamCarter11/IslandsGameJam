@@ -1,5 +1,13 @@
 using UnityEngine;
 
+public enum RelicRarity
+{
+    Common,
+    Rare,
+    Epic,
+    Legendary,
+}
+
 public enum RelicEffectType
 {
     ModifyGold,
@@ -19,6 +27,9 @@ public class RelicSO : ScriptableObject
     public string relicName;
     [TextArea(2, 6)] public string desc;
     public RelicEffect[] effects;
+
+    [Tooltip("Shop roll rarity; higher rarities use lower catalog weights.")]
+    public RelicRarity rarity = RelicRarity.Common;
 
     [Tooltip("If true, this relic can appear in the shop again after purchase and stack via multiple AddRelic calls.")]
     public bool allowMultiplePurchases;

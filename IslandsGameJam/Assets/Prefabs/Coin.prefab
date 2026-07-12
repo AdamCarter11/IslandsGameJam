@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -4.18194, y: -1.73262, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: ebe73ca9363db456bacf42c025bb4847, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a5047fb28f24273459d49e88b72a4167, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -144,21 +144,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Coin
   denominations:
   - amount: 1
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: a5047fb28f24273459d49e88b72a4167, type: 3}
   - amount: 4
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: f25d94c8c200f964fbf79dfeb49cde07, type: 3}
   - amount: 8
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: 55747f032d3b715478d3a2246cf1d1c1, type: 3}
   - amount: 16
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: 45432bc4dd800174e82b8d958b347f96, type: 3}
   - amount: 32
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: 75047c62328e68243ab0b49c42f55c09, type: 3}
   - amount: 64
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: 9782f1b80f17a284fba0a87f5efc347f, type: 3}
   - amount: 128
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: 5fcb2e1f6e83fe9499e76e96f04772f2, type: 3}
   - amount: 256
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: 3d50ca548164cb2408cebb4bc90a6ead, type: 3}
   spriteRenderer: {fileID: 4759555249257270335}
   attractRadius: 1.5
   collectRadius: 0.2

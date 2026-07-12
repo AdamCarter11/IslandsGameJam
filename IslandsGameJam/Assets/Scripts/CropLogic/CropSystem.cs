@@ -29,6 +29,12 @@ public class CropSystem : MonoBehaviour
     readonly Queue<Vector2Int> harvestQueue = new Queue<Vector2Int>();
     readonly HashSet<Vector2Int> harvestVisited = new HashSet<Vector2Int>();
     readonly List<Vector2Int> patternBuffer = new List<Vector2Int>();
+    readonly List<Vector2Int> fertilizedPos = new List<Vector2Int>();
+
+    [Header("Fertilizer")]
+    [SerializeField]
+    private int fertilizerCount = 0;
+    public int FertilizerCount => fertilizerCount;
 
     /// <summary>Next harvest starts at this multi when set (persist relics).</summary>
     float? persistedChainMulti;
@@ -322,6 +328,13 @@ public class CropSystem : MonoBehaviour
 
         int gold = resolver.GetGold(stage, crop, context);
         float multiBonus = resolver.GetMulti(stage, crop, context);
+
+        // Fertilize apply bonus before payout
+        if (fertilizedPos.Contains(pos))
+        {
+            multi += 1f;
+            fertilizedPos.Remove(pos);
+        }
 
         int payout = Mathf.RoundToInt(gold * multi);
         coinDropService.SpawnDrops(new Vector2(pos.x, pos.y), payout);
@@ -753,5 +766,21 @@ public class CropSystem : MonoBehaviour
             CropPropertiesSO nextStage = cell.CurrentStage;
             world.SetCropVisualAt(pos, nextStage != null ? nextStage.cropVisual : null);
         }
+    }
+
+    public void FertilizeAt(Vector2Int cell)
+    {
+        if (fertilizedPos.Contains(cell))
+            return;
+
+        fertilizedPos.Add(cell);
+        fertilizerCount--;
+        ToolModeController.Main.HandleFertilizerCount(fertilizerCount);
+    }
+
+    public void AddFertilizer()
+    {
+        fertilizerCount++;
+        ToolModeController.Main.HandleFertilizerCount(fertilizerCount);
     }
 }

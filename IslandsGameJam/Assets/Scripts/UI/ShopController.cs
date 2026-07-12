@@ -99,6 +99,18 @@ public class ShopController : MonoBehaviour
         if (Keyboard.current == null)
             return;
 
+        if (Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            ToggleShop();
+            return;
+        }
+
+        if (Keyboard.current.tabKey.wasPressedThisFrame)
+        {
+            ToggleRelicInventory();
+            return;
+        }
+
         // Must pick a relic — Escape cannot dismiss the choice, shop, or relic inventory.
         if (IsRelicChoiceOpen)
             return;

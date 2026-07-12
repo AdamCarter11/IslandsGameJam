@@ -1,4 +1,6 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public enum ToolMode
@@ -6,7 +8,8 @@ public enum ToolMode
     None,
     Water,
     Harvest,
-    Destroy
+    Destroy,
+    Fertilize,
 }
 
 /// <summary>
@@ -22,6 +25,8 @@ public class ToolModeController : MonoBehaviour
     static readonly Color HarvestActiveColor = new(0.3f, 0.75f, 0.35f, 1f);
     static readonly Color DestroyIdleColor = new(0.5f, 0.2f, 0.2f, 0.95f);
     static readonly Color DestroyActiveColor = new(0.85f, 0.3f, 0.3f, 1f);
+    static readonly Color FertilizeIdleColor = new(0.2f, 0.45f, 0.55f, 0.95f);
+    static readonly Color FertilizeActiveColor = new(0.25f, 0.7f, 0.85f, 1f);
 
     [SerializeField] Button waterButton;
     [SerializeField] Image waterButtonImage;
@@ -29,12 +34,16 @@ public class ToolModeController : MonoBehaviour
     [SerializeField] Image harvestButtonImage;
     [SerializeField] Button destroyButton;
     [SerializeField] Image destroyButtonImage;
+    [SerializeField] Button fertilizeButton;
+    [SerializeField] Image fertilizeButtonImage;
+    [SerializeField] TMP_Text fertilizeText;
 
     public ToolMode CurrentMode { get; private set; } = ToolMode.None;
 
     public bool IsWateringMode => CurrentMode == ToolMode.Water;
     public bool IsHarvestMode => CurrentMode == ToolMode.Harvest;
     public bool IsDestroyMode => CurrentMode == ToolMode.Destroy;
+    public bool IsFertilizeMode => CurrentMode == ToolMode.Fertilize;
 
     void Awake()
     {
@@ -51,6 +60,7 @@ public class ToolModeController : MonoBehaviour
         WireButton(waterButton, ToggleWatering);
         WireButton(harvestButton, ToggleHarvest);
         WireButton(destroyButton, ToggleDestroy);
+        WireButton(fertilizeButton, ToggleFertilize);
         RefreshVisual();
     }
 
@@ -58,6 +68,36 @@ public class ToolModeController : MonoBehaviour
     {
         if (Main == this)
             Main = null;
+    }
+
+    private void Update()
+    {
+        if (Keyboard.current == null)
+            return;
+
+        if (Keyboard.current.qKey.wasPressedThisFrame)
+        {
+            ToggleHarvest();
+            return;
+        }
+
+        if (Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            ToggleWatering();
+            return;
+        }
+
+        if (Keyboard.current.xKey.wasPressedThisFrame)
+        {
+            ToggleDestroy();
+            return;
+        }
+
+        if (Keyboard.current.fKey.wasPressedThisFrame)
+        {
+            ToggleFertilize();
+            return;
+        }
     }
 
     static void WireButton(Button button, UnityEngine.Events.UnityAction action)
@@ -71,6 +111,16 @@ public class ToolModeController : MonoBehaviour
     public void ToggleWatering() => SetMode(CurrentMode == ToolMode.Water ? ToolMode.None : ToolMode.Water);
     public void ToggleHarvest() => SetMode(CurrentMode == ToolMode.Harvest ? ToolMode.None : ToolMode.Harvest);
     public void ToggleDestroy() => SetMode(CurrentMode == ToolMode.Destroy ? ToolMode.None : ToolMode.Destroy);
+    public void ToggleFertilize() => SetMode(CurrentMode == ToolMode.Fertilize ? ToolMode.None : isFertilizerAvailable ? ToolMode.Fertilize : ToolMode.None);
+    private bool isFertilizerAvailable => GameManager.Main?.CropSystem?.FertilizerCount > 0;
+
+    public void HandleFertilizerCount(int count)
+    {
+        if (fertilizeText != null)
+            fertilizeText.text = $"Fertilizer x{count} [F]";
+
+        if (count == 0) SetMode(ToolMode.None);
+    }
 
     public void SetMode(ToolMode mode)
     {
@@ -99,6 +149,7 @@ public class ToolModeController : MonoBehaviour
         ResolveImage(ref waterButtonImage, waterButton);
         ResolveImage(ref harvestButtonImage, harvestButton);
         ResolveImage(ref destroyButtonImage, destroyButton);
+        ResolveImage(ref fertilizeButtonImage, fertilizeButton);
 
         if (waterButtonImage != null)
             waterButtonImage.color = IsWateringMode ? WaterActiveColor : WaterIdleColor;
@@ -106,6 +157,8 @@ public class ToolModeController : MonoBehaviour
             harvestButtonImage.color = IsHarvestMode ? HarvestActiveColor : HarvestIdleColor;
         if (destroyButtonImage != null)
             destroyButtonImage.color = IsDestroyMode ? DestroyActiveColor : DestroyIdleColor;
+        if (waterButtonImage != null)
+            fertilizeButtonImage.color = IsFertilizeMode ? FertilizeActiveColor : FertilizeIdleColor;
     }
 
     static void ResolveImage(ref Image image, Button button)
@@ -123,6 +176,7 @@ public class ToolModeController : MonoBehaviour
         harvestButtonImage = harvestImage;
         destroyButton = destroy;
         destroyButtonImage = destroyImage;
+
     }
 
     /// <summary>Legacy water-only assign used until HUD builder adds Harvest/Destroy buttons.</summary>

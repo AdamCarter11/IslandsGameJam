@@ -27,6 +27,7 @@ MonoBehaviour:
     obstacleChance: 0.1
     obstaclePrefabs:
     - {fileID: 2604844830565917258, guid: 5af7c1177cda5f94b9abedfaecf53b43, type: 3}
+    - {fileID: 309402531185767681, guid: ce75cc0493cca6b49a42e59bec393f47, type: 3}
   - elevation:
       min: 0.5
       max: 0.8
@@ -36,6 +37,7 @@ MonoBehaviour:
     - {fileID: 309402531185767681, guid: 6ee0e3c8ada13bf43b25f018ba2f7588, type: 3}
     - {fileID: 309402531185767681, guid: c449aba933c9f9a4e9df93ac7772271f, type: 3}
     - {fileID: 2604844830565917258, guid: 5af7c1177cda5f94b9abedfaecf53b43, type: 3}
+    - {fileID: 309402531185767681, guid: ce75cc0493cca6b49a42e59bec393f47, type: 3}
   - elevation:
       min: 0.4
       max: 0.5
@@ -45,6 +47,7 @@ MonoBehaviour:
     - {fileID: 309402531185767681, guid: ce75cc0493cca6b49a42e59bec393f47, type: 3}
     - {fileID: 309402531185767681, guid: c449aba933c9f9a4e9df93ac7772271f, type: 3}
     - {fileID: 2604844830565917258, guid: 5af7c1177cda5f94b9abedfaecf53b43, type: 3}
+    - {fileID: 309402531185767681, guid: 6ee0e3c8ada13bf43b25f018ba2f7588, type: 3}
   - elevation:
       min: 0.3
       max: 0.4
@@ -52,6 +55,7 @@ MonoBehaviour:
     obstacleChance: 0.01
     obstaclePrefabs:
     - {fileID: 2604844830565917258, guid: 5af7c1177cda5f94b9abedfaecf53b43, type: 3}
+    - {fileID: 309402531185767681, guid: ce75cc0493cca6b49a42e59bec393f47, type: 3}
   - elevation:
       min: 0
       max: 0.3

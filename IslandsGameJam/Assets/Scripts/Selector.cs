@@ -148,7 +148,17 @@ public class Selector : MonoBehaviour
                     cropSystem.DestroyAt(cell);
                 return;
             }
+
+            if (toolMode.IsFertilizeMode)
+            {
+                if (world.TryGetCrop(cell, out var fertilizeCrop) && fertilizeCrop != null)
+                    cropSystem.FertilizeAt(cell);
+                return;
+            }
         }
+
+        if (world.TryActivateObstacle(cell))
+            return;
 
         // No tool mode: plant from hotbar on empty cells only.
         if (world.TryGetCrop(cell, out CropCell existing) && existing != null)

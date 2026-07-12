@@ -457,6 +457,20 @@ public class WorldManager : MonoBehaviour
 
     #endregion
 
+    public bool TryActivateObstacle(Vector2Int position)
+    {
+        if (!obstacles.ContainsKey(position))
+            return false;
+        var obstacle = obstacles[position];
+        if (obstacle == null)
+            return false;
+        var activatable = obstacle.GetComponent<IActivatable>();
+        if (activatable == null)
+            return false;
+        activatable.Activate();
+        return true;
+    }
+
     #region Terrain Management
 
     private float GetNoise(float x, float y, Vector2 origin, Vector2 dimension,

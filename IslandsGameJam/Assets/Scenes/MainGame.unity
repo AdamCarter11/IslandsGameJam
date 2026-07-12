@@ -701,6 +701,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TimerUI
   timerText: {fileID: 666490032}
+--- !u!114 &598550563 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8849525163479085964, guid: 83dc3d04b01900c4cad469d49824550c, type: 3}
+  m_PrefabInstance: {fileID: 1387125597}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19ed6c258c1520f438d6f8dd9e5261ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OptionsPanelUI
 --- !u!1 &666490030
 GameObject:
   m_ObjectHideFlags: 0
@@ -1500,10 +1511,10 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0.0013917885
+    x: 0
     y: 0
-    width: 0.9965206
-    height: 1
+    width: 0.6770834
+    height: 0.35185185
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
@@ -2133,6 +2144,7 @@ MonoBehaviour:
   relicChoicePanelUi: {fileID: 1387125600}
   relicInventoryPanelUi: {fileID: 1387125601}
   relicsOpenButton: {fileID: 1387125604}
+  optionsPanel: {fileID: 598550563}
 --- !u!114 &1850000004
 MonoBehaviour:
   m_ObjectHideFlags: 0

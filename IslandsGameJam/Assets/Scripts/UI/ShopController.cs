@@ -21,8 +21,11 @@ public class ShopController : MonoBehaviour
     [SerializeField] RelicChoicePanelUI relicChoicePanelUi;
     [SerializeField] RelicInventoryPanelUI relicInventoryPanelUi;
     [SerializeField] Button relicsOpenButton;
+    [SerializeField] OptionsPanelUI optionsPanel;
 
     public bool IsOpen { get; private set; }
+
+    public bool IsOptionsOpen => optionsPanel != null && optionsPanel.IsOpen;
 
     public bool IsRelicChoiceOpen =>
         relicChoicePanelUi != null
@@ -79,6 +82,9 @@ public class ShopController : MonoBehaviour
         if (relicInventoryPanelUi == null)
             relicInventoryPanelUi = GetComponentInChildren<RelicInventoryPanelUI>(true);
 
+        if (optionsPanel == null)
+            optionsPanel = GetComponentInChildren<OptionsPanelUI>(true);
+
         shopPanelUi?.Initialize(inventory, CloseShop, relicShop, relicChoicePanelUi);
         relicInventoryPanelUi?.Initialize(inventory);
         relicInventoryPanelUi?.Close();
@@ -99,6 +105,14 @@ public class ShopController : MonoBehaviour
         if (Keyboard.current == null)
             return;
 
+        // Options eats Escape (close) and blocks shop / relic shortcuts while open.
+        if (IsOptionsOpen)
+        {
+            if (Keyboard.current.escapeKey.wasPressedThisFrame)
+                CloseOptions();
+            return;
+        }
+
         if (Keyboard.current.rKey.wasPressedThisFrame)
         {
             ToggleShop();
@@ -118,6 +132,12 @@ public class ShopController : MonoBehaviour
         if (!Keyboard.current.escapeKey.wasPressedThisFrame)
             return;
 
+        // Confirm dialog owns Escape while visible.
+        if (GameManager.Main != null
+            && GameManager.Main.ConfirmPanelUI != null
+            && GameManager.Main.ConfirmPanelUI.IsVisible)
+            return;
+
         // Relic inventory is independent of shop IsOpen; close it first if open.
         if (relicInventoryPanelUi != null && relicInventoryPanelUi.IsOpen)
         {
@@ -126,12 +146,17 @@ public class ShopController : MonoBehaviour
         }
 
         if (IsOpen)
+        {
             CloseShop();
+            return;
+        }
+
+        OpenOptions();
     }
 
     public void ToggleShop()
     {
-        if (IsRelicChoiceOpen)
+        if (IsRelicChoiceOpen || IsOptionsOpen)
             return;
 
         if (IsOpen)
@@ -142,7 +167,7 @@ public class ShopController : MonoBehaviour
 
     public void ToggleRelicInventory()
     {
-        if (IsRelicChoiceOpen)
+        if (IsRelicChoiceOpen || IsOptionsOpen)
             return;
 
         relicInventoryPanelUi?.Toggle();
@@ -150,7 +175,7 @@ public class ShopController : MonoBehaviour
 
     public void OpenShop()
     {
-        if (IsOpen)
+        if (IsOpen || IsOptionsOpen)
             return;
 
         if (ToolModeController.Main != null)
@@ -172,6 +197,31 @@ public class ShopController : MonoBehaviour
         if (shopPanelRoot != null)
             shopPanelRoot.SetActive(false);
         GameManager.Main?.AudioService?.PlayShopClose();
+    }
+
+    public void OpenOptions()
+    {
+        if (optionsPanel == null || IsOptionsOpen || IsRelicChoiceOpen)
+            return;
+
+        if (IsOpen)
+            CloseShop();
+
+        if (relicInventoryPanelUi != null && relicInventoryPanelUi.IsOpen)
+            relicInventoryPanelUi.Close();
+
+        if (ToolModeController.Main != null)
+            ToolModeController.Main.ClearAllModes();
+
+        GameManager.Main?.AudioService?.PlayUiClick();
+        optionsPanel.Open();
+    }
+
+    public void CloseOptions()
+    {
+        if (!IsOptionsOpen)
+            return;
+        optionsPanel.Close();
     }
 
     static void EnsureEventSystem()
@@ -200,7 +250,8 @@ public class ShopController : MonoBehaviour
         RelicInventoryPanelUI relicInventoryPanel = null,
         Button relicsButton = null,
         HighestGoldUI highestGold = null,
-        TimerUI timer = null)
+        TimerUI timer = null,
+        OptionsPanelUI options = null)
     {
         shopPanelRoot = panelRoot;
         shopOpenButton = openButton;
@@ -212,6 +263,7 @@ public class ShopController : MonoBehaviour
         relicChoicePanelUi = choicePanel;
         relicInventoryPanelUi = relicInventoryPanel;
         relicsOpenButton = relicsButton;
+        optionsPanel = options;
     }
 #endif
 }

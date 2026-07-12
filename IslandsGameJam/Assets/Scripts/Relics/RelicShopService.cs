@@ -51,7 +51,13 @@ public class RelicShopService : MonoBehaviour
             return 1;
 
         float raw = Catalog.baseRollCost * Mathf.Pow(Catalog.costMultiplierPerPurchase, purchaseCount);
-        return Mathf.Max(1, Mathf.RoundToInt(raw));
+        int baseCost = Mathf.Max(1, Mathf.RoundToInt(raw));
+
+        float discount = GameManager.Main?.CropSystem?.RelicRollDiscount ?? 0f;
+        if (discount <= 0f)
+            return baseCost;
+
+        return Mathf.Max(1, Mathf.RoundToInt(baseCost * (1f - Mathf.Clamp01(discount))));
     }
 
     public bool CanRoll()
@@ -75,6 +81,11 @@ public class RelicShopService : MonoBehaviour
         int cost = GetCurrentRollCost();
         if (!Inventory.TrySpendGold(cost))
             return false;
+
+        // Consume stacked seed-buy discount on the next successful roll begin.
+        var cropSystem = GameManager.Main?.CropSystem;
+        if (cropSystem != null)
+            cropSystem.RelicRollDiscount = 0f;
 
         purchaseCount++;
         paidCost = cost;

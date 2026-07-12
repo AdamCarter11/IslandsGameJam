@@ -75,6 +75,8 @@ public class GameManager : MonoBehaviour
         if (relicShopService != null)
             relicShopService.ResetForNewGame();
 
+        cropSystem?.ResetRelicRuntimeState();
+
         worldManager.Initialize();
     }
 

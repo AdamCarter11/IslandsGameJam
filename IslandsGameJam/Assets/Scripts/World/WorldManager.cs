@@ -576,6 +576,8 @@ public class WorldManager : MonoBehaviour
         }
     }
 
+    public bool HasObstacle(Vector2Int position) => obstacles.ContainsKey(position);
+
     public void RemoveObstacle(Vector2Int position)
     {
         if (obstacles.TryGetValue(position, out var obstacle))

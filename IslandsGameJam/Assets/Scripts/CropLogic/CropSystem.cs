@@ -7,6 +7,14 @@ using UnityEngine;
 /// </summary>
 public class CropSystem : MonoBehaviour
 {
+    static readonly Vector2Int[] AdjacentOffsets =
+    {
+        new Vector2Int(1, 0),
+        new Vector2Int(-1, 0),
+        new Vector2Int(0, 1),
+        new Vector2Int(0, -1),
+    };
+
     [SerializeField] private CropGrowthSO debugCropToPlant;
     [SerializeField] private CoinDropService coinDropService;
 
@@ -22,9 +30,68 @@ public class CropSystem : MonoBehaviour
     readonly HashSet<Vector2Int> harvestVisited = new HashSet<Vector2Int>();
     readonly List<Vector2Int> patternBuffer = new List<Vector2Int>();
 
+    /// <summary>Next harvest starts at this multi when set (persist relics).</summary>
+    float? persistedChainMulti;
+
+    /// <summary>Additive bonus applied once at the next harvest start, then cleared.</summary>
+    float pendingStartMultiBonus;
+
+    /// <summary>Multiplies death gold; grows on death relics; resets when a harvest chain starts.</summary>
+    float deathGoldStreakMulti = 1f;
+
+    /// <summary>Fraction off next relic roll cost (0-1). Consumed by shop service.</summary>
+    float relicRollDiscount;
+
+    /// <summary>Toggles each completed harvest when PersistComboMultiEveryOther is owned.</summary>
+    bool everyOtherPersistToggle;
+
     public CropGrowthSO DebugCropToPlant => debugCropToPlant;
     public IReadOnlyList<Vector2Int> PlantedPositions => plantedPositions;
     public bool IsHarvestBusy { get; private set; }
+
+    public float? PersistedChainMulti
+    {
+        get => persistedChainMulti;
+        set => persistedChainMulti = value;
+    }
+
+    public float PendingStartMultiBonus
+    {
+        get => pendingStartMultiBonus;
+        set => pendingStartMultiBonus = Mathf.Max(0f, value);
+    }
+
+    public float DeathGoldStreakMulti
+    {
+        get => deathGoldStreakMulti;
+        set => deathGoldStreakMulti = Mathf.Max(0f, value);
+    }
+
+    public float RelicRollDiscount
+    {
+        get => relicRollDiscount;
+        set => relicRollDiscount = Mathf.Clamp01(value);
+    }
+
+    public bool EveryOtherPersistToggle
+    {
+        get => everyOtherPersistToggle;
+        set => everyOtherPersistToggle = value;
+    }
+
+    public void AddPendingStartMultiBonus(float amount)
+    {
+        if (amount == 0f)
+            return;
+        pendingStartMultiBonus = Mathf.Max(0f, pendingStartMultiBonus + amount);
+    }
+
+    public void AddRelicRollDiscount(float fraction)
+    {
+        if (fraction <= 0f)
+            return;
+        relicRollDiscount = Mathf.Clamp01(relicRollDiscount + fraction);
+    }
 
     /// <summary>
     /// Plants via WorldManager and registers the cell for growth updates
@@ -72,7 +139,7 @@ public class CropSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// Removes a plant from a single cell with no coin drops and no death/harvest relics.
+    /// Removes a plant from a single cell. Ready crops grant destroy-harvestable relic rewards.
     /// </summary>
     public void DestroyAt(Vector2Int position)
     {
@@ -82,6 +149,9 @@ public class CropSystem : MonoBehaviour
 
         if (!world.TryGetCrop(position, out CropCell cell) || cell == null)
             return;
+
+        if (cell.IsReady && cell.crop != null)
+            ApplyDestroyHarvestableRelics(position, cell, world);
 
         world.ClearCrop(position);
         UnregisterPlanted(position);
@@ -104,9 +174,16 @@ public class CropSystem : MonoBehaviour
             return;
 
         CropGrowthSO crop = cell.crop;
-        int deathGold = resolver.GetDeathGold(crop);
+        RelicEffectContext context = BuildCellContext(position, cell, world);
+
+        int deathGold = resolver.GetDeathGold(crop, context);
+        deathGold = Mathf.Max(0, Mathf.RoundToInt(deathGold * deathGoldStreakMulti));
+        deathGold += CountAdjacentUnwateredGold(position, world);
+
         if (coinDropService != null && deathGold > 0)
             coinDropService.SpawnDrops(new Vector2(position.x, position.y), deathGold);
+
+        ApplyDeathStreakMultiRelics(crop, context);
 
         world.ClearCrop(position);
         UnregisterPlanted(position);
@@ -147,10 +224,15 @@ public class CropSystem : MonoBehaviour
         IsHarvestBusy = true;
         HarvestHopVisual flyer = null;
 
+        int comboIndex = 0;
+        float multi = 1f;
+        Vector2Int endPos = origin;
+
         try
         {
-            float multi = 1f;
-            int comboIndex = 0;
+            multi = ResolveHarvestStartMulti(resolver);
+            deathGoldStreakMulti = 1f;
+
             harvestQueue.Clear();
             harvestVisited.Clear();
 
@@ -171,6 +253,7 @@ public class CropSystem : MonoBehaviour
                 yield break;
 
             Vector2Int current = origin;
+            endPos = origin;
 
             while (harvestQueue.Count > 0)
             {
@@ -191,14 +274,27 @@ public class CropSystem : MonoBehaviour
                     continue;
 
                 current = pos;
+                endPos = pos;
             }
         }
         finally
         {
+            if (comboIndex > 0)
+                ApplyHarvestEndRelics(comboIndex, multi, endPos);
+
             if (flyer != null)
                 Destroy(flyer.gameObject);
             IsHarvestBusy = false;
         }
+    }
+
+    float ResolveHarvestStartMulti(CropStateResolver resolver)
+    {
+        float multi = persistedChainMulti ?? 1f;
+        multi = resolver.GetBaseComboMulti(multi);
+        multi += pendingStartMultiBonus;
+        pendingStartMultiBonus = 0f;
+        return Mathf.Max(0f, multi);
     }
 
     /// <summary>
@@ -217,26 +313,226 @@ public class CropSystem : MonoBehaviour
         if (stage == null || crop == null)
             return false;
 
+        RelicEffectContext context = BuildCellContext(pos, cell, world);
+
         GameManager.Main?.AudioService?.PlayHarvest(comboIndex);
         comboIndex++;
 
         harvestVisited.Add(pos);
 
-        int gold = resolver.GetGold(stage, crop);
-        float multiBonus = resolver.GetMulti(stage, crop);
+        int gold = resolver.GetGold(stage, crop, context);
+        float multiBonus = resolver.GetMulti(stage, crop, context);
 
         int payout = Mathf.RoundToInt(gold * multi);
         coinDropService.SpawnDrops(new Vector2(pos.x, pos.y), payout);
         multi += multiBonus;
 
+        ApplyComboMilestoneRelics(pos, comboIndex, ref multi);
+
         EnqueuePattern(stage.harvestPattern, pos, world);
         EnqueueExtraPatternsFromRelics(pos, crop, world);
+        EnqueueMirrorOppositeFromRelics(pos, stage.harvestPattern, crop, context);
 
         world.ClearCrop(pos);
         UnregisterPlanted(pos);
         ApplyHarvestSpawnTile(pos, crop, world);
         SaveGameService.NotifyChanged();
         return true;
+    }
+
+    void ApplyComboMilestoneRelics(Vector2Int pos, int comboIndex, ref float multi)
+    {
+        RelicEffectUtility.ForEachEffect(RelicEffectType.OnComboEveryNGold, effect =>
+        {
+            if (effect.threshold <= 0)
+                return;
+            if (comboIndex % effect.threshold != 0)
+                return;
+
+            int bonus = Mathf.RoundToInt(effect.amount);
+            if (bonus > 0 && coinDropService != null)
+                coinDropService.SpawnDrops(new Vector2(pos.x, pos.y), bonus);
+        });
+
+        float multiLocal = multi;
+        RelicEffectUtility.ForEachEffect(RelicEffectType.OnComboAtNAddMulti, effect =>
+        {
+            if (comboIndex != effect.threshold)
+                return;
+            multiLocal += effect.amount;
+        });
+        multi = multiLocal;
+    }
+
+    void ApplyHarvestEndRelics(int comboIndex, float endingMulti, Vector2Int endPos)
+    {
+        RelicEffectUtility.ForEachEffect(RelicEffectType.OnHarvestEndComboEqualsGold, effect =>
+        {
+            if (comboIndex != effect.threshold)
+                return;
+
+            int bonus = Mathf.RoundToInt(effect.amount);
+            if (bonus > 0 && coinDropService != null)
+                coinDropService.SpawnDrops(new Vector2(endPos.x, endPos.y), bonus);
+        });
+
+        RelicEffectUtility.ForEachEffect(RelicEffectType.OnHarvestEndComboLessThanRandomSeed, effect =>
+        {
+            if (comboIndex >= effect.threshold)
+                return;
+            if (!RelicEffectUtility.RollChance(effect))
+                return;
+            TryGrantRandomUnlockedSeed();
+        });
+
+        ResolvePersistComboMulti(comboIndex, endingMulti);
+        SaveGameService.NotifyChanged();
+    }
+
+    void ResolvePersistComboMulti(int comboIndex, float endingMulti)
+    {
+        bool everyOtherPersist = false;
+        if (RelicEffectUtility.HasEffect(RelicEffectType.PersistComboMultiEveryOther))
+        {
+            everyOtherPersistToggle = !everyOtherPersistToggle;
+            everyOtherPersist = everyOtherPersistToggle;
+        }
+
+        bool shouldPersist = RelicEffectUtility.HasEffect(RelicEffectType.PersistComboMulti) || everyOtherPersist;
+
+        if (!shouldPersist)
+        {
+            RelicEffectUtility.ForEachEffect(RelicEffectType.PersistComboMultiOnEndCombo, effect =>
+            {
+                if (comboIndex == effect.threshold)
+                    shouldPersist = true;
+            });
+        }
+
+        persistedChainMulti = shouldPersist ? endingMulti : (float?)null;
+    }
+
+    void TryGrantRandomUnlockedSeed()
+    {
+        var inventory = GameManager.Main?.Inventory;
+        if (inventory == null)
+            return;
+
+        IReadOnlyCollection<CropGrowthSO> unlocked = inventory.UnlockedSeeds;
+        if (unlocked == null || unlocked.Count == 0)
+            return;
+
+        var candidates = new List<CropGrowthSO>(unlocked.Count);
+        foreach (CropGrowthSO crop in unlocked)
+        {
+            if (crop != null && inventory.CanFitSeed(crop, 1))
+                candidates.Add(crop);
+        }
+
+        if (candidates.Count == 0)
+            return;
+
+        CropGrowthSO pick = candidates[Random.Range(0, candidates.Count)];
+        inventory.TryAddSeeds(pick, 1);
+    }
+
+    void ApplyDestroyHarvestableRelics(Vector2Int position, CropCell cell, WorldManager world)
+    {
+        CropGrowthSO crop = cell.crop;
+        CropPropertiesSO stage = cell.CurrentStage;
+        if (crop == null || stage == null)
+            return;
+
+        RelicEffectContext context = BuildCellContext(position, cell, world);
+        float goldTotal = 0f;
+
+        RelicEffectUtility.ForEachEffect(
+            RelicEffectType.OnDestroyHarvestableGold,
+            crop,
+            context,
+            effect =>
+            {
+                if (effect.multiplicative)
+                    goldTotal += stage.goldGain * effect.amount;
+                else
+                    goldTotal += effect.amount;
+            });
+
+        int gold = Mathf.Max(0, Mathf.RoundToInt(goldTotal));
+        if (gold > 0 && coinDropService != null)
+            coinDropService.SpawnDrops(new Vector2(position.x, position.y), gold);
+
+        RelicEffectUtility.ForEachEffect(
+            RelicEffectType.OnDestroyHarvestableReturnSeeds,
+            crop,
+            context,
+            effect =>
+            {
+                if (!RelicEffectUtility.RollChance(effect))
+                    return;
+
+                int seeds = Mathf.Max(0, Mathf.RoundToInt(effect.amount));
+                if (seeds > 0)
+                    GameManager.Main?.Inventory?.TryAddSeeds(crop, seeds);
+            });
+
+        RelicEffectUtility.ForEachEffect(
+            RelicEffectType.OnDestroyHarvestableNextStartMulti,
+            crop,
+            context,
+            effect => AddPendingStartMultiBonus(effect.amount));
+    }
+
+    int CountAdjacentUnwateredGold(Vector2Int position, WorldManager world)
+    {
+        int total = 0;
+        RelicEffectUtility.ForEachEffect(RelicEffectType.OnCropDeathAdjacentUnwateredGold, effect =>
+        {
+            int perCrop = Mathf.RoundToInt(effect.amount);
+            if (perCrop == 0)
+                return;
+
+            int count = 0;
+            for (int i = 0; i < AdjacentOffsets.Length; i++)
+            {
+                Vector2Int neighbor = position + AdjacentOffsets[i];
+                if (!world.TryGetCrop(neighbor, out CropCell adj) || adj == null || adj.crop == null)
+                    continue;
+                if (adj.isWatered)
+                    continue;
+                count++;
+            }
+
+            total += count * perCrop;
+        });
+        return total;
+    }
+
+    void ApplyDeathStreakMultiRelics(CropGrowthSO crop, RelicEffectContext context)
+    {
+        RelicEffectUtility.ForEachEffect(
+            RelicEffectType.OnCropDeathStreakMulti,
+            crop,
+            context,
+            effect =>
+            {
+                if (effect.multiplicative)
+                    deathGoldStreakMulti *= effect.amount;
+                else
+                    deathGoldStreakMulti += effect.amount;
+            });
+
+        deathGoldStreakMulti = Mathf.Max(0f, deathGoldStreakMulti);
+    }
+
+    static RelicEffectContext BuildCellContext(Vector2Int pos, CropCell cell, WorldManager world)
+    {
+        TerrainType terrain = default;
+        if (world.TryGetTerrainUnit(pos, out TerrainUnit unit) && unit != null)
+            terrain = unit.Type;
+
+        HarvestPattern pattern = cell.CurrentStage != null ? cell.CurrentStage.harvestPattern : null;
+        return RelicEffectContext.ForHarvest(cell.isWatered, terrain, pattern);
     }
 
     static Vector3 CellToWorld(Vector2Int cell) => new Vector3(cell.x, cell.y, 0f);
@@ -254,6 +550,23 @@ public class CropSystem : MonoBehaviour
             if (!harvestVisited.Contains(target))
                 harvestQueue.Enqueue(target);
         }
+    }
+
+    void EnqueueMirrorOppositeFromRelics(
+        Vector2Int origin,
+        HarvestPattern pattern,
+        CropGrowthSO harvestedCrop,
+        RelicEffectContext context)
+    {
+        if (!RelicEffectUtility.IsSingleOffsetPattern(pattern))
+            return;
+        if (!RelicEffectUtility.HasEffect(RelicEffectType.OnHarvestMirrorOpposite, harvestedCrop, context))
+            return;
+
+        cellOffset offset = pattern.offsets[0];
+        Vector2Int opposite = new Vector2Int(origin.x - offset.x, origin.y - offset.y);
+        if (!harvestVisited.Contains(opposite))
+            harvestQueue.Enqueue(opposite);
     }
 
     /// <summary>
@@ -338,6 +651,53 @@ public class CropSystem : MonoBehaviour
             return;
 
         world.CollectPlantedPositions(plantedPositions);
+    }
+
+    /// <summary>
+    /// Writes relic runtime stacks into <paramref name="data"/>.
+    /// </summary>
+    public void CaptureTo(GameSaveData data)
+    {
+        if (data == null)
+            return;
+
+        data.hasPersistedChainMulti = persistedChainMulti.HasValue;
+        data.persistedChainMulti = persistedChainMulti ?? 0f;
+        data.pendingStartMultiBonus = pendingStartMultiBonus;
+        data.deathGoldStreakMulti = deathGoldStreakMulti;
+        data.relicRollDiscount = relicRollDiscount;
+        data.everyOtherPersistToggle = everyOtherPersistToggle;
+    }
+
+    /// <summary>
+    /// Restores relic runtime stacks from <paramref name="data"/>.
+    /// </summary>
+    public void ApplyFrom(GameSaveData data)
+    {
+        if (data == null)
+        {
+            ResetRelicRuntimeState();
+            return;
+        }
+
+        persistedChainMulti = data.hasPersistedChainMulti ? data.persistedChainMulti : (float?)null;
+        pendingStartMultiBonus = Mathf.Max(0f, data.pendingStartMultiBonus);
+        // Old saves omit this field (0); treat as the default streak of 1.
+        deathGoldStreakMulti = data.deathGoldStreakMulti > 0f ? data.deathGoldStreakMulti : 1f;
+        relicRollDiscount = Mathf.Clamp01(data.relicRollDiscount);
+        everyOtherPersistToggle = data.everyOtherPersistToggle;
+    }
+
+    /// <summary>
+    /// Resets session relic stacks (used when starting a fresh run).
+    /// </summary>
+    public void ResetRelicRuntimeState()
+    {
+        persistedChainMulti = null;
+        pendingStartMultiBonus = 0f;
+        deathGoldStreakMulti = 1f;
+        relicRollDiscount = 0f;
+        everyOtherPersistToggle = false;
     }
 
     void Update()

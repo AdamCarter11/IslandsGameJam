@@ -244,6 +244,7 @@ public class SaveGameService : MonoBehaviour
 
         game.Inventory?.CaptureTo(data);
         game.WorldManager?.CaptureTo(data);
+        game.CropSystem?.CaptureTo(data);
         game.RelicShopService?.CaptureTo(data);
         return data;
     }
@@ -261,6 +262,7 @@ public class SaveGameService : MonoBehaviour
         game.Inventory?.ApplyFrom(data, lookup);
         game.WorldManager?.LoadFromSave(data, lookup);
         game.CropSystem?.RebuildPlantedFromWorld();
+        game.CropSystem?.ApplyFrom(data);
         game.RelicShopService?.ApplySaveState(data.relicShopPurchaseCount, data.relicSkipCounts, lookup);
     }
 
@@ -302,6 +304,7 @@ public class SaveGameService : MonoBehaviour
             terrainOverrides = System.Array.Empty<TerrainOverrideSaveData>(),
             obstacleCells = System.Array.Empty<Vector2Int>(),
             crops = System.Array.Empty<CropSaveData>(),
+            deathGoldStreakMulti = 1f,
             relicSkipCounts = System.Array.Empty<RelicSkipCountSaveData>(),
         };
     }

@@ -24,6 +24,14 @@ public class GameSaveData
     // --- Crops ---
     public CropSaveData[] crops;
 
+    // --- Relic runtime stacks (CropSystem session state) ---
+    public bool hasPersistedChainMulti;
+    public float persistedChainMulti;
+    public float pendingStartMultiBonus;
+    public float deathGoldStreakMulti;
+    public float relicRollDiscount;
+    public bool everyOtherPersistToggle;
+
     // --- Relic shop ---
     public int relicShopPurchaseCount;
     public RelicSkipCountSaveData[] relicSkipCounts;

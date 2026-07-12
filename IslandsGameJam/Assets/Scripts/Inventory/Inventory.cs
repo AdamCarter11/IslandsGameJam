@@ -327,20 +327,85 @@ public class Inventory : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Seed shop price after <see cref="RelicEffectType.ModifySeedPrice"/> relics.
+    /// </summary>
+    public int GetResolvedSeedPrice(CropGrowthSO crop)
+    {
+        if (crop == null)
+            return 0;
+
+        var resolver = GameManager.Main?.CropStateResolver;
+        if (resolver != null)
+            return resolver.GetSeedPrice(crop);
+
+        return Mathf.Max(0, crop.seedPrice);
+    }
+
     public bool TryBuySeed(CropGrowthSO crop)
     {
         if (crop == null || !IsUnlocked(crop))
             return false;
         if (!CanFitSeed(crop, 1))
             return false;
-        if (!TrySpendGold(crop.seedPrice))
+
+        int price = GetResolvedSeedPrice(crop);
+        if (!TrySpendGold(price))
             return false;
         if (!TryAddSeeds(crop, 1))
         {
             // Should not happen after CanFitSeed + spend; refund to stay consistent.
-            AddGold(crop.seedPrice);
+            AddGold(price);
             return false;
         }
+
+        ApplyBuySeedRelicEffects(crop, price);
         return true;
+    }
+
+    void ApplyBuySeedRelicEffects(CropGrowthSO crop, int paidPrice)
+    {
+        var cropSystem = GameManager.Main?.CropSystem;
+
+        RelicEffectUtility.ForEachEffect(
+            RelicEffectType.OnBuySeedNextStartMulti,
+            crop,
+            RelicEffectContext.None,
+            effect => cropSystem?.AddPendingStartMultiBonus(effect.amount));
+
+        RelicEffectUtility.ForEachEffect(
+            RelicEffectType.OnBuySeedRefundChance,
+            crop,
+            RelicEffectContext.None,
+            effect =>
+            {
+                if (RelicEffectUtility.RollChance(effect) && paidPrice > 0)
+                    AddGold(paidPrice);
+            });
+
+        RelicEffectUtility.ForEachEffect(
+            RelicEffectType.OnBuySeedRelicDiscount,
+            crop,
+            RelicEffectContext.None,
+            effect =>
+            {
+                // amount is percent off (e.g. 25 → 25%), stacked as a 0-1 fraction.
+                float fraction = effect.amount / 100f;
+                cropSystem?.AddRelicRollDiscount(fraction);
+            });
+
+        RelicEffectUtility.ForEachEffect(
+            RelicEffectType.OnBuySeedGainGold,
+            crop,
+            RelicEffectContext.None,
+            effect =>
+            {
+                int goldGain = Mathf.RoundToInt(effect.amount);
+                if (goldGain != 0)
+                    AddGold(goldGain);
+            });
+
+        if (cropSystem != null)
+            SaveGameService.NotifyChanged();
     }
 }

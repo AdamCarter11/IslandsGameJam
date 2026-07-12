@@ -114,7 +114,17 @@ public class Selector : MonoBehaviour
             return;
         }
 
+        // Obstacle clear (EnableClearObstacles): prefer when not in a tool mode.
         var toolMode = ToolModeController.Main;
+        bool inToolMode = toolMode != null && toolMode.CurrentMode != ToolMode.None;
+        if (!inToolMode
+            && world.HasObstacle(cell)
+            && RelicEffectUtility.HasEffect(RelicEffectType.EnableClearObstacles))
+        {
+            TryClearObstacleAt(cell, world);
+            return;
+        }
+
         if (toolMode != null)
         {
             if (toolMode.IsWateringMode)
@@ -153,5 +163,39 @@ public class Selector : MonoBehaviour
 
         if (cropSystem.PlantCrop(cell, selected.crop))
             inventory.TryConsumeSelected(out _);
+    }
+
+    /// <summary>
+    /// If an <see cref="RelicEffectType.EnableClearObstacles"/> relic is owned and the cell has an
+    /// obstacle, spends the effect's gold cost and removes it. Uses the lowest cost among matching effects.
+    /// </summary>
+    static bool TryClearObstacleAt(Vector2Int cell, WorldManager world)
+    {
+        if (world == null || !world.HasObstacle(cell))
+            return false;
+        if (!RelicEffectUtility.HasEffect(RelicEffectType.EnableClearObstacles))
+            return false;
+
+        var inventory = GameManager.Main?.Inventory;
+        if (inventory == null)
+            return false;
+
+        float bestCost = float.PositiveInfinity;
+        RelicEffectUtility.ForEachEffect(RelicEffectType.EnableClearObstacles, effect =>
+        {
+            if (effect.amount < bestCost)
+                bestCost = effect.amount;
+        });
+
+        if (float.IsPositiveInfinity(bestCost))
+            return false;
+
+        int cost = Mathf.Max(0, Mathf.RoundToInt(bestCost));
+        if (!inventory.TrySpendGold(cost))
+            return false;
+
+        world.RemoveObstacle(cell);
+        SaveGameService.NotifyChanged();
+        return true;
     }
 }

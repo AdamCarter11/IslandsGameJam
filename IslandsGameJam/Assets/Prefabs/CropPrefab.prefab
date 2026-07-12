@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.5176471}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -102,6 +102,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2100111222333444005}
   - component: {fileID: 2100111222333444006}
+  - component: {fileID: 6325080720880766304}
   m_Layer: 0
   m_Name: NeedsWaterIcon
   m_TagString: Untagged
@@ -118,8 +119,8 @@ Transform:
   m_GameObject: {fileID: 2100111222333444004}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.75, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0.15, z: 0}
+  m_LocalScale: {x: 0.75, y: 0.75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 903059433296466589}
@@ -184,6 +185,20 @@ SpriteRenderer:
   m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &6325080720880766304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2100111222333444004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25ae9907facc31648bcb279e7ea6bf09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WaterRotater
+  angle: 15
+  speed: 2
 --- !u!1 &3631138170149481173
 GameObject:
   m_ObjectHideFlags: 0
@@ -295,4 +310,5 @@ MonoBehaviour:
   wateredTileRenderer: {fileID: 2100111222333444003}
   needsWaterIconRenderer: {fileID: 2100111222333444006}
   wateredTileSprite: {fileID: -1147200055, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
-  needsWaterIconSprite: {fileID: 152018455644470310, guid: fe55ede08226be749a4b47a25a92a303, type: 3}
+  needsWaterIconSprite: {fileID: 21300000, guid: f218b17a3dd16fb4e963d0f71e57705e, type: 3}
+  needsWaterIconYPadding: 0.15

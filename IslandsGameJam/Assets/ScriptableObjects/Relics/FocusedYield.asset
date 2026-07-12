@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 55ba736ceff09a54cba70813fb62263f, type: 3}
-  m_Name: Relic_DryEndurance
+  m_Name: FocusedYield
   m_EditorClassIdentifier: Assembly-CSharp::RelicSO
-  relicName: Dry Endurance
-  desc: Crops survive dry soil longer.
+  relicName: Focused Yield
+  desc: Crops that trigger only one base cell get +20 more base gold.
   effects:
-  - type: 4
-    amount: 5
+  - type: 0
+    amount: 20
     multiplicative: 0
     onlyCrop: {fileID: 0}
     tileToSpawn: {fileID: 0}
@@ -25,6 +25,12 @@ MonoBehaviour:
       offsets: []
       direction: {x: 0, y: 0}
       maxSteps: -1
+    filterByTerrain: 0
+    terrainType: 0
+    requireUnwatered: 0
+    requireSingleOffset: 1
+    chance: 1
+    threshold: 0
   rarity: 0
-  allowMultiplePurchases: 0
+  allowMultiplePurchases: 1
   shopIcon: {fileID: 0}

@@ -10,13 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 55ba736ceff09a54cba70813fb62263f, type: 3}
-  m_Name: Relic_BountifulYield
+  m_Name: MerchantFavor
   m_EditorClassIdentifier: Assembly-CSharp::RelicSO
-  relicName: Bountiful Yield
-  desc: Increases harvest multiplier by 10%.
+  relicName: Merchant Favor
+  desc: Every time you buy a seed, reduce the cost of your next relic purchase by
+    1%. Stacks up to 50%.
   effects:
-  - type: 1
-    amount: 0.15
+  - type: 26
+    amount: 1
     multiplicative: 0
     onlyCrop: {fileID: 0}
     tileToSpawn: {fileID: 0}
@@ -31,6 +32,6 @@ MonoBehaviour:
     requireSingleOffset: 0
     chance: 1
     threshold: 0
-  rarity: 1
-  allowMultiplePurchases: 1
+  rarity: 3
+  allowMultiplePurchases: 0
   shopIcon: {fileID: 0}

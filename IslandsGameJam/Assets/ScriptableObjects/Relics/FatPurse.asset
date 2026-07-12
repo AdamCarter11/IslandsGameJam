@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 55ba736ceff09a54cba70813fb62263f, type: 3}
-  m_Name: Relic_BountifulYield
+  m_Name: FatPurse
   m_EditorClassIdentifier: Assembly-CSharp::RelicSO
-  relicName: Bountiful Yield
-  desc: Increases harvest multiplier by 10%.
+  relicName: Fat Purse
+  desc: Harvested crops give +5 more gold before multiplier.
   effects:
-  - type: 1
-    amount: 0.15
+  - type: 0
+    amount: 5
     multiplicative: 0
     onlyCrop: {fileID: 0}
     tileToSpawn: {fileID: 0}
@@ -31,6 +31,6 @@ MonoBehaviour:
     requireSingleOffset: 0
     chance: 1
     threshold: 0
-  rarity: 1
+  rarity: 0
   allowMultiplePurchases: 1
   shopIcon: {fileID: 0}

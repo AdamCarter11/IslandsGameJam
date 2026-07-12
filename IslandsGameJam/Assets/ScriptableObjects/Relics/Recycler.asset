@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 55ba736ceff09a54cba70813fb62263f, type: 3}
-  m_Name: Relic_BountifulYield
+  m_Name: Recycler
   m_EditorClassIdentifier: Assembly-CSharp::RelicSO
-  relicName: Bountiful Yield
-  desc: Increases harvest multiplier by 10%.
+  relicName: Recycler
+  desc: When a crop dies, gain +10 gold from it
   effects:
-  - type: 1
-    amount: 0.15
+  - type: 5
+    amount: 10
     multiplicative: 0
     onlyCrop: {fileID: 0}
     tileToSpawn: {fileID: 0}

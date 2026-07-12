@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 55ba736ceff09a54cba70813fb62263f, type: 3}
-  m_Name: Relic_BountifulYield
+  m_Name: SingularForce
   m_EditorClassIdentifier: Assembly-CSharp::RelicSO
-  relicName: Bountiful Yield
-  desc: Increases harvest multiplier by 10%.
+  relicName: Singular Force
+  desc: Crops that trigger only one base cell have a +2x multiplier.
   effects:
   - type: 1
-    amount: 0.15
-    multiplicative: 0
+    amount: 2
+    multiplicative: 1
     onlyCrop: {fileID: 0}
     tileToSpawn: {fileID: 0}
     extraPattern:
@@ -28,9 +28,9 @@ MonoBehaviour:
     filterByTerrain: 0
     terrainType: 0
     requireUnwatered: 0
-    requireSingleOffset: 0
+    requireSingleOffset: 1
     chance: 1
     threshold: 0
-  rarity: 1
-  allowMultiplePurchases: 1
+  rarity: 3
+  allowMultiplePurchases: 0
   shopIcon: {fileID: 0}

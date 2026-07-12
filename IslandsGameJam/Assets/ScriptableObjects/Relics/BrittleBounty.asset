@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 55ba736ceff09a54cba70813fb62263f, type: 3}
-  m_Name: Relic_BountifulYield
+  m_Name: BrittleBounty
   m_EditorClassIdentifier: Assembly-CSharp::RelicSO
-  relicName: Bountiful Yield
-  desc: Increases harvest multiplier by 10%.
+  relicName: Brittle Bounty
+  desc: Crops die from dehydration 10% faster, but yield 10% more death gold.
   effects:
-  - type: 1
-    amount: 0.15
-    multiplicative: 0
+  - type: 4
+    amount: 0.9
+    multiplicative: 1
     onlyCrop: {fileID: 0}
     tileToSpawn: {fileID: 0}
     extraPattern:
@@ -31,6 +31,22 @@ MonoBehaviour:
     requireSingleOffset: 0
     chance: 1
     threshold: 0
-  rarity: 1
+  - type: 5
+    amount: 1.1
+    multiplicative: 1
+    onlyCrop: {fileID: 0}
+    tileToSpawn: {fileID: 0}
+    extraPattern:
+      kind: 0
+      offsets: []
+      direction: {x: 0, y: 0}
+      maxSteps: -1
+    filterByTerrain: 0
+    terrainType: 0
+    requireUnwatered: 0
+    requireSingleOffset: 0
+    chance: 1
+    threshold: 0
+  rarity: 0
   allowMultiplePurchases: 1
   shopIcon: {fileID: 0}

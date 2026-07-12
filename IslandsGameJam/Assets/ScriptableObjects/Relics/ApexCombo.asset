@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 55ba736ceff09a54cba70813fb62263f, type: 3}
-  m_Name: Relic_GoldenTouch
+  m_Name: ApexCombo
   m_EditorClassIdentifier: Assembly-CSharp::RelicSO
-  relicName: Golden Touch
-  desc: Harvested crops yield a bit more gold.
+  relicName: Apex Combo
+  desc: Increase your base combo multiplier by 200%.
   effects:
-  - type: 0
-    amount: 2
-    multiplicative: 0
+  - type: 6
+    amount: 3
+    multiplicative: 1
     onlyCrop: {fileID: 0}
     tileToSpawn: {fileID: 0}
     extraPattern:
@@ -25,6 +25,12 @@ MonoBehaviour:
       offsets: []
       direction: {x: 0, y: 0}
       maxSteps: -1
-  rarity: 1
-  allowMultiplePurchases: 0
+    filterByTerrain: 0
+    terrainType: 0
+    requireUnwatered: 0
+    requireSingleOffset: 0
+    chance: 1
+    threshold: 0
+  rarity: 3
+  allowMultiplePurchases: 1
   shopIcon: {fileID: 0}

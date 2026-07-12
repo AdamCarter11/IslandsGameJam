@@ -13,6 +13,7 @@ public class CropView : MonoBehaviour
     [Header("Optional sprite overrides (else uses renderer.sprite on children)")]
     [SerializeField] Sprite wateredTileSprite;
     [SerializeField] Sprite needsWaterIconSprite;
+    [SerializeField] float needsWaterIconYPadding = 0.15f;
 
     void Awake()
     {
@@ -30,6 +31,23 @@ public class CropView : MonoBehaviour
         if (spriteRenderer == null)
             return;
         spriteRenderer.sprite = sprite;
+        //RepositionNeedsWaterIcon();
+    }
+
+    private void RepositionNeedsWaterIcon()
+    {
+        if (needsWaterIconSprite == null || spriteRenderer?.sprite == null)
+            return;
+
+        float topY = spriteRenderer.sprite.bounds.max.y;
+
+        float iconHalfH = 0f;
+        if(needsWaterIconRenderer.sprite != null)
+        {
+            iconHalfH = needsWaterIconRenderer.sprite.bounds.extents.y * needsWaterIconRenderer.transform.localScale.y;
+        }
+        var t = needsWaterIconRenderer.transform;
+        t.localPosition = new Vector3(0f, topY + needsWaterIconYPadding + iconHalfH, t.localPosition.z);
     }
 
     /// <summary>

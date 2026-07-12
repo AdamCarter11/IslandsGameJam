@@ -13,12 +13,43 @@ MonoBehaviour:
   m_Name: RelicShopCatalog
   m_EditorClassIdentifier: Assembly-CSharp::RelicShopCatalog
   allRelics:
-  - {fileID: 11400000, guid: a1b2c3d4e5f60718293a4b5c6d7e8f01, type: 2}
   - {fileID: 11400000, guid: a1b2c3d4e5f60718293a4b5c6d7e8f02, type: 2}
   - {fileID: 11400000, guid: a1b2c3d4e5f60718293a4b5c6d7e8f03, type: 2}
-  - {fileID: 11400000, guid: a1b2c3d4e5f60718293a4b5c6d7e8f04, type: 2}
+  - {fileID: 11400000, guid: 00d66f0fbd7dad34fa25c52af07f0761, type: 2}
+  - {fileID: 11400000, guid: 06339a6d2e57635439e8e0122757700d, type: 2}
+  - {fileID: 11400000, guid: aca5059192c64930b74dfc6f1f66f991, type: 2}
+  - {fileID: 11400000, guid: f433464ac88d4b22b4ed41a3ed23ce68, type: 2}
+  - {fileID: 11400000, guid: d1a004279f1047948f1631062dbe2b9c, type: 2}
+  - {fileID: 11400000, guid: fc40e9926aa341c898e74a29ff62767d, type: 2}
+  - {fileID: 11400000, guid: afea98fa8c264e7d952fc908b29e093b, type: 2}
+  - {fileID: 11400000, guid: dffc2345ce754dfb8941933e830bd35e, type: 2}
+  - {fileID: 11400000, guid: 2d34f614995e41a0aa08a21f36407977, type: 2}
+  - {fileID: 11400000, guid: cc52953e4bbd47b081c0bf0195127cd1, type: 2}
+  - {fileID: 11400000, guid: ca9f46815160449cb92c71e851b49d57, type: 2}
+  - {fileID: 11400000, guid: 6cf6b26b7b1c41f0bfc33a190b2f08b4, type: 2}
+  - {fileID: 11400000, guid: c48d6e4f154847808a51516334dd24ea, type: 2}
+  - {fileID: 11400000, guid: fc09aadbfcb74e0b919f8924b685367a, type: 2}
+  - {fileID: 11400000, guid: 703873a7c2a34dcfa29e1e739ef3a238, type: 2}
+  - {fileID: 11400000, guid: 7bfd92a32e854a00bff1801ad280d473, type: 2}
+  - {fileID: 11400000, guid: 482102c17ab34cad807def6c78d77464, type: 2}
+  - {fileID: 11400000, guid: 7821baee0fbe4b138242d3b73b0f93d3, type: 2}
+  - {fileID: 11400000, guid: ee6ff39863764206b2bc15098c82866a, type: 2}
+  - {fileID: 11400000, guid: 2e009dec674040fd947caee3af112a98, type: 2}
+  - {fileID: 11400000, guid: 52d05c33f359403193f8f53241d49bd9, type: 2}
+  - {fileID: 11400000, guid: bfcc3945d9214051abda2de3a3921202, type: 2}
+  - {fileID: 11400000, guid: 6fa86e1468cb4d88a4136df22a6c92e1, type: 2}
+  - {fileID: 11400000, guid: 220b4b15ed5e473b8cab0182a3a75b8d, type: 2}
+  - {fileID: 11400000, guid: f110aee97e7c4dec884bb9c03327e7f8, type: 2}
+  - {fileID: 11400000, guid: 98b8722977884ca8a4454d75e1ad3604, type: 2}
+  - {fileID: 11400000, guid: e27f68c755a34692a922eef1f0c51b17, type: 2}
+  - {fileID: 11400000, guid: efa9b87580dd407987bbbbdd09912e69, type: 2}
+  - {fileID: 11400000, guid: d3647462a912496abdc546c39c74ec59, type: 2}
   baseRollCost: 25
   costMultiplierPerPurchase: 1.5
   skipRefundBasePercent: 0.1
   skipRefundIncreasePerSkip: 0.05
   skipRefundMaxPercent: 0.5
+  commonWeight: 60
+  rareWeight: 25
+  epicWeight: 12
+  legendaryWeight: 3

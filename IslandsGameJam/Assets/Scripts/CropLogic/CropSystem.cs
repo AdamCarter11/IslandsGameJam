@@ -76,7 +76,7 @@ public class CropSystem : MonoBehaviour
     public float RelicRollDiscount
     {
         get => relicRollDiscount;
-        set => relicRollDiscount = Mathf.Clamp01(value);
+        set => relicRollDiscount = Mathf.Clamp(value, 0f, 0.5f);
     }
 
     public bool EveryOtherPersistToggle
@@ -96,7 +96,8 @@ public class CropSystem : MonoBehaviour
     {
         if (fraction <= 0f)
             return;
-        relicRollDiscount = Mathf.Clamp01(relicRollDiscount + fraction);
+        // Merchant Favor and similar: stack seed-buy discounts up to 50% off.
+        relicRollDiscount = Mathf.Clamp(relicRollDiscount + fraction, 0f, 0.5f);
     }
 
     /// <summary>
@@ -697,7 +698,7 @@ public class CropSystem : MonoBehaviour
         pendingStartMultiBonus = Mathf.Max(0f, data.pendingStartMultiBonus);
         // Old saves omit this field (0); treat as the default streak of 1.
         deathGoldStreakMulti = data.deathGoldStreakMulti > 0f ? data.deathGoldStreakMulti : 1f;
-        relicRollDiscount = Mathf.Clamp01(data.relicRollDiscount);
+        relicRollDiscount = Mathf.Clamp(data.relicRollDiscount, 0f, 0.5f);
         everyOtherPersistToggle = data.everyOtherPersistToggle;
     }
 

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
+  m_Name: Mythicmallow_Mature
+  m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
+  cropVisual: {fileID: -2353564247272742209, guid: bb24676aaf2a7b24ba5fa36fb356d5ad, type: 3}
+  growthTime: 14.5
+  dryGrowthMultiplier: 1
+  goldGain: 1300
+  multiBonus: 1.4
+  harvestPattern:
+    kind: 0
+    offsets:
+    - x: -1
+      y: -1
+    - x: 0
+      y: -1
+    - x: 1
+      y: -1
+    - x: -1
+      y: 0
+    - x: 1
+      y: 0
+    direction: {x: 0, y: 0}
+    maxSteps: -1

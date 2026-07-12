@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
+  m_Name: Silvershallot_Baby
+  m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
+  cropVisual: {fileID: 3994033136373939748, guid: bb24676aaf2a7b24ba5fa36fb356d5ad, type: 3}
+  growthTime: 12.5
+  dryGrowthMultiplier: 0.5
+  goldGain: 280
+  multiBonus: 1.35
+  harvestPattern:
+    kind: 0
+    offsets:
+    - x: -1
+      y: 0
+    - x: 1
+      y: 0
+    - x: 0
+      y: -1
+    - x: 0
+      y: 1
+    - x: 0
+      y: 2
+    direction: {x: 0, y: 0}
+    maxSteps: -1

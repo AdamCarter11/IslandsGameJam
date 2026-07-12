@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7679a0d82b5a9d642ab28ae28e1b9eac, type: 3}
+  m_Name: Elderoot_Group
+  m_EditorClassIdentifier: Assembly-CSharp::CropGrowthSO
+  cropName: Elderoot
+  desc: Ancient apex root. Cardinal rays feel via long cross offsets.
+  stages:
+  - {fileID: 11400000, guid: 060ae1004966ea24abd5e746bd3f113f, type: 2}
+  - {fileID: 11400000, guid: fa92b893157c7334f9a195138d13c4f6, type: 2}
+  dryDeathTime: 30
+  deathGold: 8
+  shopIcon: {fileID: -8670371468120161816, guid: 2eac74dff1e0d95408fb5849d0957df9, type: 3}
+  seedPrice: 2000
+  unlockedByDefault: 0
+  harvestBounceVisual: {fileID: -8670371468120161816, guid: 2eac74dff1e0d95408fb5849d0957df9, type: 3}

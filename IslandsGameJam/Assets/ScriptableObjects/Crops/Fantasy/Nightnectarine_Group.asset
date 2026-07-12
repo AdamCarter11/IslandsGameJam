@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7679a0d82b5a9d642ab28ae28e1b9eac, type: 3}
+  m_Name: Nightnectarine_Group
+  m_EditorClassIdentifier: Assembly-CSharp::CropGrowthSO
+  cropName: Night nectarine
+  desc: Midnight fruit. Knight leaps left and right.
+  stages:
+  - {fileID: 11400000, guid: ad2b9f7068849834099cb3518455ee92, type: 2}
+  - {fileID: 11400000, guid: 6d1fb156319207f46b8a9bfe6b26bd7e, type: 2}
+  dryDeathTime: 30
+  deathGold: 6
+  shopIcon: {fileID: 7198516199790418987, guid: 9614e89f522c52a4fb305b3296a0928b, type: 3}
+  seedPrice: 380
+  unlockedByDefault: 0
+  harvestBounceVisual: {fileID: 7198516199790418987, guid: 9614e89f522c52a4fb305b3296a0928b, type: 3}

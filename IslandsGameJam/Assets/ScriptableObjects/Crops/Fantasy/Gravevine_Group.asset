@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7679a0d82b5a9d642ab28ae28e1b9eac, type: 3}
+  m_Name: Gravevine_Group
+  m_EditorClassIdentifier: Assembly-CSharp::CropGrowthSO
+  cropName: Grave vine
+  desc: Creeping drought vine. Left ray. dies dry for 2.25x seed gold.
+  stages:
+  - {fileID: 11400000, guid: 99e89a826dd3d844bb58a2673240e0e1, type: 2}
+  - {fileID: 11400000, guid: ec437697dc509de41b0fb0fce8d34340, type: 2}
+  dryDeathTime: 20
+  deathGold: 900
+  shopIcon: {fileID: -2353564247272742209, guid: bb24676aaf2a7b24ba5fa36fb356d5ad, type: 3}
+  seedPrice: 400
+  unlockedByDefault: 0
+  harvestBounceVisual: {fileID: -2353564247272742209, guid: bb24676aaf2a7b24ba5fa36fb356d5ad, type: 3}

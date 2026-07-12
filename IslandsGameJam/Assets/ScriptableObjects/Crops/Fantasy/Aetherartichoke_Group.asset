@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7679a0d82b5a9d642ab28ae28e1b9eac, type: 3}
+  m_Name: Aetherartichoke_Group
+  m_EditorClassIdentifier: Assembly-CSharp::CropGrowthSO
+  cropName: Aetherartichoke
+  desc: Sky-thistle heart. Wide T above.
+  stages:
+  - {fileID: 11400000, guid: a6bc4a8995b6a514da7091f94b6f4fcb, type: 2}
+  - {fileID: 11400000, guid: f952282204c6ebc4981cd7805372fefd, type: 2}
+  dryDeathTime: 30
+  deathGold: 7
+  shopIcon: {fileID: -2353564247272742209, guid: bb24676aaf2a7b24ba5fa36fb356d5ad, type: 3}
+  seedPrice: 720
+  unlockedByDefault: 0
+  harvestBounceVisual: {fileID: -2353564247272742209, guid: bb24676aaf2a7b24ba5fa36fb356d5ad, type: 3}

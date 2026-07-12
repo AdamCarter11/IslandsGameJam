@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7679a0d82b5a9d642ab28ae28e1b9eac, type: 3}
+  m_Name: Emberbean_Group
+  m_EditorClassIdentifier: Assembly-CSharp::CropGrowthSO
+  cropName: Emberbean
+  desc: Warm pulse beans. Harvests left and above.
+  stages:
+  - {fileID: 11400000, guid: 0fc57f0fef81dd646bf5a29d5c10b90f, type: 2}
+  - {fileID: 11400000, guid: 641cb492b2d41ef4a8d1d26701ebf76a, type: 2}
+  dryDeathTime: 30
+  deathGold: 2
+  shopIcon: {fileID: 8314729164969292333, guid: ca1198b4615873243a397a318166be00, type: 3}
+  seedPrice: 25
+  unlockedByDefault: 1
+  harvestBounceVisual: {fileID: 8314729164969292333, guid: ca1198b4615873243a397a318166be00, type: 3}

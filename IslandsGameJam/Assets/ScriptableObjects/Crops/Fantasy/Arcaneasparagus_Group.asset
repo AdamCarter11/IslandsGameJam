@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7679a0d82b5a9d642ab28ae28e1b9eac, type: 3}
+  m_Name: Arcaneasparagus_Group
+  m_EditorClassIdentifier: Assembly-CSharp::CropGrowthSO
+  cropName: Arcaneasparagus
+  desc: Enchanted spears. Tall column ray up (4).
+  stages:
+  - {fileID: 11400000, guid: 6432f37d5c8a5e247ab86fdd9e582d82, type: 2}
+  - {fileID: 11400000, guid: 58fad12eba0c6ee46bdca028bc47b7a5, type: 2}
+  dryDeathTime: 30
+  deathGold: 8
+  shopIcon: {fileID: 737859076552439139, guid: 63e6d16f530d3964990375bd24726b25, type: 3}
+  seedPrice: 1550
+  unlockedByDefault: 0
+  harvestBounceVisual: {fileID: 737859076552439139, guid: 63e6d16f530d3964990375bd24726b25, type: 3}

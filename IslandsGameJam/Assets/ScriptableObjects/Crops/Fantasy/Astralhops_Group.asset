@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7679a0d82b5a9d642ab28ae28e1b9eac, type: 3}
+  m_Name: Astralhops_Group
+  m_EditorClassIdentifier: Assembly-CSharp::CropGrowthSO
+  cropName: Astral hops
+  desc: Starfield cones. Dense local cluster (8-neighbors).
+  stages:
+  - {fileID: 11400000, guid: 473655cdb60ed9e4da248841d5b1863d, type: 2}
+  - {fileID: 11400000, guid: 1f998cd0bfd2e95429043ccb3eafd001, type: 2}
+  dryDeathTime: 30
+  deathGold: 8
+  shopIcon: {fileID: 7198516199790418987, guid: 9614e89f522c52a4fb305b3296a0928b, type: 3}
+  seedPrice: 1990
+  unlockedByDefault: 0
+  harvestBounceVisual: {fileID: 7198516199790418987, guid: 9614e89f522c52a4fb305b3296a0928b, type: 3}

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7679a0d82b5a9d642ab28ae28e1b9eac, type: 3}
+  m_Name: Prismpepper_Group
+  m_EditorClassIdentifier: Assembly-CSharp::CropGrowthSO
+  cropName: Prism pepper
+  desc: Refracting peppers. Three-cell arc above.
+  stages:
+  - {fileID: 11400000, guid: a74302604c13f724cb04a3c158dce1bc, type: 2}
+  - {fileID: 11400000, guid: ba772caa0ce5ebc4489a0da2ea021859, type: 2}
+  dryDeathTime: 30
+  deathGold: 4
+  shopIcon: {fileID: 8314729164969292333, guid: ca1198b4615873243a397a318166be00, type: 3}
+  seedPrice: 140
+  unlockedByDefault: 0
+  harvestBounceVisual: {fileID: 8314729164969292333, guid: ca1198b4615873243a397a318166be00, type: 3}

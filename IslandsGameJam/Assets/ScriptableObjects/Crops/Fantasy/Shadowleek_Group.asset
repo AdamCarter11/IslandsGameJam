@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7679a0d82b5a9d642ab28ae28e1b9eac, type: 3}
+  m_Name: Shadowleek_Group
+  m_EditorClassIdentifier: Assembly-CSharp::CropGrowthSO
+  cropName: Shadow leek
+  desc: Umbral stalks. Knight-leap to the right.
+  stages:
+  - {fileID: 11400000, guid: 388285f45512c6b41ba4b5fcbafc27d5, type: 2}
+  - {fileID: 11400000, guid: dd510b3eb997a3647929185baa3abcbb, type: 2}
+  dryDeathTime: 30
+  deathGold: 3
+  shopIcon: {fileID: 3721053832486967156, guid: 5796c103ba91c5a478df01bc02442ab0, type: 3}
+  seedPrice: 125
+  unlockedByDefault: 0
+  harvestBounceVisual: {fileID: 3721053832486967156, guid: 5796c103ba91c5a478df01bc02442ab0, type: 3}

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7679a0d82b5a9d642ab28ae28e1b9eac, type: 3}
+  m_Name: Cobaltcorn_Group
+  m_EditorClassIdentifier: Assembly-CSharp::CropGrowthSO
+  cropName: Cobal tcorn
+  desc: Mineral ears. Classic corn reach, left 2 and up 2.
+  stages:
+  - {fileID: 11400000, guid: 17b52723c8595fa408538614f21da4bb, type: 2}
+  - {fileID: 11400000, guid: b5286fa0bb76e84479f9fd3956d478a1, type: 2}
+  dryDeathTime: 30
+  deathGold: 7
+  shopIcon: {fileID: 737859076552439139, guid: 63e6d16f530d3964990375bd24726b25, type: 3}
+  seedPrice: 880
+  unlockedByDefault: 0
+  harvestBounceVisual: {fileID: 737859076552439139, guid: 63e6d16f530d3964990375bd24726b25, type: 3}

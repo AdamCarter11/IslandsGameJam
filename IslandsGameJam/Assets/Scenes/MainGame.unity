@@ -220,7 +220,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c7bcd8efbc912a4980e4c648f9631ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CropSystem
-  debugCropToPlant: {fileID: 11400000, guid: 6f5e785a4c90f5340a7385fc17cb565c, type: 2}
+  debugCropToPlant: {fileID: 11400000, guid: d1551b27694e4444a8e7f4ec4f6f639a, type: 2}
   coinDropService: {fileID: 2082189033}
   popDuration: 0.12
   hopDuration: 0.22
@@ -1378,8 +1378,8 @@ Camera:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1
-    height: 1
+    width: 0.33333334
+    height: 0.44444445
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60

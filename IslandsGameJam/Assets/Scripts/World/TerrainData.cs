@@ -3,12 +3,12 @@ using UnityEngine;
 
 public enum TerrainType
 {
-    Grass,
-    Dirt,
-    Water,
-    Sand,
-    Rock,
-    Snow,
+    Plains,
+    Wasteland,
+    Wetland,
+    Desert,
+    Mountainous,
+    Tundra,
 }
 
 [CreateAssetMenu(fileName = "TU__", menuName = "Island/Terrain Unit")]

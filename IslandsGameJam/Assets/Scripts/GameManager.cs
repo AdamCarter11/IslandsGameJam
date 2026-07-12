@@ -11,8 +11,7 @@ public class GameManager : MonoBehaviour
     }
 
     [Header("Components")]
-    [SerializeField]
-    private WorldManager worldManager;
+    [SerializeField] private WorldManager worldManager;
     public WorldManager WorldManager => worldManager;
 
     [SerializeField] private Inventory inventory;
@@ -30,12 +29,22 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioService audioService;
     public AudioService AudioService => audioService;
 
+    [SerializeField] private LandUnlockSystem landUnlockSystem;
+    public LandUnlockSystem LandUnlockSystem => landUnlockSystem;
+
+    [Header("UI")]
+    [SerializeField] private ConfirmPanelUI confirmPanelUI;
+    public ConfirmPanelUI ConfirmPanelUI => confirmPanelUI;
+    [SerializeField] private LandCostUI landCostUI;
+    public LandCostUI LandCostUI => landCostUI;
+
     [Header("Shop")]
     [SerializeField] private SeedShopCatalog seedShopCatalog;
     public SeedShopCatalog SeedShopCatalog => seedShopCatalog;
 
     [SerializeField] private RelicShopCatalog relicShopCatalog;
     public RelicShopCatalog RelicShopCatalog => relicShopCatalog;
+
 
     [Header("Runtime")]
     [SerializeField]

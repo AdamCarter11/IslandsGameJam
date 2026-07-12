@@ -1,4 +1,5 @@
 using ColorMak3r.Utility;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -27,6 +28,9 @@ public class Selector : MonoBehaviour
         if (ShopController.Main != null && ShopController.Main.IsOpen)
             return;
 
+        if (GameManager.Main.ConfirmPanelUI.IsVisible)
+            return;
+
         if (Mouse.current == null)
             return;
 
@@ -45,10 +49,14 @@ public class Selector : MonoBehaviour
         {
             SetSize(3);
             transform.position = worldPosition.SnapToGrid(3, true);
+            var cost = GameManager.Main.LandUnlockSystem.GetCurrentCost();
+            GameManager.Main.LandCostUI.UpdateText($"Unlock for\n${cost.ToString("N0")}");
+            GameManager.Main.LandCostUI.Show();
         }
         else
         {
             SetSize(1);
+            GameManager.Main.LandCostUI.Hide();
         }
 
         if (Mouse.current.leftButton.wasPressedThisFrame)
@@ -83,6 +91,8 @@ public class Selector : MonoBehaviour
         Vector2Int chunk = worldPosition.SnapToGrid(3, true).ToInt();
         var cropSystem = GameManager.Main.CropSystem;
         var world = GameManager.Main.WorldManager;
+        var landUnlocker = GameManager.Main.LandUnlockSystem;
+        var confirmPanel = GameManager.Main.ConfirmPanelUI;
 
         if (cropSystem == null || world == null)
         {
@@ -92,9 +102,15 @@ public class Selector : MonoBehaviour
         if (cropSystem.IsHarvestBusy)
             return;
 
-        if (world.IsInsideAvailableChunk(cell))
+        if (world.IsInsideAvailableChunk(cell) && landUnlocker.CanUnlockLand())
         {
-            world.UnlockChunk(chunk);
+            confirmPanel.Show($"Unlock land for ${landUnlocker.GetCurrentCost().ToString("N0")}", onYes: () =>
+            {
+                if (landUnlocker.UnlockLand())
+                {
+                    world.UnlockChunk(chunk);
+                }
+            });
             return;
         }
 

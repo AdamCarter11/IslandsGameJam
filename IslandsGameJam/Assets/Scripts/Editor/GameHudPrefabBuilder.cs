@@ -694,7 +694,35 @@ public static class GameHudPrefabBuilder
         choicePanel.EditorAssign(choiceCards);
         choiceRt.gameObject.SetActive(false);
 
-        shopPanel.EditorAssign(closeBtn, listRt, shopRowPrefab, relicRollBtn, relicRollLabel, choicePanel);
+        // Shared seed tooltip (shop rows + hotbar slots); sibling order fixed after hotbar
+        var seedTooltipRt = CreateRect("SeedTooltip", canvasRt);
+        SetAnchored(seedTooltipRt, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
+            new Vector2(0f, 12f), new Vector2(280f, 160f));
+        var seedTooltipBg = seedTooltipRt.gameObject.AddComponent<Image>();
+        seedTooltipBg.color = new Color(0.05f, 0.06f, 0.09f, 0.96f);
+        seedTooltipBg.raycastTarget = false;
+
+        var seedTooltipNameRt = CreateRect("Name", seedTooltipRt);
+        SetAnchored(seedTooltipNameRt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -6f), new Vector2(-16f, 24f));
+        var seedTooltipName = AddText(seedTooltipNameRt, "Seed", 16, TextAnchor.MiddleLeft, Color.white);
+
+        var seedTooltipBodyRt = CreateRect("Body", seedTooltipRt);
+        SetAnchored(seedTooltipBodyRt, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
+            new Vector2(0f, -4f), new Vector2(-16f, -32f));
+        var seedTooltipBody = AddText(seedTooltipBodyRt, "Stats", 13, TextAnchor.UpperLeft, new Color(0.85f, 0.85f, 0.9f));
+        seedTooltipBody.textWrappingMode = TextWrappingModes.Normal;
+        seedTooltipBody.overflowMode = TextOverflowModes.Truncate;
+
+        var seedTooltipUi = seedTooltipRt.gameObject.AddComponent<SeedTooltipUI>();
+        seedTooltipUi.EditorAssign(
+            seedTooltipRt.gameObject,
+            seedTooltipName,
+            seedTooltipBody,
+            seedTooltipRt);
+        seedTooltipRt.gameObject.SetActive(false);
+
+        shopPanel.EditorAssign(closeBtn, listRt, shopRowPrefab, relicRollBtn, relicRollLabel, choicePanel, seedTooltipUi);
 
         var sync = shopPanelRt.gameObject.AddComponent<ShopBackdropSync>();
         sync.SetBackdrop(backdropRt.gameObject);
@@ -804,7 +832,10 @@ public static class GameHudPrefabBuilder
                 new Vector2(x, 0f), new Vector2(SlotSize, SlotSize));
             slotViews[i] = slotInstance.GetComponent<HotbarSlotView>();
         }
-        hotbar.EditorAssignSlots(slotViews);
+        hotbar.EditorAssignSlots(slotViews, seedTooltipUi);
+
+        // Draw above shop/hotbar chrome so hover text is not occluded.
+        seedTooltipRt.SetAsLastSibling();
 
         PrefabUtility.SaveAsPrefabAsset(canvasGo, GameHudPath);
         Object.DestroyImmediate(canvasGo);

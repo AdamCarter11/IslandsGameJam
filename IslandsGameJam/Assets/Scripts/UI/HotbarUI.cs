@@ -6,6 +6,7 @@ public class HotbarUI : MonoBehaviour
     const int SlotCount = Inventory.HotbarSlotCount;
 
     [SerializeField] HotbarSlotView[] slots = new HotbarSlotView[SlotCount];
+    [SerializeField] SeedTooltipUI seedTooltip;
 
     Inventory inventory;
 
@@ -22,6 +23,7 @@ public class HotbarUI : MonoBehaviour
 
         inventory = inv;
         WireSlotClicks();
+        WireSlotHover();
 
         if (inventory == null)
             return;
@@ -53,6 +55,20 @@ public class HotbarUI : MonoBehaviour
         }
     }
 
+    void WireSlotHover()
+    {
+        if (slots == null)
+            return;
+
+        for (int i = 0; i < slots.Length; i++)
+        {
+            var slot = slots[i];
+            if (slot == null)
+                continue;
+            slot.SetHoverHandlers(ShowTooltipForSlot, HideSeedTooltip);
+        }
+    }
+
     static void ClearAllToolModes()
     {
         if (ToolModeController.Main != null)
@@ -61,6 +77,7 @@ public class HotbarUI : MonoBehaviour
 
     void OnDestroy()
     {
+        HideSeedTooltip();
         if (inventory == null)
             return;
         inventory.OnHotbarChanged -= Refresh;
@@ -167,6 +184,9 @@ public class HotbarUI : MonoBehaviour
             bool empty = stack == null || stack.IsEmpty;
             if (empty)
             {
+                if (slot.BoundCrop != null)
+                    HideSeedTooltip();
+                slot.BindCrop(null);
                 if (slot.Icon != null)
                 {
                     slot.Icon.enabled = false;
@@ -177,6 +197,7 @@ public class HotbarUI : MonoBehaviour
                 continue;
             }
 
+            slot.BindCrop(stack.crop);
             var icon = stack.crop.GetShopIcon();
             if (slot.Icon != null)
             {
@@ -188,7 +209,28 @@ public class HotbarUI : MonoBehaviour
         }
     }
 
+    void ShowTooltipForSlot(HotbarSlotView slot, CropGrowthSO crop)
+    {
+        if (seedTooltip == null || crop == null || slot == null)
+        {
+            HideSeedTooltip();
+            return;
+        }
+
+        seedTooltip.Show(crop, slot.transform as RectTransform);
+    }
+
+    void HideSeedTooltip()
+    {
+        seedTooltip?.Hide();
+    }
+
 #if UNITY_EDITOR
-    public void EditorAssignSlots(HotbarSlotView[] slotViews) => slots = slotViews;
+    public void EditorAssignSlots(HotbarSlotView[] slotViews, SeedTooltipUI tooltip = null)
+    {
+        slots = slotViews;
+        if (tooltip != null)
+            seedTooltip = tooltip;
+    }
 #endif
 }

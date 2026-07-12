@@ -11,6 +11,7 @@ public class ShopPanelUI : MonoBehaviour
     [SerializeField] Button relicRollButton;
     [SerializeField] TextMeshProUGUI relicRollLabel;
     [SerializeField] RelicChoicePanelUI relicChoicePanel;
+    [SerializeField] SeedTooltipUI seedTooltip;
 
     Inventory inventory;
     RelicShopService relicShop;
@@ -43,6 +44,7 @@ public class ShopPanelUI : MonoBehaviour
             {
                 if (IsRelicChoiceOpen)
                     return;
+                HideSeedTooltip();
                 onClose?.Invoke();
             });
         }
@@ -56,6 +58,8 @@ public class ShopPanelUI : MonoBehaviour
         if (relicChoicePanel != null)
             relicChoicePanel.Initialize(relicShop, RefreshRelicRollButton);
 
+        HideSeedTooltip();
+
         if (inventory == null)
             return;
 
@@ -67,8 +71,14 @@ public class ShopPanelUI : MonoBehaviour
         RefreshRelicRollButton();
     }
 
+    void OnDisable()
+    {
+        HideSeedTooltip();
+    }
+
     void OnDestroy()
     {
+        HideSeedTooltip();
         if (inventory == null)
             return;
         inventory.OnShopUnlocksChanged -= Rebuild;
@@ -101,6 +111,8 @@ public class ShopPanelUI : MonoBehaviour
 
     void Rebuild()
     {
+        HideSeedTooltip();
+
         foreach (var row in rows)
         {
             if (row != null)
@@ -136,7 +148,24 @@ public class ShopPanelUI : MonoBehaviour
                 RefreshRelicRollButton();
             }
         }, price);
+        row.SetHoverHandlers(ShowTooltipForRow, HideSeedTooltip);
         return row;
+    }
+
+    void ShowTooltipForRow(ShopRowView row, CropGrowthSO crop)
+    {
+        if (seedTooltip == null || crop == null || row == null)
+        {
+            HideSeedTooltip();
+            return;
+        }
+
+        seedTooltip.Show(crop, row.transform as RectTransform);
+    }
+
+    void HideSeedTooltip()
+    {
+        seedTooltip?.Hide();
     }
 
     void RefreshBuyStates()
@@ -186,7 +215,8 @@ public class ShopPanelUI : MonoBehaviour
         ShopRowView rowPrefab,
         Button rollButton = null,
         TextMeshProUGUI rollLabel = null,
-        RelicChoicePanelUI choicePanel = null)
+        RelicChoicePanelUI choicePanel = null,
+        SeedTooltipUI tooltip = null)
     {
         closeButton = close;
         listRoot = list;
@@ -194,6 +224,7 @@ public class ShopPanelUI : MonoBehaviour
         relicRollButton = rollButton;
         relicRollLabel = rollLabel;
         relicChoicePanel = choicePanel;
+        seedTooltip = tooltip;
     }
 #endif
 }

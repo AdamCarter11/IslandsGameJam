@@ -1,16 +1,20 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
 /// Prefab-authored shop row visuals. ShopPanelUI populates crop data and buy state.
 /// </summary>
-public class ShopRowView : MonoBehaviour
+public class ShopRowView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] Image icon;
     [SerializeField] TextMeshProUGUI nameText;
     [SerializeField] TextMeshProUGUI priceText;
     [SerializeField] Button buyButton;
+
+    System.Action<ShopRowView, CropGrowthSO> onHoverEnter;
+    System.Action onHoverExit;
 
     public CropGrowthSO Crop { get; private set; }
     public Button BuyButton => buyButton;
@@ -51,6 +55,25 @@ public class ShopRowView : MonoBehaviour
     {
         if (buyButton != null)
             buyButton.interactable = canBuy;
+    }
+
+    public void SetHoverHandlers(
+        System.Action<ShopRowView, CropGrowthSO> enter,
+        System.Action exit)
+    {
+        onHoverEnter = enter;
+        onHoverExit = exit;
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (Crop != null)
+            onHoverEnter?.Invoke(this, Crop);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        onHoverExit?.Invoke();
     }
 
 #if UNITY_EDITOR

@@ -43,8 +43,8 @@ public class Selector : MonoBehaviour
         if (GameManager.Main == null || !GameManager.Main.IsInitialized)
             return;
 
-        // Pause world interaction while the shop is open.
-        if (ShopController.Main != null && ShopController.Main.IsOpen)
+        // Pause world interaction while the shop or options is open.
+        if (ShopController.Main != null && (ShopController.Main.IsOpen || ShopController.Main.IsOptionsOpen))
             return;
 
         if (GameManager.Main.ConfirmPanelUI.IsVisible)

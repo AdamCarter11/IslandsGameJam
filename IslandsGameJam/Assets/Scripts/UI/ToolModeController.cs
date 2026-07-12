@@ -75,6 +75,9 @@ public class ToolModeController : MonoBehaviour
         if (Keyboard.current == null)
             return;
 
+        if (ShopController.Main != null && ShopController.Main.IsOptionsOpen)
+            return;
+
         if (Keyboard.current.qKey.wasPressedThisFrame)
         {
             ToggleHarvest();

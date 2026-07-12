@@ -89,6 +89,9 @@ public class HotbarUI : MonoBehaviour
         if (inventory == null)
             return;
 
+        if (ShopController.Main != null && ShopController.Main.IsOptionsOpen)
+            return;
+
         if (TrySelectFromScroll())
             return;
 

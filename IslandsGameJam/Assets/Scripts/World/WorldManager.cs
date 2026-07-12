@@ -403,6 +403,7 @@ public class WorldManager : MonoBehaviour
         {
             view.SetVisual(stage != null ? stage.cropVisual : null);
             view.SetWatered(false);
+            view.SetHarvestReady(cell.IsReady);
         }
         cell.view = view;
         return true;
@@ -450,6 +451,7 @@ public class WorldManager : MonoBehaviour
         {
             view.SetVisual(stage != null ? stage.cropVisual : null);
             view.SetWatered(cell.isWatered);
+            view.SetHarvestReady(cell.IsReady);
         }
         cell.view = view;
         return true;
@@ -513,12 +515,21 @@ public class WorldManager : MonoBehaviour
 
         GameManager.Main?.AudioService?.PlayChunkUnlock();
 
-        if (GameManager.Main != null && SeedUnlockService.TryUnlockRandom(GameManager.Main.Inventory, GameManager.Main.SeedShopCatalog))
+        if (GameManager.Main != null
+            && SeedUnlockService.TryUnlockRandom(GameManager.Main.Inventory, GameManager.Main.SeedShopCatalog, out CropGrowthSO unlocked)
+            && unlocked != null)
         {
             GameManager.Main?.AudioService?.PlaySeedUnlock();
+            JuiceToast.SpawnScreenCenter(transform, BuildUnlockToastText(unlocked), 10);
         }
 
         SaveGameService.NotifyChanged();
+    }
+
+    static string BuildUnlockToastText(CropGrowthSO crop)
+    {
+        string name = !string.IsNullOrWhiteSpace(crop.cropName) ? crop.cropName.Trim() : crop.name;
+        return $"Seed unlocked!\n{name}";
     }
 
     public bool IsInsideAvailableChunk(Vector2 position)

@@ -48,5 +48,8 @@ public class CropCell
 
         stageIndex++;
         stageElapsed = 0f;
+
+        if (IsReady)
+            view?.SetHarvestReady(true);
     }
 }

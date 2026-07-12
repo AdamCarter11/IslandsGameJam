@@ -39,14 +39,7 @@ public class SeedTooltipUI : MonoBehaviour
 
     void PositionNear(RectTransform near)
     {
-        if (tooltipFollowRoot == null || near == null)
-            return;
-
-        Vector3[] corners = new Vector3[4];
-        near.GetWorldCorners(corners);
-        Vector3 topCenter = (corners[1] + corners[2]) * 0.5f;
-        tooltipFollowRoot.position = topCenter;
-        tooltipFollowRoot.anchoredPosition += new Vector2(0f, 8f);
+        UiTooltipPositioner.PlaceNear(tooltipFollowRoot, near);
     }
 
 #if UNITY_EDITOR

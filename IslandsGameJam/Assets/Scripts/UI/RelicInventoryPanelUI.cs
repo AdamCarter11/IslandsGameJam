@@ -147,18 +147,10 @@ public class RelicInventoryPanelUI : MonoBehaviour
 
     void PositionTooltipNearSlot(RelicInventorySlotView slot)
     {
-        if (tooltipFollowRoot == null || slot == null)
+        if (slot == null)
             return;
 
-        var slotRt = slot.transform as RectTransform;
-        if (slotRt == null)
-            return;
-
-        Vector3[] corners = new Vector3[4];
-        slotRt.GetWorldCorners(corners);
-        Vector3 topCenter = (corners[1] + corners[2]) * 0.5f;
-        tooltipFollowRoot.position = topCenter;
-        tooltipFollowRoot.anchoredPosition += new Vector2(0f, 8f);
+        UiTooltipPositioner.PlaceNear(tooltipFollowRoot, slot.transform as RectTransform);
     }
 
     void HideTooltip()

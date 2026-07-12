@@ -41,6 +41,16 @@ public class WorldManager : MonoBehaviour
     [SerializeField]
     private WorldGenDataSet worldGenDataSet;
 
+    [Header("FailSafe")]
+    [SerializeField]
+    private int maxFailSafeIterations = 1000;
+    [SerializeField]
+    private Vector2Int failSafeZone;
+    [SerializeField]
+    private float maxWaterAllowance = 0.1f;
+    [SerializeField]
+    private float waterThreshold = 0.3f;
+
     [Header("Prefabs")]
     [SerializeField]
     private GameObject obstaclePrefab;
@@ -70,12 +80,45 @@ public class WorldManager : MonoBehaviour
         availableChunks.Clear();
         terrainOverrides.Clear();
 
-        origin = randomizeOrigin ? UnityEngine.Random.insideUnitCircle * (worldHeight + worldWidth) / 2 : origin;
+        if (randomizeOrigin) FailSafeOrigin();
 
         var firstChunk = new TerrainChunk(Vector2Int.zero);
         currentChunks.Add(firstChunk.Position, firstChunk);
         GenerateAvailableChunksFromPosition(firstChunk.Position);
         BuildChunk(firstChunk.Position);
+    }
+
+    int failSafeRetryCount = 0;
+    private void FailSafeOrigin()
+    {
+        while (failSafeRetryCount < maxFailSafeIterations)
+        {
+            Vector2Int newOrigin = (UnityEngine.Random.insideUnitCircle * (worldHeight + worldWidth) / 2).SnapToGrid().ToInt();
+
+            float total = 0;
+            float water = 0;
+            for (int x = -failSafeZone.x; x <= failSafeZone.x; x++)
+            {
+                for (int y = -failSafeZone.y; y <= failSafeZone.y; y++)
+                {
+                    Vector2Int pos = new Vector2Int(newOrigin.x + x, newOrigin.y + y);
+                    float elevation = GetNoise(pos.x + worldWidth / 2, pos.y + worldHeight / 2, newOrigin, dimension, scale, octaves, persistence, frequencyBase, exponent);
+                    if (elevation < waterThreshold)
+                        water++;
+                    total++;
+                }
+            }
+
+            var ratio = water / total;
+            if (ratio <= maxWaterAllowance)
+            {
+                Debug.Log($"Failsafe iteration {failSafeRetryCount}, water/land ratio = {ratio}");
+                origin = newOrigin;
+                return;
+            }
+
+            failSafeRetryCount++;
+        }
     }
 
     /// <summary>

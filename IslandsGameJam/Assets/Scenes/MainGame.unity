@@ -1764,6 +1764,10 @@ MonoBehaviour:
   exponent: 1
   voidTerrainData: {fileID: 11400000, guid: cc3ebec9e0fbf29459a807b681d6cc1b, type: 2}
   worldGenDataSet: {fileID: 11400000, guid: 938f408b235db7845aa551b40db47f00, type: 2}
+  maxFailSafeIterations: 1000
+  failSafeZone: {x: 0, y: 0}
+  maxWaterAllowance: 0.1
+  waterThreshold: 0.3
   obstaclePrefab: {fileID: 309402531185767681, guid: c449aba933c9f9a4e9df93ac7772271f, type: 3}
   terrainUnitPrefab: {fileID: 7025223914562458753, guid: 0813c39bdbc442e4fb3eb0ff64abcee2, type: 3}
   cropPrefab: {fileID: 3631138170149481173, guid: 4a2a2d3c6df03714eba60aba3efd5c0f, type: 3}

@@ -59,6 +59,8 @@ public class Selector : MonoBehaviour
             GameManager.Main.LandCostUI.Hide();
         }
 
+        selectorRenderer.enabled = !IsPointerOverUi();
+
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             if (IsPointerOverUi())
@@ -78,7 +80,6 @@ public class Selector : MonoBehaviour
 
         return EventSystem.current.IsPointerOverGameObject();
     }
-
 
     private void SetSize(int size)
     {

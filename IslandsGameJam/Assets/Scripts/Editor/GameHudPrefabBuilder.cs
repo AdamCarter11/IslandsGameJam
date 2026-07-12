@@ -17,7 +17,7 @@ public static class GameHudPrefabBuilder
     const string RelicInventorySlotPath = PrefabFolder + "/RelicInventorySlot.prefab";
     const string GameHudPath = PrefabFolder + "/GameHUD.prefab";
     const string MainGamePath = "Assets/Scenes/MainGame.unity";
-    const string DefaultTmpFontPath = "Assets/slapduck SDF.asset";
+    const string DefaultTmpFontPath = "Assets/Resources/slapduck SDF.asset";
 
     const string RelicsFolder = "Assets/ScriptableObjects/Relics";
     const string RelicShopCatalogPath = RelicsFolder + "/RelicShopCatalog.asset";

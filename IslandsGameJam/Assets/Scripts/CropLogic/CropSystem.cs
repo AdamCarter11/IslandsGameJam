@@ -325,6 +325,9 @@ public class CropSystem : MonoBehaviour
         GameManager.Main?.AudioService?.PlayHarvest(comboIndex);
         comboIndex++;
 
+        if (comboIndex > 0 && comboIndex % 5 == 0)
+            JuiceToast.Spawn(transform, CellToWorld(pos), $"x{comboIndex}!", JuiceToast.ComboSortingOrder, flyerSortingLayer);
+
         harvestVisited.Add(pos);
 
         int gold = resolver.GetGold(stage, crop, context);

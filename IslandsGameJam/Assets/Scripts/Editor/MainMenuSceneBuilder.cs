@@ -13,7 +13,7 @@ public static class MainMenuSceneBuilder
 {
     const string MainMenuPath = "Assets/Scenes/MainMenu.unity";
     const string MainGamePath = "Assets/Scenes/MainGame.unity";
-    const string DefaultTmpFontPath = "Assets/slapduck SDF.asset";
+    const string DefaultTmpFontPath = "Assets/Resources/slapduck SDF.asset";
 
     static readonly Color BgColor = new(0.12f, 0.28f, 0.27f, 1f);
     static readonly Color PanelColor = new(0.08f, 0.09f, 0.12f, 0.92f);
@@ -155,7 +155,7 @@ public static class MainMenuSceneBuilder
 
         var panelRt = CreateRect("Panel", rootRt);
         SetAnchored(panelRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            Vector2.zero, new Vector2(420f, 280f));
+            Vector2.zero, new Vector2(420f, 340f));
         var panelImg = panelRt.gameObject.AddComponent<Image>();
         panelImg.color = PanelColor;
         panelImg.raycastTarget = true;
@@ -185,14 +185,49 @@ public static class MainMenuSceneBuilder
             new Vector2(0f, -184f), new Vector2(-48f, 28f));
         var musicSlider = MakeSlider(musicSliderRt);
 
+        var hideIconsRt = CreateRect("HideCropStatusIcons", panelRt);
+        SetAnchored(hideIconsRt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -224f), new Vector2(-48f, 32f));
+        var hideIconsToggle = MakeToggle(hideIconsRt, "Hide crop status icons");
+
         var closeRt = CreateRect("Close", panelRt);
         SetAnchored(closeRt, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
             new Vector2(0f, 24f), new Vector2(160f, 44f));
         var closeBtn = MakeButton(closeRt, "Close", CloseColor);
 
         var optionsUi = rootRt.gameObject.AddComponent<OptionsPanelUI>();
-        optionsUi.EditorAssign(rootRt.gameObject, sfxSlider, musicSlider, closeBtn);
+        optionsUi.EditorAssign(rootRt.gameObject, sfxSlider, musicSlider, hideIconsToggle, closeBtn);
         return optionsUi;
+    }
+
+    static Toggle MakeToggle(RectTransform rowRt, string label)
+    {
+        var toggleRt = CreateRect("Toggle", rowRt);
+        SetAnchored(toggleRt, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
+            Vector2.zero, new Vector2(28f, 28f));
+        var bg = toggleRt.gameObject.AddComponent<Image>();
+        bg.color = SliderTrackColor;
+
+        var checkRt = CreateRect("Checkmark", toggleRt);
+        Stretch(checkRt);
+        checkRt.offsetMin = new Vector2(4f, 4f);
+        checkRt.offsetMax = new Vector2(-4f, -4f);
+        var checkImg = checkRt.gameObject.AddComponent<Image>();
+        checkImg.color = SliderFillColor;
+
+        var toggle = toggleRt.gameObject.AddComponent<Toggle>();
+        toggle.targetGraphic = bg;
+        toggle.graphic = checkImg;
+        toggle.isOn = false;
+
+        var labelRt = CreateRect("Label", rowRt);
+        SetAnchored(labelRt, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
+            Vector2.zero, Vector2.zero);
+        labelRt.offsetMin = new Vector2(36f, 0f);
+        labelRt.offsetMax = Vector2.zero;
+        AddText(labelRt, label, 18, TextAnchor.MiddleLeft, Color.white);
+
+        return toggle;
     }
 
     static Slider MakeSlider(RectTransform rt)

@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SeedShopCatalog
   allSeeds:
   - {fileID: 11400000, guid: 6f5e785a4c90f5340a7385fc17cb565c, type: 2}
-  startingGold: 50
+  startingGold: 9999

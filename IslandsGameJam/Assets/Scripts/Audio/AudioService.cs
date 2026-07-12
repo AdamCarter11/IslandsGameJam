@@ -2,10 +2,13 @@ using UnityEngine;
 
 /// <summary>
 /// Jam-style audio hub: one-shot SFX and looping music via separate AudioSources.
-/// Access via GameManager.Main.AudioService. Missing clips/sources are no-ops.
+/// Access via GameManager.Main.AudioService or AudioService.Instance (e.g. Main Menu).
+/// Missing clips/sources are no-ops. Scene-local — no DontDestroyOnLoad.
 /// </summary>
 public class AudioService : MonoBehaviour
 {
+    public static AudioService Instance { get; private set; }
+
     [Header("Sources")]
     [SerializeField] AudioSource sfxSource;
     [SerializeField] AudioSource musicSource;
@@ -39,9 +42,16 @@ public class AudioService : MonoBehaviour
 
     private void Awake()
     {
+        Instance = this;
         sfxVolume = AudioSettings.LoadSfxVolume();
         musicVolume = AudioSettings.LoadMusicVolume();
         ApplyVolumes();
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 
     private void OnValidate()

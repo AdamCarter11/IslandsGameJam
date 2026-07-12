@@ -12,7 +12,7 @@ public static class AudioSettings
 
     public static float GetSfxVolume()
     {
-        var audio = GameManager.Main?.AudioService;
+        var audio = ResolveLiveService();
         if (audio != null)
             return audio.GetSfxVolume();
         return LoadSfxVolume();
@@ -20,7 +20,7 @@ public static class AudioSettings
 
     public static float GetMusicVolume()
     {
-        var audio = GameManager.Main?.AudioService;
+        var audio = ResolveLiveService();
         if (audio != null)
             return audio.GetMusicVolume();
         return LoadMusicVolume();
@@ -29,7 +29,7 @@ public static class AudioSettings
     public static void SetSfxVolume(float volume)
     {
         volume = Mathf.Clamp01(volume);
-        var audio = GameManager.Main?.AudioService;
+        var audio = ResolveLiveService();
         if (audio != null)
         {
             audio.SetSfxVolume(volume);
@@ -42,7 +42,7 @@ public static class AudioSettings
     public static void SetMusicVolume(float volume)
     {
         volume = Mathf.Clamp01(volume);
-        var audio = GameManager.Main?.AudioService;
+        var audio = ResolveLiveService();
         if (audio != null)
         {
             audio.SetMusicVolume(volume);
@@ -51,6 +51,9 @@ public static class AudioSettings
 
         SaveMusicVolume(volume);
     }
+
+    private static AudioService ResolveLiveService() =>
+        GameManager.Main?.AudioService ?? AudioService.Instance;
 
     public static float LoadSfxVolume() =>
         Mathf.Clamp01(PlayerPrefs.GetFloat(SfxVolumeKey, DefaultVolume));

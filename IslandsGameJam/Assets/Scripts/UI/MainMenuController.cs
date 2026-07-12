@@ -13,6 +13,8 @@ public class MainMenuController : MonoBehaviour
 
     [SerializeField] Button continueButton;
     [SerializeField] Button newGameButton;
+    [SerializeField] Button optionsButton;
+    [SerializeField] OptionsPanelUI optionsPanel;
 
     void Start()
     {
@@ -30,10 +32,18 @@ public class MainMenuController : MonoBehaviour
             newGameButton.onClick.RemoveAllListeners();
             newGameButton.onClick.AddListener(OnNewGame);
         }
+
+        if (optionsButton != null)
+        {
+            optionsButton.onClick.RemoveAllListeners();
+            optionsButton.onClick.AddListener(OnOptions);
+        }
     }
 
     void OnContinue()
     {
+        AudioService.Instance?.PlayUiClick();
+
         if (!SaveGameService.HasSave)
             return;
 
@@ -43,9 +53,17 @@ public class MainMenuController : MonoBehaviour
 
     void OnNewGame()
     {
+        AudioService.Instance?.PlayUiClick();
+
         SaveGameService.DeleteSave();
         SaveGameService.BootMode = BootMode.New;
         SceneManager.LoadScene(MainGameSceneName);
+    }
+
+    void OnOptions()
+    {
+        AudioService.Instance?.PlayUiClick();
+        optionsPanel?.Open();
     }
 
     static void EnsureEventSystem()
@@ -64,10 +82,12 @@ public class MainMenuController : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    public void EditorAssign(Button continueBtn, Button newGameBtn)
+    public void EditorAssign(Button continueBtn, Button newGameBtn, Button optionsBtn, OptionsPanelUI options)
     {
         continueButton = continueBtn;
         newGameButton = newGameBtn;
+        optionsButton = optionsBtn;
+        optionsPanel = options;
     }
 #endif
 }

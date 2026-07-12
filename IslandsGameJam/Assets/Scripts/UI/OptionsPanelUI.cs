@@ -15,6 +15,11 @@ public class OptionsPanelUI : MonoBehaviour
 
     Action onClosed;
     bool syncingSliders;
+    /// <summary>
+    /// When PanelRoot is this GameObject and starts inactive, Awake runs on the first Open().
+    /// Skip the default hide so we don't immediately close again.
+    /// </summary>
+    bool suppressHideOnAwake;
 
     public bool IsOpen => PanelRoot != null && PanelRoot.activeSelf;
 
@@ -44,7 +49,8 @@ public class OptionsPanelUI : MonoBehaviour
             musicSlider.onValueChanged.AddListener(OnMusicSliderChanged);
         }
 
-        PanelRoot.SetActive(false);
+        if (!suppressHideOnAwake)
+            PanelRoot.SetActive(false);
     }
 
     /// <summary>
@@ -57,6 +63,7 @@ public class OptionsPanelUI : MonoBehaviour
 
     public void Open()
     {
+        suppressHideOnAwake = true;
         SyncSlidersFromSettings();
         PanelRoot.SetActive(true);
     }
@@ -66,6 +73,7 @@ public class OptionsPanelUI : MonoBehaviour
         if (!IsOpen)
             return;
 
+        AudioService.Instance?.PlayUiClick();
         PanelRoot.SetActive(false);
         onClosed?.Invoke();
     }

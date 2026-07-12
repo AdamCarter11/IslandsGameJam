@@ -7,7 +7,7 @@ using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 /// <summary>
-/// Creates MainMenu.unity (title + Continue / New Game) and sets Build Settings order.
+/// Creates MainMenu.unity (title + Continue / New Game / Options / Credits) and sets Build Settings order.
 /// </summary>
 public static class MainMenuSceneBuilder
 {
@@ -19,7 +19,13 @@ public static class MainMenuSceneBuilder
     static readonly Color PanelColor = new(0.08f, 0.09f, 0.12f, 0.92f);
     static readonly Color ContinueColor = new(0.25f, 0.55f, 0.3f, 1f);
     static readonly Color NewGameColor = new(0.2f, 0.35f, 0.55f, 0.95f);
+    static readonly Color OptionsColor = new(0.2f, 0.35f, 0.55f, 0.95f);
+    static readonly Color CreditsColor = new(0.2f, 0.35f, 0.55f, 0.95f);
     static readonly Color TitleColor = new(1f, 0.92f, 0.45f, 1f);
+    static readonly Color CloseColor = new(0.45f, 0.2f, 0.2f, 1f);
+    static readonly Color SliderTrackColor = new(0.18f, 0.2f, 0.24f, 1f);
+    static readonly Color SliderFillColor = new(0.35f, 0.65f, 0.55f, 1f);
+    static readonly Color SliderHandleColor = new(0.92f, 0.92f, 0.95f, 1f);
 
     [MenuItem("Tools/UI/Build Main Menu Scene")]
     public static void BuildMainMenu()
@@ -98,7 +104,7 @@ public static class MainMenuSceneBuilder
 
         var panelRt = CreateRect("Panel", canvasRt);
         SetAnchored(panelRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            Vector2.zero, new Vector2(420f, 320f));
+            Vector2.zero, new Vector2(420f, 420f));
         var panelImg = panelRt.gameObject.AddComponent<Image>();
         panelImg.color = PanelColor;
         panelImg.raycastTarget = false;
@@ -110,17 +116,119 @@ public static class MainMenuSceneBuilder
 
         var continueRt = CreateRect("ContinueButton", panelRt);
         SetAnchored(continueRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(0f, 10f), new Vector2(260f, 52f));
+            new Vector2(0f, 60f), new Vector2(260f, 52f));
         var continueBtn = MakeButton(continueRt, "Continue", ContinueColor);
 
         var newGameRt = CreateRect("NewGameButton", panelRt);
         SetAnchored(newGameRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(0f, -62f), new Vector2(260f, 52f));
+            new Vector2(0f, -10f), new Vector2(260f, 52f));
         var newGameBtn = MakeButton(newGameRt, "New Game", NewGameColor);
 
+        var optionsRt = CreateRect("Options", panelRt);
+        SetAnchored(optionsRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(0f, -80f), new Vector2(260f, 52f));
+        var optionsBtn = MakeButton(optionsRt, "Options", OptionsColor);
+
+        var creditsRt = CreateRect("Credits", panelRt);
+        SetAnchored(creditsRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(0f, -150f), new Vector2(260f, 52f));
+        MakeButton(creditsRt, "Credits", CreditsColor);
+
+        var optionsPanel = CreateOptionsPanel(canvasRt);
+
         var controller = canvasGo.AddComponent<MainMenuController>();
-        controller.EditorAssign(continueBtn, newGameBtn);
+        controller.EditorAssign(continueBtn, newGameBtn, optionsBtn, optionsPanel);
         return controller;
+    }
+
+    static OptionsPanelUI CreateOptionsPanel(RectTransform canvasRt)
+    {
+        var rootRt = CreateRect("OptionsPanel", canvasRt);
+        Stretch(rootRt);
+        rootRt.gameObject.SetActive(false);
+
+        var backdropRt = CreateRect("Backdrop", rootRt);
+        Stretch(backdropRt);
+        var backdropImg = backdropRt.gameObject.AddComponent<Image>();
+        backdropImg.color = new Color(0f, 0f, 0f, 0.55f);
+        backdropImg.raycastTarget = true;
+
+        var panelRt = CreateRect("Panel", rootRt);
+        SetAnchored(panelRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            Vector2.zero, new Vector2(420f, 280f));
+        var panelImg = panelRt.gameObject.AddComponent<Image>();
+        panelImg.color = PanelColor;
+        panelImg.raycastTarget = true;
+
+        var titleRt = CreateRect("Title", panelRt);
+        SetAnchored(titleRt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -20f), new Vector2(-32f, 40f));
+        AddText(titleRt, "Options", 32, TextAnchor.MiddleCenter, TitleColor);
+
+        var sfxLabelRt = CreateRect("SfxLabel", panelRt);
+        SetAnchored(sfxLabelRt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -72f), new Vector2(-48f, 28f));
+        AddText(sfxLabelRt, "SFX", 20, TextAnchor.MiddleLeft, Color.white);
+
+        var sfxSliderRt = CreateRect("SfxSlider", panelRt);
+        SetAnchored(sfxSliderRt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -108f), new Vector2(-48f, 28f));
+        var sfxSlider = MakeSlider(sfxSliderRt);
+
+        var musicLabelRt = CreateRect("MusicLabel", panelRt);
+        SetAnchored(musicLabelRt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -148f), new Vector2(-48f, 28f));
+        AddText(musicLabelRt, "Music", 20, TextAnchor.MiddleLeft, Color.white);
+
+        var musicSliderRt = CreateRect("MusicSlider", panelRt);
+        SetAnchored(musicSliderRt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -184f), new Vector2(-48f, 28f));
+        var musicSlider = MakeSlider(musicSliderRt);
+
+        var closeRt = CreateRect("Close", panelRt);
+        SetAnchored(closeRt, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
+            new Vector2(0f, 24f), new Vector2(160f, 44f));
+        var closeBtn = MakeButton(closeRt, "Close", CloseColor);
+
+        var optionsUi = rootRt.gameObject.AddComponent<OptionsPanelUI>();
+        optionsUi.EditorAssign(rootRt.gameObject, sfxSlider, musicSlider, closeBtn);
+        return optionsUi;
+    }
+
+    static Slider MakeSlider(RectTransform rt)
+    {
+        var bgImg = rt.gameObject.AddComponent<Image>();
+        bgImg.color = SliderTrackColor;
+
+        var fillAreaRt = CreateRect("Fill Area", rt);
+        SetAnchored(fillAreaRt, new Vector2(0f, 0.25f), new Vector2(1f, 0.75f), new Vector2(0.5f, 0.5f),
+            Vector2.zero, new Vector2(-20f, 0f));
+
+        var fillRt = CreateRect("Fill", fillAreaRt);
+        Stretch(fillRt);
+        var fillImg = fillRt.gameObject.AddComponent<Image>();
+        fillImg.color = SliderFillColor;
+
+        var handleAreaRt = CreateRect("Handle Slide Area", rt);
+        Stretch(handleAreaRt);
+        handleAreaRt.offsetMin = new Vector2(10f, 0f);
+        handleAreaRt.offsetMax = new Vector2(-10f, 0f);
+
+        var handleRt = CreateRect("Handle", handleAreaRt);
+        handleRt.sizeDelta = new Vector2(24f, 24f);
+        var handleImg = handleRt.gameObject.AddComponent<Image>();
+        handleImg.color = SliderHandleColor;
+
+        var slider = rt.gameObject.AddComponent<Slider>();
+        slider.targetGraphic = handleImg;
+        slider.fillRect = fillRt;
+        slider.handleRect = handleRt;
+        slider.direction = Slider.Direction.LeftToRight;
+        slider.minValue = 0f;
+        slider.maxValue = 1f;
+        slider.wholeNumbers = false;
+        slider.value = 1f;
+        return slider;
     }
 
     static Button MakeButton(RectTransform rt, string label, Color color)

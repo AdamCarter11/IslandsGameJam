@@ -5,7 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Builds/rewires GameHUD, HotbarSlot, and ShopRow prefabs and places GameHUD under MainGame's Game HUD.
+/// Builds/rewires GameHUD, HotbarSlot, ShopRow, RelicChoiceCard, RelicInventorySlot prefabs
+/// and places GameHUD under MainGame's Game HUD.
 /// </summary>
 public static class GameHudPrefabBuilder
 {
@@ -13,6 +14,7 @@ public static class GameHudPrefabBuilder
     const string HotbarSlotPath = PrefabFolder + "/HotbarSlot.prefab";
     const string ShopRowPath = PrefabFolder + "/ShopRow.prefab";
     const string RelicChoiceCardPath = PrefabFolder + "/RelicChoiceCard.prefab";
+    const string RelicInventorySlotPath = PrefabFolder + "/RelicInventorySlot.prefab";
     const string GameHudPath = PrefabFolder + "/GameHUD.prefab";
     const string MainGamePath = "Assets/Scenes/MainGame.unity";
     const string DefaultTmpFontPath = "Assets/slapduck SDF.asset";
@@ -40,12 +42,13 @@ public static class GameHudPrefabBuilder
         var hotbarSlot = BuildHotbarSlotPrefab();
         var shopRow = BuildShopRowPrefab();
         var relicCard = BuildRelicChoiceCardPrefab();
-        BuildGameHudPrefab(hotbarSlot, shopRow, relicCard);
+        var relicInvSlot = BuildRelicInventorySlotPrefab();
+        BuildGameHudPrefab(hotbarSlot, shopRow, relicCard, relicInvSlot);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[GameHudPrefabBuilder] Wrote:\n  {HotbarSlotPath}\n  {ShopRowPath}\n  {RelicChoiceCardPath}\n  {GameHudPath}\n  {RelicShopCatalogPath}");
+        Debug.Log($"[GameHudPrefabBuilder] Wrote:\n  {HotbarSlotPath}\n  {ShopRowPath}\n  {RelicChoiceCardPath}\n  {RelicInventorySlotPath}\n  {GameHudPath}\n  {RelicShopCatalogPath}");
     }
 
     [MenuItem("Tools/UI/Wire Game HUD Into MainGame")]
@@ -78,19 +81,28 @@ public static class GameHudPrefabBuilder
         var hotbarUi = hudInstance.GetComponentInChildren<HotbarUI>(true);
         var shopPanelUi = hudInstance.GetComponentInChildren<ShopPanelUI>(true);
         var relicChoicePanelUi = hudInstance.GetComponentInChildren<RelicChoicePanelUI>(true);
+        var relicInventoryPanelUi = hudInstance.GetComponentInChildren<RelicInventoryPanelUI>(true);
         var shopPanelRoot = shopPanelUi != null ? shopPanelUi.gameObject : null;
 
         Button openButton = null;
+        Button relicsOpenButton = null;
         foreach (var btn in hudInstance.GetComponentsInChildren<Button>(true))
         {
             if (btn.gameObject.name == "ShopButton")
-            {
                 openButton = btn;
-                break;
-            }
+            else if (btn.gameObject.name == "RelicsButton")
+                relicsOpenButton = btn;
         }
 
-        shopController.EditorAssign(shopPanelRoot, openButton, goldHud, hotbarUi, shopPanelUi, relicChoicePanelUi);
+        shopController.EditorAssign(
+            shopPanelRoot,
+            openButton,
+            goldHud,
+            hotbarUi,
+            shopPanelUi,
+            relicChoicePanelUi,
+            relicInventoryPanelUi,
+            relicsOpenButton);
         EditorUtility.SetDirty(shopController);
 
         WireRelicShopIntoGameManager(catalog);
@@ -394,7 +406,51 @@ public static class GameHudPrefabBuilder
         return prefab.GetComponent<RelicChoiceCardView>();
     }
 
-    static void BuildGameHudPrefab(GameObject hotbarSlotPrefab, ShopRowView shopRowPrefab, RelicChoiceCardView relicCardPrefab)
+    static RelicInventorySlotView BuildRelicInventorySlotPrefab()
+    {
+        var root = new GameObject("RelicInventorySlot", typeof(RectTransform), typeof(Image), typeof(LayoutElement));
+        var rootRt = root.GetComponent<RectTransform>();
+        SetAnchored(rootRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            Vector2.zero, new Vector2(SlotSize, SlotSize));
+
+        var le = root.GetComponent<LayoutElement>();
+        le.minWidth = SlotSize;
+        le.preferredWidth = SlotSize;
+        le.minHeight = SlotSize;
+        le.preferredHeight = SlotSize;
+
+        var bg = root.GetComponent<Image>();
+        bg.color = SlotColor;
+        bg.raycastTarget = true;
+
+        var iconRt = CreateRect("Icon", rootRt);
+        SetAnchored(iconRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            Vector2.zero, new Vector2(40f, 40f));
+        var icon = iconRt.gameObject.AddComponent<Image>();
+        icon.color = Color.white;
+        icon.raycastTarget = false;
+        icon.enabled = false;
+        icon.preserveAspect = true;
+
+        var countRt = CreateRect("Count", rootRt);
+        SetAnchored(countRt, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f),
+            new Vector2(-4f, 2f), new Vector2(40f, 18f));
+        var count = AddText(countRt, "", 14, TextAnchor.LowerRight, Color.white);
+        count.gameObject.SetActive(false);
+
+        var view = root.AddComponent<RelicInventorySlotView>();
+        view.EditorAssign(icon, count);
+
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, RelicInventorySlotPath);
+        Object.DestroyImmediate(root);
+        return prefab.GetComponent<RelicInventorySlotView>();
+    }
+
+    static void BuildGameHudPrefab(
+        GameObject hotbarSlotPrefab,
+        ShopRowView shopRowPrefab,
+        RelicChoiceCardView relicCardPrefab,
+        RelicInventorySlotView relicInventorySlotPrefab)
     {
         var canvasGo = new GameObject("GameHUD", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         var canvasRt = (RectTransform)canvasGo.transform;
@@ -439,10 +495,24 @@ public static class GameHudPrefabBuilder
         Stretch(shopLabelRt);
         AddText(shopLabelRt, "Shop", 20, TextAnchor.MiddleCenter, Color.white);
 
-        // Tool buttons (top-right, left of Shop): Destroy, Harvest, Water
+        // Relics button (top-right, left of Shop)
+        var relicsBtnRt = CreateRect("RelicsButton", canvasRt);
+        SetAnchored(relicsBtnRt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
+            new Vector2(-144f, -16f), new Vector2(120f, 44f));
+        var relicsBtnColor = new Color(0.4f, 0.28f, 0.5f, 0.95f);
+        var relicsBtnImg = relicsBtnRt.gameObject.AddComponent<Image>();
+        relicsBtnImg.color = relicsBtnColor;
+        var relicsBtn = relicsBtnRt.gameObject.AddComponent<Button>();
+        relicsBtn.targetGraphic = relicsBtnImg;
+        ApplyButtonColors(relicsBtn, relicsBtnColor);
+        var relicsLabelRt = CreateRect("Label", relicsBtnRt);
+        Stretch(relicsLabelRt);
+        AddText(relicsLabelRt, "Relics", 20, TextAnchor.MiddleCenter, Color.white);
+
+        // Tool buttons (top-right, left of Relics): Destroy, Harvest, Water
         var destroyBtnRt = CreateRect("DestroyButton", canvasRt);
         SetAnchored(destroyBtnRt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
-            new Vector2(-400f, -16f), new Vector2(120f, 44f));
+            new Vector2(-528f, -16f), new Vector2(120f, 44f));
         var destroyBtnColor = new Color(0.5f, 0.2f, 0.2f, 0.95f);
         var destroyBtnImg = destroyBtnRt.gameObject.AddComponent<Image>();
         destroyBtnImg.color = destroyBtnColor;
@@ -455,7 +525,7 @@ public static class GameHudPrefabBuilder
 
         var harvestBtnRt = CreateRect("HarvestButton", canvasRt);
         SetAnchored(harvestBtnRt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
-            new Vector2(-272f, -16f), new Vector2(120f, 44f));
+            new Vector2(-400f, -16f), new Vector2(120f, 44f));
         var harvestBtnColor = new Color(0.2f, 0.45f, 0.25f, 0.95f);
         var harvestBtnImg = harvestBtnRt.gameObject.AddComponent<Image>();
         harvestBtnImg.color = harvestBtnColor;
@@ -468,7 +538,7 @@ public static class GameHudPrefabBuilder
 
         var waterBtnRt = CreateRect("WaterButton", canvasRt);
         SetAnchored(waterBtnRt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
-            new Vector2(-144f, -16f), new Vector2(120f, 44f));
+            new Vector2(-272f, -16f), new Vector2(120f, 44f));
         var waterBtnColor = new Color(0.2f, 0.45f, 0.55f, 0.95f);
         var waterBtnImg = waterBtnRt.gameObject.AddComponent<Image>();
         waterBtnImg.color = waterBtnColor;
@@ -587,6 +657,84 @@ public static class GameHudPrefabBuilder
         shopPanelRt.SetSiblingIndex(backdropRt.GetSiblingIndex() + 1);
         // Choice overlay sits above the seed shop.
         choiceRt.SetSiblingIndex(shopPanelRt.GetSiblingIndex() + 1);
+
+        // Relic inventory panel (independent of seed shop)
+        var relicInvRt = CreateRect("RelicInventoryPanel", canvasRt);
+        SetAnchored(relicInvRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(220f, 0f), new Vector2(360f, 320f));
+        var relicInvImg = relicInvRt.gameObject.AddComponent<Image>();
+        relicInvImg.color = PanelColor;
+        var relicInvPanel = relicInvRt.gameObject.AddComponent<RelicInventoryPanelUI>();
+
+        var relicInvTitleRt = CreateRect("Title", relicInvRt);
+        SetAnchored(relicInvTitleRt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -12f), new Vector2(-24f, 36f));
+        AddText(relicInvTitleRt, "Relics", 24, TextAnchor.MiddleCenter, Color.white);
+
+        var relicInvCloseRt = CreateRect("Close", relicInvRt);
+        SetAnchored(relicInvCloseRt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
+            new Vector2(-10f, -10f), new Vector2(36f, 36f));
+        var relicInvCloseColor = new Color(0.45f, 0.2f, 0.2f, 1f);
+        var relicInvCloseImg = relicInvCloseRt.gameObject.AddComponent<Image>();
+        relicInvCloseImg.color = relicInvCloseColor;
+        var relicInvCloseBtn = relicInvCloseRt.gameObject.AddComponent<Button>();
+        relicInvCloseBtn.targetGraphic = relicInvCloseImg;
+        ApplyButtonColors(relicInvCloseBtn, relicInvCloseColor);
+        var relicInvCloseLabelRt = CreateRect("Label", relicInvCloseRt);
+        Stretch(relicInvCloseLabelRt);
+        AddText(relicInvCloseLabelRt, "X", 18, TextAnchor.MiddleCenter, Color.white);
+
+        var relicInvContentRt = CreateRect("Content", relicInvRt);
+        SetAnchored(relicInvContentRt, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
+            new Vector2(0f, -8f), new Vector2(-24f, -64f));
+        var relicInvGrid = relicInvContentRt.gameObject.AddComponent<GridLayoutGroup>();
+        relicInvGrid.cellSize = new Vector2(SlotSize, SlotSize);
+        relicInvGrid.spacing = new Vector2(SlotGap, SlotGap);
+        relicInvGrid.padding = new RectOffset(8, 8, 8, 8);
+        relicInvGrid.childAlignment = TextAnchor.UpperLeft;
+        relicInvGrid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        relicInvGrid.constraintCount = 5;
+        relicInvGrid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+        relicInvGrid.startAxis = GridLayoutGroup.Axis.Horizontal;
+
+        var relicInvEmptyRt = CreateRect("EmptyLabel", relicInvRt);
+        SetAnchored(relicInvEmptyRt, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
+            new Vector2(0f, -8f), new Vector2(-40f, -80f));
+        var relicInvEmpty = AddText(relicInvEmptyRt, "No relics yet", 16, TextAnchor.MiddleCenter, new Color(0.7f, 0.7f, 0.75f));
+
+        var relicTooltipRt = CreateRect("Tooltip", relicInvRt);
+        SetAnchored(relicTooltipRt, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
+            new Vector2(0f, 12f), new Vector2(280f, 88f));
+        var relicTooltipBg = relicTooltipRt.gameObject.AddComponent<Image>();
+        relicTooltipBg.color = new Color(0.05f, 0.06f, 0.09f, 0.96f);
+        relicTooltipBg.raycastTarget = false;
+
+        var relicTooltipNameRt = CreateRect("Name", relicTooltipRt);
+        SetAnchored(relicTooltipNameRt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -6f), new Vector2(-16f, 24f));
+        var relicTooltipName = AddText(relicTooltipNameRt, "Relic", 16, TextAnchor.MiddleLeft, Color.white);
+
+        var relicTooltipDescRt = CreateRect("Desc", relicTooltipRt);
+        SetAnchored(relicTooltipDescRt, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
+            new Vector2(0f, -4f), new Vector2(-16f, -32f));
+        var relicTooltipDesc = AddText(relicTooltipDescRt, "Description", 13, TextAnchor.UpperLeft, new Color(0.85f, 0.85f, 0.9f));
+        relicTooltipDesc.textWrappingMode = TextWrappingModes.Normal;
+        relicTooltipDesc.overflowMode = TextOverflowModes.Truncate;
+
+        relicTooltipRt.gameObject.SetActive(false);
+
+        relicInvPanel.EditorAssign(
+            relicInvCloseBtn,
+            relicInvContentRt,
+            relicInventorySlotPrefab,
+            relicInvEmpty,
+            relicTooltipRt.gameObject,
+            relicTooltipName,
+            relicTooltipDesc,
+            relicTooltipRt);
+        relicInvRt.gameObject.SetActive(false);
+        // Keep inventory panel above shop chrome but below must-pick choice overlay.
+        relicInvRt.SetSiblingIndex(choiceRt.GetSiblingIndex());
 
         // Hotbar
         float totalWidth = SlotCount * SlotSize + (SlotCount - 1) * SlotGap;

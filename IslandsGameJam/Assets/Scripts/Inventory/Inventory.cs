@@ -211,6 +211,7 @@ public class Inventory : MonoBehaviour
                     ownedRelics.Add(relic);
             }
         }
+        OnRelicsChanged?.Invoke();
     }
 
     public bool IsUnlocked(CropGrowthSO crop) => crop != null && unlockedSeeds.Contains(crop);

@@ -17,6 +17,8 @@ public class ShopController : MonoBehaviour
     [SerializeField] HotbarUI hotbarUi;
     [SerializeField] ShopPanelUI shopPanelUi;
     [SerializeField] RelicChoicePanelUI relicChoicePanelUi;
+    [SerializeField] RelicInventoryPanelUI relicInventoryPanelUi;
+    [SerializeField] Button relicsOpenButton;
 
     public bool IsOpen { get; private set; }
 
@@ -50,6 +52,12 @@ public class ShopController : MonoBehaviour
             shopOpenButton.onClick.AddListener(ToggleShop);
         }
 
+        if (relicsOpenButton != null)
+        {
+            relicsOpenButton.onClick.RemoveAllListeners();
+            relicsOpenButton.onClick.AddListener(ToggleRelicInventory);
+        }
+
         goldHud?.Initialize(inventory);
         hotbarUi?.Initialize(inventory);
 
@@ -58,7 +66,12 @@ public class ShopController : MonoBehaviour
         if (relicChoicePanelUi == null)
             relicChoicePanelUi = GetComponentInChildren<RelicChoicePanelUI>(true);
 
+        if (relicInventoryPanelUi == null)
+            relicInventoryPanelUi = GetComponentInChildren<RelicInventoryPanelUI>(true);
+
         shopPanelUi?.Initialize(inventory, CloseShop, relicShop, relicChoicePanelUi);
+        relicInventoryPanelUi?.Initialize(inventory);
+        relicInventoryPanelUi?.Close();
 
         if (shopPanelRoot != null)
             shopPanelRoot.SetActive(false);
@@ -76,11 +89,21 @@ public class ShopController : MonoBehaviour
         if (Keyboard.current == null)
             return;
 
-        // Must pick a relic — Escape cannot dismiss the choice or close the seed shop.
+        // Must pick a relic — Escape cannot dismiss the choice, shop, or relic inventory.
         if (IsRelicChoiceOpen)
             return;
 
-        if (IsOpen && Keyboard.current.escapeKey.wasPressedThisFrame)
+        if (!Keyboard.current.escapeKey.wasPressedThisFrame)
+            return;
+
+        // Relic inventory is independent of shop IsOpen; close it first if open.
+        if (relicInventoryPanelUi != null && relicInventoryPanelUi.IsOpen)
+        {
+            relicInventoryPanelUi.Close();
+            return;
+        }
+
+        if (IsOpen)
             CloseShop();
     }
 
@@ -93,6 +116,14 @@ public class ShopController : MonoBehaviour
             CloseShop();
         else
             OpenShop();
+    }
+
+    public void ToggleRelicInventory()
+    {
+        if (IsRelicChoiceOpen)
+            return;
+
+        relicInventoryPanelUi?.Toggle();
     }
 
     public void OpenShop()
@@ -143,7 +174,9 @@ public class ShopController : MonoBehaviour
         GoldHUD gold,
         HotbarUI hotbar,
         ShopPanelUI shopPanel,
-        RelicChoicePanelUI choicePanel = null)
+        RelicChoicePanelUI choicePanel = null,
+        RelicInventoryPanelUI relicInventoryPanel = null,
+        Button relicsButton = null)
     {
         shopPanelRoot = panelRoot;
         shopOpenButton = openButton;
@@ -151,6 +184,8 @@ public class ShopController : MonoBehaviour
         hotbarUi = hotbar;
         shopPanelUi = shopPanel;
         relicChoicePanelUi = choicePanel;
+        relicInventoryPanelUi = relicInventoryPanel;
+        relicsOpenButton = relicsButton;
     }
 #endif
 }

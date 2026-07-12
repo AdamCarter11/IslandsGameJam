@@ -24,6 +24,14 @@ public class CropGrowthSO : ScriptableObject
     [Tooltip("Sprite used by the harvest hop flyer. Falls back to the ready (final) stage visual if unset.")]
     public Sprite harvestBounceVisual;
 
+    public bool TryGetHarvestPattern(out HarvestPattern pattern, int stage = -1)
+    {
+        pattern = null;
+        if (stage == -1) stage = stages.Length - 1;
+        pattern = stages[stage].harvestPattern;
+        return true;
+    }
+
     public Sprite GetShopIcon()
     {
         if (shopIcon != null)
@@ -106,18 +114,18 @@ public class CropGrowthSO : ScriptableObject
         switch (pattern.kind)
         {
             case HarvestPatternKind.Offsets:
-            {
-                int count = pattern.offsets != null ? pattern.offsets.Length : 0;
-                return count == 1 ? "1 offset" : $"{count} offsets";
-            }
+                {
+                    int count = pattern.offsets != null ? pattern.offsets.Length : 0;
+                    return count == 1 ? "1 offset" : $"{count} offsets";
+                }
             case HarvestPatternKind.Ray:
-            {
-                Vector2Int dir = pattern.direction;
-                string steps = pattern.maxSteps < 0
-                    ? "until blocked"
-                    : $"{pattern.maxSteps} steps";
-                return $"ray ({dir.x},{dir.y}), {steps}";
-            }
+                {
+                    Vector2Int dir = pattern.direction;
+                    string steps = pattern.maxSteps < 0
+                        ? "until blocked"
+                        : $"{pattern.maxSteps} steps";
+                    return $"ray ({dir.x},{dir.y}), {steps}";
+                }
             default:
                 return pattern.kind.ToString();
         }

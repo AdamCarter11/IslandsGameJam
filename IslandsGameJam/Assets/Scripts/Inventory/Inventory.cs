@@ -233,6 +233,18 @@ public class Inventory : MonoBehaviour
         return true;
     }
 
+    public bool GetCurrentHarvestPattern(out HarvestPattern pattern, out Sprite seedSprite, int stage = -1)
+    {
+        pattern = null;
+        seedSprite = null;
+        var slot = slots[selectedSlot];
+        if (slot.IsEmpty || slot.crop == null)
+            return false;
+        if (stage == -1) stage = slot.crop.stages.Length - 1;
+        seedSprite = slot.crop.stages[stage].cropVisual;
+        return slot.crop.TryGetHarvestPattern(out pattern, stage);
+    }
+
     public void SelectSlot(int index)
     {
         if (index < 0 || index >= HotbarSlotCount)

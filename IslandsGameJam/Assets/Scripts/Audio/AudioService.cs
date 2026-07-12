@@ -33,6 +33,10 @@ public class AudioService : MonoBehaviour
     [Header("Music")]
     [SerializeField] AudioClip musicClip;
 
+    [Header("Harvest Combo Pitch")]
+    [SerializeField] float harvestPitchStep = 0.08f;
+    [SerializeField] float harvestMaxPitch = 1.6f;
+
     private void Awake()
     {
         ApplyVolumes();
@@ -61,7 +65,11 @@ public class AudioService : MonoBehaviour
 
     public void PlayPlant() => PlaySfx(plantClip);
     public void PlayWater() => PlaySfx(waterClip);
-    public void PlayHarvest() => PlaySfx(harvestClip);
+    public void PlayHarvest(int comboIndex = 0)
+    {
+        float pitch = Mathf.Min(1f + comboIndex * harvestPitchStep, harvestMaxPitch);
+        PlaySfxPitched(harvestClip, pitch);
+    }
     public void PlayDestroy() => PlaySfx(destroyClip);
     public void PlayKill() => PlaySfx(killClip);
     public void PlayCoinCollect() => PlaySfx(coinCollectClip);
@@ -114,6 +122,27 @@ public class AudioService : MonoBehaviour
             return;
 
         sfxSource.PlayOneShot(clip, sfxVolume);
+    }
+
+    /// <summary>
+    /// Plays a one-shot at a custom pitch without changing the shared SFX source
+    /// (PlayOneShot inherits AudioSource.pitch continuously).
+    /// </summary>
+    private void PlaySfxPitched(AudioClip clip, float pitch)
+    {
+        if (clip == null)
+            return;
+
+        var go = new GameObject("SFX_Pitched");
+        go.transform.SetParent(transform);
+        var src = go.AddComponent<AudioSource>();
+        src.playOnAwake = false;
+        src.spatialBlend = 0f;
+        src.clip = clip;
+        src.volume = sfxVolume;
+        src.pitch = Mathf.Max(0.01f, pitch);
+        src.Play();
+        Destroy(go, clip.length / src.pitch + 0.05f);
     }
 
     private void HandleCoinCollected(int amount, Vector3 position)

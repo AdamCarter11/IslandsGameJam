@@ -130,7 +130,6 @@ public class CropSystem : MonoBehaviour
         if (!world.TryGetCrop(origin, out CropCell originCell) || originCell == null || !originCell.IsReady)
             return;
 
-        GameManager.Main?.AudioService?.PlayHarvest();
         StartCoroutine(HarvestChainRoutine(origin));
     }
 
@@ -147,6 +146,7 @@ public class CropSystem : MonoBehaviour
         try
         {
             float multi = 1f;
+            int comboIndex = 0;
             harvestQueue.Clear();
             harvestVisited.Clear();
 
@@ -163,7 +163,7 @@ public class CropSystem : MonoBehaviour
 
             yield return flyer.Pop(popDuration);
 
-            if (!HarvestOneCell(origin, world, resolver, ref multi))
+            if (!HarvestOneCell(origin, world, resolver, ref multi, ref comboIndex))
                 yield break;
 
             Vector2Int current = origin;
@@ -183,7 +183,7 @@ public class CropSystem : MonoBehaviour
                 flyer.SetSprite(cell.crop.GetHarvestBounceVisual());
                 yield return flyer.Hop(CellToWorld(current), CellToWorld(pos), hopDuration, hopHeight);
 
-                if (!HarvestOneCell(pos, world, resolver, ref multi))
+                if (!HarvestOneCell(pos, world, resolver, ref multi, ref comboIndex))
                     continue;
 
                 current = pos;
@@ -200,7 +200,7 @@ public class CropSystem : MonoBehaviour
     /// <summary>
     /// Harvests one ready cell: payout, multi growth, pattern enqueue, clear, spawn-tile relics.
     /// </summary>
-    bool HarvestOneCell(Vector2Int pos, WorldManager world, CropStateResolver resolver, ref float multi)
+    bool HarvestOneCell(Vector2Int pos, WorldManager world, CropStateResolver resolver, ref float multi, ref int comboIndex)
     {
         if (harvestVisited.Contains(pos))
             return false;
@@ -212,6 +212,9 @@ public class CropSystem : MonoBehaviour
         CropGrowthSO crop = cell.crop;
         if (stage == null || crop == null)
             return false;
+
+        GameManager.Main?.AudioService?.PlayHarvest(comboIndex);
+        comboIndex++;
 
         harvestVisited.Add(pos);
 

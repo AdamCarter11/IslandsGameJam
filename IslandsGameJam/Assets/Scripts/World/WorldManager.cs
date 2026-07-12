@@ -53,8 +53,6 @@ public class WorldManager : MonoBehaviour
 
     [Header("Prefabs")]
     [SerializeField]
-    private GameObject obstaclePrefab;
-    [SerializeField]
     private GameObject terrainUnitPrefab;
     [SerializeField]
     private GameObject cropPrefab;
@@ -112,7 +110,7 @@ public class WorldManager : MonoBehaviour
             var ratio = water / total;
             if (ratio <= maxWaterAllowance)
             {
-                Debug.Log($"Failsafe iteration {failSafeRetryCount}, water/land ratio = {ratio}");
+                Debug.Log($"Failsafe iteration {failSafeRetryCount}, water({water})/land ratio = {ratio}, total = {total}");
                 origin = newOrigin;
                 return;
             }
@@ -565,9 +563,9 @@ public class WorldManager : MonoBehaviour
                 if (x < -noObstacleChunkZone.x || x > noObstacleChunkZone.x ||
                     y < -noObstacleChunkZone.y || y > noObstacleChunkZone.y)
                 {
-                    if (worldGenDataSet.TryGetObstacleData(data, out var sprte))
+                    if (worldGenDataSet.TryGetObstacle(data, out var prefab))
                     {
-                        PlaceObstacleObject(new Vector2Int(x, y), terrainUnit, sprte);
+                        PlaceObstacleObject(new Vector2Int(x, y), terrainUnit, prefab);
                     }
                 }
             }
@@ -582,23 +580,21 @@ public class WorldManager : MonoBehaviour
             return;
 
         TerrainData data = terrainUnit.Data ?? GeRawTerrainData(position);
-        if (!worldGenDataSet.TryPickObstacleSprite(data, out Sprite sprite))
-            return;
-
-        PlaceObstacleObject(position, terrainUnit, sprite);
+        if (worldGenDataSet.TryGetObstacle(data, out var prefab))
+        {
+            PlaceObstacleObject(position, terrainUnit, prefab);
+        }
+        // Todo: save and restore obstacle by enum type
     }
 
-    void PlaceObstacleObject(Vector2Int position, TerrainUnit terrainUnit, Sprite sprite)
+    void PlaceObstacleObject(Vector2Int position, TerrainUnit terrainUnit, GameObject prefab)
     {
-        if (obstaclePrefab == null || terrainUnit == null || obstacles.ContainsKey(position))
+        if (prefab == null || terrainUnit == null || obstacles.ContainsKey(position))
             return;
 
         var spawnPosition = new Vector2(position.x, position.y);
-        GameObject obstacleObject = Instantiate(obstaclePrefab, spawnPosition,
+        GameObject obstacleObject = Instantiate(prefab, spawnPosition,
             Quaternion.identity, terrainUnit.transform);
-        var renderer = obstacleObject.GetComponentInChildren<SpriteRenderer>();
-        if (renderer != null)
-            renderer.sprite = sprite;
         obstacles.Add(position, obstacleObject);
     }
 

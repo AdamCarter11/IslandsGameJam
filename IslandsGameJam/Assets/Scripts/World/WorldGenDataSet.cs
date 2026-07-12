@@ -10,7 +10,7 @@ public struct WorldGenData
     public TerrainData data;
     [Range(0f, 1f)]
     public float obstacleChance;
-    public Sprite[] obstacleSprites;
+    public GameObject[] obstaclePrefabs;
 }
 
 [CreateAssetMenu(fileName = "WGDS__", menuName = "Island/World Gen DataSet")]
@@ -33,7 +33,7 @@ public class WorldGenDataSet : ScriptableObject
         return null;
     }
 
-    public bool TryGetObstacleData(TerrainData data, out Sprite obstacleSprite)
+    public bool TryGetObstacle(TerrainData data, out GameObject prefab)
     {
         foreach (var d in dataSet)
         {
@@ -41,42 +41,19 @@ public class WorldGenDataSet : ScriptableObject
             {
                 if (UnityEngine.Random.value < d.obstacleChance)
                 {
-                    obstacleSprite = d.obstacleSprites.Random();
+                    prefab = d.obstaclePrefabs.Random();
                     return true;
                 }
                 else
                 {
-                    obstacleSprite = null;
+                    prefab = null;
                     return false;
                 }
 
             }
         }
 
-        obstacleSprite = null;
-        return false;
-    }
-
-    /// <summary>
-    /// Picks an obstacle sprite for a terrain without the random chance gate (save restore).
-    /// </summary>
-    public bool TryPickObstacleSprite(TerrainData data, out Sprite obstacleSprite)
-    {
-        foreach (var d in dataSet)
-        {
-            if (d.data != data)
-                continue;
-            if (d.obstacleSprites == null || d.obstacleSprites.Length == 0)
-            {
-                obstacleSprite = null;
-                return false;
-            }
-
-            obstacleSprite = d.obstacleSprites.Random();
-            return true;
-        }
-
-        obstacleSprite = null;
+        prefab = null;
         return false;
     }
 

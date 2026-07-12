@@ -50,7 +50,12 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private bool isInitialized = false;
     public bool IsInitialized => isInitialized;
-
+    [SerializeField]
+    private bool timerStarted = false;
+    public bool TimerStarted => timerStarted;
+    [SerializeField]
+    private float playTime = 0f;
+    public float PlayTime => playTime;
 
     private void Start()
     {
@@ -66,6 +71,8 @@ public class GameManager : MonoBehaviour
 
     private void Initialize()
     {
+        ResetTimer();
+
         if (inventory != null)
         {
             inventory.ClearForNewGame();
@@ -78,6 +85,45 @@ public class GameManager : MonoBehaviour
         cropSystem?.ResetRelicRuntimeState();
 
         worldManager.Initialize();
+    }
+
+    // Start timer on the first crop planted
+    public void StartTimer()
+    {
+        if (timerStarted)
+            return;
+
+        timerStarted = true;
+        SaveGameService.NotifyChanged();
+    }
+
+    public void ResetTimer()
+    {
+        timerStarted = false;
+        playTime = 0f;
+    }
+
+    private void Update()
+    {
+        if (timerStarted) playTime += Time.deltaTime;
+    }
+
+    public void CaptureTo(GameSaveData data)
+    {
+        if (data == null)
+            return;
+
+        data.timerStarted = timerStarted;
+        data.playTime = playTime;
+    }
+
+    public void ApplyFrom(GameSaveData data)
+    {
+        if (data == null)
+            return;
+
+        timerStarted = data.timerStarted;
+        playTime = Mathf.Max(0f, data.playTime);
     }
 
 #if UNITY_EDITOR

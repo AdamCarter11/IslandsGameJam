@@ -11,9 +11,14 @@ public class GameSaveData
 
     // --- Inventory ---
     public int gold;
+    public int highestGoldEver;
     public HotbarSlotSaveData[] hotbar;
     public string[] unlockedCropIds;
     public string[] ownedRelicIds;
+
+    // --- Runtime ---
+    public bool timerStarted;
+    public float playTime;
 
     // --- World ---
     public Vector2 origin;

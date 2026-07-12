@@ -15,6 +15,8 @@ public class ShopController : MonoBehaviour
     [SerializeField] Button shopOpenButton;
     [SerializeField] GoldHUD goldHud;
     [SerializeField] HotbarUI hotbarUi;
+    [SerializeField] HighestGoldUI highestGoldUi;
+    [SerializeField] TimerUI timerUi;
     [SerializeField] ShopPanelUI shopPanelUi;
     [SerializeField] RelicChoicePanelUI relicChoicePanelUi;
     [SerializeField] RelicInventoryPanelUI relicInventoryPanelUi;
@@ -60,6 +62,14 @@ public class ShopController : MonoBehaviour
 
         goldHud?.Initialize(inventory);
         hotbarUi?.Initialize(inventory);
+
+        if (highestGoldUi == null)
+            highestGoldUi = GetComponentInChildren<HighestGoldUI>(true);
+        if (timerUi == null)
+            timerUi = GetComponentInChildren<TimerUI>(true);
+
+        highestGoldUi?.Initialize(inventory);
+        timerUi?.Initialize(GameManager.Main != null ? GameManager.Main : FindFirstObjectByType<GameManager>());
 
         if (relicChoicePanelUi == null && shopPanelUi != null)
             relicChoicePanelUi = shopPanelUi.GetComponentInChildren<RelicChoicePanelUI>(true);
@@ -176,12 +186,16 @@ public class ShopController : MonoBehaviour
         ShopPanelUI shopPanel,
         RelicChoicePanelUI choicePanel = null,
         RelicInventoryPanelUI relicInventoryPanel = null,
-        Button relicsButton = null)
+        Button relicsButton = null,
+        HighestGoldUI highestGold = null,
+        TimerUI timer = null)
     {
         shopPanelRoot = panelRoot;
         shopOpenButton = openButton;
         goldHud = gold;
         hotbarUi = hotbar;
+        highestGoldUi = highestGold;
+        timerUi = timer;
         shopPanelUi = shopPanel;
         relicChoicePanelUi = choicePanel;
         relicInventoryPanelUi = relicInventoryPanel;

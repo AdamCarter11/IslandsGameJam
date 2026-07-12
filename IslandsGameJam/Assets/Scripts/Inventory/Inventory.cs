@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Inventory : MonoBehaviour
@@ -46,6 +47,8 @@ public class Inventory : MonoBehaviour
 
     // --- Gold ---
     public int gold;
+    public int highestGoldEver;
+    public int HighestGold => Mathf.Max(highestGoldEver, gold);
 
     public event Action<int> OnGoldChanged;
 
@@ -54,6 +57,8 @@ public class Inventory : MonoBehaviour
         if (amount == 0)
             return;
         gold += amount;
+        if (gold > highestGoldEver)
+            highestGoldEver = gold;
         OnGoldChanged?.Invoke(gold);
     }
 
@@ -115,6 +120,7 @@ public class Inventory : MonoBehaviour
             return;
 
         gold = catalog.startingGold;
+        highestGoldEver = gold;
         OnGoldChanged?.Invoke(gold);
 
         unlockedSeeds.Clear();
@@ -139,6 +145,7 @@ public class Inventory : MonoBehaviour
             return;
 
         data.gold = gold;
+        data.highestGoldEver = HighestGold;
 
         data.hotbar = new HotbarSlotSaveData[HotbarSlotCount];
         for (int i = 0; i < HotbarSlotCount; i++)
@@ -174,6 +181,7 @@ public class Inventory : MonoBehaviour
             return;
 
         gold = data.gold;
+        highestGoldEver = Mathf.Max(data.highestGoldEver, gold);
         OnGoldChanged?.Invoke(gold);
 
         for (int i = 0; i < HotbarSlotCount; i++)
@@ -324,6 +332,7 @@ public class Inventory : MonoBehaviour
             slot.Clear();
 
         OnHotbarChanged?.Invoke();
+        GameManager.Main.StartTimer();
         return true;
     }
 

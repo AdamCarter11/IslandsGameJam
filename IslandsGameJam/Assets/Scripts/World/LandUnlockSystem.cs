@@ -35,10 +35,13 @@ public class LandUnlockSystem : MonoBehaviour
     [SerializeField]
     private int landCount = 0;
 
+
     public int GetCurrentCost()
     {
-        // Todo: Infinite land cost scaling
-        return cost[landCount];
+        if (landCount < cost.Length)
+            return cost[landCount];
+        else
+            return Mathf.FloorToInt(100000f + landCount * 3.5f * 10000f);
     }
 
     public bool CanUnlockLand()

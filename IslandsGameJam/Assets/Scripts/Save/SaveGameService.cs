@@ -198,11 +198,15 @@ public class SaveGameService : MonoBehaviour
     /// </summary>
     public static void Flush()
     {
-        if (!dirty)
+        GameManager game = pendingGame != null
+            ? pendingGame
+            : boundGame != null
+                ? boundGame
+                : GameManager.Main;
+        if (game == null)
             return;
 
-        GameManager game = pendingGame != null ? pendingGame : GameManager.Main;
-        if (game == null)
+        if (!dirty && (!autosaveEnabled || !game.TimerStarted))
             return;
 
         Save(game);
@@ -243,6 +247,7 @@ public class SaveGameService : MonoBehaviour
             return data;
 
         game.Inventory?.CaptureTo(data);
+        game.CaptureTo(data);
         game.WorldManager?.CaptureTo(data);
         game.CropSystem?.CaptureTo(data);
         game.RelicShopService?.CaptureTo(data);
@@ -260,6 +265,7 @@ public class SaveGameService : MonoBehaviour
         SaveIdLookup lookup = CreateLookup(game);
 
         game.Inventory?.ApplyFrom(data, lookup);
+        game.ApplyFrom(data);
         game.WorldManager?.LoadFromSave(data, lookup);
         game.CropSystem?.RebuildPlantedFromWorld();
         game.CropSystem?.ApplyFrom(data);

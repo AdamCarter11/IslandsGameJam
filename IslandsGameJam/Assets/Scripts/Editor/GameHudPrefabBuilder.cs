@@ -79,6 +79,8 @@ public static class GameHudPrefabBuilder
 
         var goldHud = hudInstance.GetComponentInChildren<GoldHUD>(true);
         var hotbarUi = hudInstance.GetComponentInChildren<HotbarUI>(true);
+        var highestGoldUi = hudInstance.GetComponentInChildren<HighestGoldUI>(true);
+        var timerUi = hudInstance.GetComponentInChildren<TimerUI>(true);
         var shopPanelUi = hudInstance.GetComponentInChildren<ShopPanelUI>(true);
         var relicChoicePanelUi = hudInstance.GetComponentInChildren<RelicChoicePanelUI>(true);
         var relicInventoryPanelUi = hudInstance.GetComponentInChildren<RelicInventoryPanelUI>(true);
@@ -102,7 +104,9 @@ public static class GameHudPrefabBuilder
             shopPanelUi,
             relicChoicePanelUi,
             relicInventoryPanelUi,
-            relicsOpenButton);
+            relicsOpenButton,
+            highestGoldUi,
+            timerUi);
         EditorUtility.SetDirty(shopController);
 
         WireRelicShopIntoGameManager(catalog);
@@ -491,6 +495,38 @@ public static class GameHudPrefabBuilder
         goldTextRt.offsetMax = new Vector2(-8f, 0f);
         var goldText = AddText(goldTextRt, "Gold: 0", 22, TextAnchor.MiddleLeft, new Color(1f, 0.92f, 0.45f));
         goldHud.EditorAssign(goldText);
+
+        // Highest gold HUD
+        var highestGoldRoot = CreateRect("HighestGoldHUD", canvasRt);
+        SetAnchored(highestGoldRoot, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f),
+            new Vector2(16f, -64f), new Vector2(220f, 40f));
+        var highestGoldBg = highestGoldRoot.gameObject.AddComponent<Image>();
+        highestGoldBg.color = new Color(0.05f, 0.05f, 0.08f, 0.75f);
+        highestGoldBg.raycastTarget = false;
+        var highestGold = highestGoldRoot.gameObject.AddComponent<HighestGoldUI>();
+
+        var highestGoldTextRt = CreateRect("Text", highestGoldRoot);
+        Stretch(highestGoldTextRt);
+        highestGoldTextRt.offsetMin = new Vector2(12f, 0f);
+        highestGoldTextRt.offsetMax = new Vector2(-8f, 0f);
+        var highestGoldText = AddText(highestGoldTextRt, "Highest: 0", 22, TextAnchor.MiddleLeft, new Color(1f, 0.92f, 0.45f));
+        highestGold.EditorAssign(highestGoldText);
+
+        // Timer HUD
+        var timerRoot = CreateRect("TimerHUD", canvasRt);
+        SetAnchored(timerRoot, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f),
+            new Vector2(16f, -112f), new Vector2(220f, 40f));
+        var timerBg = timerRoot.gameObject.AddComponent<Image>();
+        timerBg.color = new Color(0.05f, 0.05f, 0.08f, 0.75f);
+        timerBg.raycastTarget = false;
+        var timer = timerRoot.gameObject.AddComponent<TimerUI>();
+
+        var timerTextRt = CreateRect("Text", timerRoot);
+        Stretch(timerTextRt);
+        timerTextRt.offsetMin = new Vector2(12f, 0f);
+        timerTextRt.offsetMax = new Vector2(-8f, 0f);
+        var timerText = AddText(timerTextRt, "Time: 00m00s", 22, TextAnchor.MiddleLeft, new Color(1f, 0.92f, 0.45f));
+        timer.EditorAssign(timerText);
 
         // Shop button
         var shopBtnRt = CreateRect("ShopButton", canvasRt);

@@ -39,6 +39,8 @@ public class AudioService : MonoBehaviour
 
     private void Awake()
     {
+        sfxVolume = AudioSettings.LoadSfxVolume();
+        musicVolume = AudioSettings.LoadMusicVolume();
         ApplyVolumes();
     }
 
@@ -102,9 +104,14 @@ public class AudioService : MonoBehaviour
         musicSource.Stop();
     }
 
+    public float GetSfxVolume() => sfxVolume;
+
+    public float GetMusicVolume() => musicVolume;
+
     public void SetSfxVolume(float volume)
     {
         sfxVolume = Mathf.Clamp01(volume);
+        AudioSettings.SaveSfxVolume(sfxVolume);
         if (sfxSource != null)
             sfxSource.volume = sfxVolume;
     }
@@ -112,6 +119,7 @@ public class AudioService : MonoBehaviour
     public void SetMusicVolume(float volume)
     {
         musicVolume = Mathf.Clamp01(volume);
+        AudioSettings.SaveMusicVolume(musicVolume);
         if (musicSource != null)
             musicSource.volume = musicVolume;
     }

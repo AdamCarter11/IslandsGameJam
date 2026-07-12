@@ -15,7 +15,7 @@ public class ShopRowView : MonoBehaviour
     public CropGrowthSO Crop { get; private set; }
     public Button BuyButton => buyButton;
 
-    public void Bind(CropGrowthSO crop, System.Action onBuy)
+    public void Bind(CropGrowthSO crop, System.Action onBuy, int? resolvedPrice = null)
     {
         Crop = crop;
         if (crop == null)
@@ -32,14 +32,19 @@ public class ShopRowView : MonoBehaviour
         if (nameText != null)
             nameText.text = string.IsNullOrEmpty(crop.cropName) ? crop.name : crop.cropName;
 
-        if (priceText != null)
-            priceText.text = $"{crop.seedPrice} gold";
+        SetPrice(resolvedPrice ?? crop.seedPrice);
 
         if (buyButton != null)
         {
             buyButton.onClick.RemoveAllListeners();
             buyButton.onClick.AddListener(() => onBuy?.Invoke());
         }
+    }
+
+    public void SetPrice(int price)
+    {
+        if (priceText != null)
+            priceText.text = $"{price} gold";
     }
 
     public void SetBuyInteractable(bool canBuy)

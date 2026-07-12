@@ -156,7 +156,8 @@ public static class GameHudPrefabBuilder
                 allowMultiple: false,
                 RelicEffectType.ModifyGold,
                 2f,
-                multiplicative: false),
+                multiplicative: false,
+                RelicRarity.Rare),
             EnsureRelicAsset(
                 "Relic_GrowthCharm",
                 "Growth Charm",
@@ -164,7 +165,8 @@ public static class GameHudPrefabBuilder
                 allowMultiple: true,
                 RelicEffectType.ModifyGrowthTime,
                 0.9f,
-                multiplicative: true),
+                multiplicative: true,
+                RelicRarity.Common),
             EnsureRelicAsset(
                 "Relic_BountifulYield",
                 "Bountiful Yield",
@@ -172,7 +174,8 @@ public static class GameHudPrefabBuilder
                 allowMultiple: true,
                 RelicEffectType.ModifyMulti,
                 0.15f,
-                multiplicative: false),
+                multiplicative: false,
+                RelicRarity.Epic),
             EnsureRelicAsset(
                 "Relic_DryEndurance",
                 "Dry Endurance",
@@ -180,7 +183,8 @@ public static class GameHudPrefabBuilder
                 allowMultiple: false,
                 RelicEffectType.ModifyDryDeathTime,
                 5f,
-                multiplicative: false),
+                multiplicative: false,
+                RelicRarity.Common),
         };
 
         var catalog = AssetDatabase.LoadAssetAtPath<RelicShopCatalog>(RelicShopCatalogPath);
@@ -208,7 +212,8 @@ public static class GameHudPrefabBuilder
         bool allowMultiple,
         RelicEffectType effectType,
         float amount,
-        bool multiplicative)
+        bool multiplicative,
+        RelicRarity rarity)
     {
         string path = $"{RelicsFolder}/{fileName}.asset";
         var relic = AssetDatabase.LoadAssetAtPath<RelicSO>(path);
@@ -220,6 +225,7 @@ public static class GameHudPrefabBuilder
 
         relic.relicName = displayName;
         relic.desc = description;
+        relic.rarity = rarity;
         relic.allowMultiplePurchases = allowMultiple;
         relic.effects = new[]
         {
@@ -385,9 +391,14 @@ public static class GameHudPrefabBuilder
             new Vector2(0f, -96f), new Vector2(-16f, 28f));
         var nameText = AddText(nameRt, "Relic", 18, TextAnchor.MiddleCenter, Color.white);
 
+        var rarityRt = CreateRect("Rarity", rootRt);
+        SetAnchored(rarityRt, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -122f), new Vector2(-16f, 22f));
+        var rarityText = AddText(rarityRt, "Common", 14, TextAnchor.MiddleCenter, new Color(0.75f, 0.75f, 0.78f));
+
         var descRt = CreateRect("Desc", rootRt);
         SetAnchored(descRt, new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
-            new Vector2(0f, -20f), new Vector2(-20f, -160f));
+            new Vector2(0f, -28f), new Vector2(-20f, -170f));
         var descText = AddText(descRt, "Description", 13, TextAnchor.UpperCenter, new Color(0.85f, 0.85f, 0.9f));
         descText.textWrappingMode = TextWrappingModes.Normal;
         descText.overflowMode = TextOverflowModes.Truncate;
@@ -399,7 +410,7 @@ public static class GameHudPrefabBuilder
         refundText.gameObject.SetActive(false);
 
         var view = root.AddComponent<RelicChoiceCardView>();
-        view.EditorAssign(icon, nameText, descText, refundText, selectBtn);
+        view.EditorAssign(icon, nameText, rarityText, descText, refundText, selectBtn);
 
         var prefab = PrefabUtility.SaveAsPrefabAsset(root, RelicChoiceCardPath);
         Object.DestroyImmediate(root);

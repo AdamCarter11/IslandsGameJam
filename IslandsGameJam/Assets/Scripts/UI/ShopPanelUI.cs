@@ -26,6 +26,7 @@ public class ShopPanelUI : MonoBehaviour
             inventory.OnShopUnlocksChanged -= Rebuild;
             inventory.OnGoldChanged -= OnGoldChanged;
             inventory.OnHotbarChanged -= RefreshBuyStates;
+            inventory.OnRelicsChanged -= RefreshBuyStates;
         }
 
         inventory = inv;
@@ -61,6 +62,7 @@ public class ShopPanelUI : MonoBehaviour
         inventory.OnShopUnlocksChanged += Rebuild;
         inventory.OnGoldChanged += OnGoldChanged;
         inventory.OnHotbarChanged += RefreshBuyStates;
+        inventory.OnRelicsChanged += RefreshBuyStates;
         Rebuild();
         RefreshRelicRollButton();
     }
@@ -72,6 +74,7 @@ public class ShopPanelUI : MonoBehaviour
         inventory.OnShopUnlocksChanged -= Rebuild;
         inventory.OnGoldChanged -= OnGoldChanged;
         inventory.OnHotbarChanged -= RefreshBuyStates;
+        inventory.OnRelicsChanged -= RefreshBuyStates;
     }
 
     void OnGoldChanged(int _)
@@ -123,14 +126,16 @@ public class ShopPanelUI : MonoBehaviour
     {
         var row = Instantiate(shopRowPrefab, listRoot);
         row.gameObject.name = $"ShopRow_{crop.name}";
+        int price = inventory.GetResolvedSeedPrice(crop);
         row.Bind(crop, () =>
         {
             if (inventory != null && inventory.TryBuySeed(crop))
             {
                 GameManager.Main?.AudioService?.PlayBuySeed();
                 RefreshBuyStates();
+                RefreshRelicRollButton();
             }
-        });
+        }, price);
         return row;
     }
 
@@ -144,8 +149,11 @@ public class ShopPanelUI : MonoBehaviour
             if (row == null || row.Crop == null)
                 continue;
 
+            int price = inventory.GetResolvedSeedPrice(row.Crop);
+            row.SetPrice(price);
+
             bool canBuy = inventory.IsUnlocked(row.Crop)
-                          && inventory.gold >= row.Crop.seedPrice
+                          && inventory.gold >= price
                           && inventory.CanFitSeed(row.Crop, 1);
             row.SetBuyInteractable(canBuy);
         }

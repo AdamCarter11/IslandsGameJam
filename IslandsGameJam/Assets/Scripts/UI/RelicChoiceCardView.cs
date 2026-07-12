@@ -9,6 +9,7 @@ public class RelicChoiceCardView : MonoBehaviour
 {
     [SerializeField] Image icon;
     [SerializeField] TextMeshProUGUI nameText;
+    [SerializeField] TextMeshProUGUI rarityText;
     [SerializeField] TextMeshProUGUI descText;
     [SerializeField] TextMeshProUGUI refundText;
     [SerializeField] Button selectButton;
@@ -32,6 +33,12 @@ public class RelicChoiceCardView : MonoBehaviour
 
         if (nameText != null)
             nameText.text = string.IsNullOrEmpty(relic.relicName) ? relic.name : relic.relicName;
+
+        if (rarityText != null)
+        {
+            rarityText.text = relic.rarity.ToString();
+            rarityText.color = GetRarityColor(relic.rarity);
+        }
 
         if (descText != null)
             descText.text = relic.desc ?? string.Empty;
@@ -59,11 +66,27 @@ public class RelicChoiceCardView : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    static Color GetRarityColor(RelicRarity rarity) => rarity switch
+    {
+        RelicRarity.Common => new Color(0.75f, 0.75f, 0.78f),
+        RelicRarity.Rare => new Color(0.35f, 0.55f, 1f),
+        RelicRarity.Epic => new Color(0.75f, 0.4f, 0.95f),
+        RelicRarity.Legendary => new Color(1f, 0.75f, 0.25f),
+        _ => Color.white,
+    };
+
 #if UNITY_EDITOR
-    public void EditorAssign(Image iconImage, TextMeshProUGUI name, TextMeshProUGUI desc, TextMeshProUGUI refund, Button select)
+    public void EditorAssign(
+        Image iconImage,
+        TextMeshProUGUI name,
+        TextMeshProUGUI rarity,
+        TextMeshProUGUI desc,
+        TextMeshProUGUI refund,
+        Button select)
     {
         icon = iconImage;
         nameText = name;
+        rarityText = rarity;
         descText = desc;
         refundText = refund;
         selectButton = select;

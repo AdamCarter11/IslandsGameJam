@@ -5,12 +5,20 @@ public class CropStateResolver : MonoBehaviour
     const float MinGrowthTime = 0.05f;
     const float MinDryDeathTime = 0.05f;
 
-    public float GetGrowthTime(CropPropertiesSO stage, CropGrowthSO crop, bool isWatered = true)
+    public float GetGrowthTime(
+        CropPropertiesSO stage,
+        CropGrowthSO crop,
+        bool isWatered = true,
+        RelicEffectContext context = default)
     {
-        float value = ApplyRelicModifiers(stage.growthTime, RelicEffectType.ModifyGrowthTime, crop);
+        float value = RelicEffectUtility.ApplyModifiers(
+            stage.growthTime,
+            RelicEffectType.ModifyGrowthTime,
+            crop,
+            context);
         if (!isWatered)
         {
-            float dryMult = GetDryGrowthMultiplier(stage, crop);
+            float dryMult = GetDryGrowthMultiplier(stage, crop, context);
             // Rate multiplier: 0 = no dry growth, >1 = faster while dry.
             if (dryMult <= 0f)
                 return float.PositiveInfinity;
@@ -19,55 +27,92 @@ public class CropStateResolver : MonoBehaviour
         return Mathf.Max(MinGrowthTime, value);
     }
 
-    public float GetDryGrowthMultiplier(CropPropertiesSO stage, CropGrowthSO crop)
+    public float GetDryGrowthMultiplier(
+        CropPropertiesSO stage,
+        CropGrowthSO crop,
+        RelicEffectContext context = default)
     {
-        float value = ApplyRelicModifiers(stage.dryGrowthMultiplier, RelicEffectType.ModifyDryGrowthMultiplier, crop);
+        float value = RelicEffectUtility.ApplyModifiers(
+            stage.dryGrowthMultiplier,
+            RelicEffectType.ModifyDryGrowthMultiplier,
+            crop,
+            context);
         return Mathf.Max(0f, value);
     }
 
-    public float GetDryDeathTime(CropGrowthSO crop)
+    public float GetDryDeathTime(CropGrowthSO crop, RelicEffectContext context = default)
     {
-        float value = ApplyRelicModifiers(crop.dryDeathTime, RelicEffectType.ModifyDryDeathTime, crop);
+        float value = RelicEffectUtility.ApplyModifiers(
+            crop.dryDeathTime,
+            RelicEffectType.ModifyDryDeathTime,
+            crop,
+            context);
         return Mathf.Max(MinDryDeathTime, value);
     }
 
-    public int GetDeathGold(CropGrowthSO crop)
+    public int GetDeathGold(CropGrowthSO crop, RelicEffectContext context = default)
     {
-        float value = ApplyRelicModifiers(crop.deathGold, RelicEffectType.ModifyDeathGold, crop);
+        float value = RelicEffectUtility.ApplyModifiers(
+            crop.deathGold,
+            RelicEffectType.ModifyDeathGold,
+            crop,
+            context);
         return Mathf.Max(0, Mathf.RoundToInt(value));
     }
 
-    public int GetGold(CropPropertiesSO stage, CropGrowthSO crop)
+    public int GetGold(
+        CropPropertiesSO stage,
+        CropGrowthSO crop,
+        RelicEffectContext context = default)
     {
-        float value = ApplyRelicModifiers(stage.goldGain, RelicEffectType.ModifyGold, crop);
+        float value = RelicEffectUtility.ApplyModifiers(
+            stage.goldGain,
+            RelicEffectType.ModifyGold,
+            crop,
+            context);
         return Mathf.Max(0, Mathf.RoundToInt(value));
     }
 
-    public float GetMulti(CropPropertiesSO stage, CropGrowthSO crop)
+    public float GetMulti(
+        CropPropertiesSO stage,
+        CropGrowthSO crop,
+        RelicEffectContext context = default)
     {
-        float value = ApplyRelicModifiers(stage.multiBonus, RelicEffectType.ModifyMulti, crop);
+        float value = RelicEffectUtility.ApplyModifiers(
+            stage.multiBonus,
+            RelicEffectType.ModifyMulti,
+            crop,
+            context);
         return Mathf.Max(0f, value);
     }
 
-    float ApplyRelicModifiers(float baseValue, RelicEffectType effectType, CropGrowthSO crop)
+    /// <summary>
+    /// Starting chain multi after <see cref="RelicEffectType.ModifyBaseComboMulti"/> relics.
+    /// Pass persisted multi (or 1) as <paramref name="baseMulti"/>.
+    /// </summary>
+    public float GetBaseComboMulti(float baseMulti = 1f, RelicEffectContext context = default)
     {
-        float value = baseValue;
-        foreach (var relic in GameManager.Main.Inventory.ownedRelics)
-        {
-            if (relic?.effects == null) continue;
+        float value = RelicEffectUtility.ApplyModifiers(
+            baseMulti,
+            RelicEffectType.ModifyBaseComboMulti,
+            crop: null,
+            context);
+        return Mathf.Max(0f, value);
+    }
 
-            foreach (var effect in relic.effects)
-            {
-                if (effect == null)
-                {
-                    Debug.LogError("The effect on relic is null: " + relic.relicName);
-                    continue;
-                }
-                if (effect.type != effectType) continue;
-                if (effect.onlyCrop != null && effect.onlyCrop != crop) continue;
-                value = effect.multiplicative ? value * effect.amount : value + effect.amount;
-            }
-        }
-        return value;
+    /// <summary>
+    /// Shop seed cost after <see cref="RelicEffectType.ModifySeedPrice"/> relics.
+    /// </summary>
+    public int GetSeedPrice(CropGrowthSO crop, RelicEffectContext context = default)
+    {
+        if (crop == null)
+            return 0;
+
+        float value = RelicEffectUtility.ApplyModifiers(
+            crop.seedPrice,
+            RelicEffectType.ModifySeedPrice,
+            crop,
+            context);
+        return Mathf.Max(0, Mathf.RoundToInt(value));
     }
 }

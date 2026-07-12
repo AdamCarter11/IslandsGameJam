@@ -8,7 +8,16 @@ public class Inventory : MonoBehaviour
 
     // --- Relic inventory management ---
     public List<RelicSO> ownedRelics = new();
-    public void AddRelic(RelicSO relic) => ownedRelics.Add(relic);
+
+    public event Action OnRelicsChanged;
+
+    public void AddRelic(RelicSO relic)
+    {
+        if (relic == null)
+            return;
+        ownedRelics.Add(relic);
+        OnRelicsChanged?.Invoke();
+    }
 
     public bool OwnsRelic(RelicSO relic)
     {
@@ -81,7 +90,24 @@ public class Inventory : MonoBehaviour
     }
 
     /// <summary>
-    /// Sets starting gold and default unlocks from the shop catalog. we will need to change where this is called when/if we add saving 
+    /// Clears hotbar, owned relics, and shop unlocks so a New Game never inherits leftover state.
+    /// Call before <see cref="InitializeFromCatalog"/>.
+    /// </summary>
+    public void ClearForNewGame()
+    {
+        for (int i = 0; i < HotbarSlotCount; i++)
+            slots[i].Clear();
+        OnHotbarChanged?.Invoke();
+
+        ownedRelics.Clear();
+
+        unlockedSeeds.Clear();
+        OnShopUnlocksChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// Sets starting gold and default unlocks from the shop catalog.
+    /// Prefer <see cref="ClearForNewGame"/> first when starting a new run.
     /// </summary>
     public void InitializeFromCatalog(SeedShopCatalog catalog)
     {
@@ -102,6 +128,89 @@ public class Inventory : MonoBehaviour
         }
 
         OnShopUnlocksChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// Writes gold, hotbar, unlocks, and owned relics into <paramref name="data"/>.
+    /// </summary>
+    public void CaptureTo(GameSaveData data)
+    {
+        if (data == null)
+            return;
+
+        data.gold = gold;
+
+        data.hotbar = new HotbarSlotSaveData[HotbarSlotCount];
+        for (int i = 0; i < HotbarSlotCount; i++)
+        {
+            SeedStack slot = slots[i];
+            data.hotbar[i] = new HotbarSlotSaveData
+            {
+                cropId = slot.IsEmpty ? null : SaveIdLookup.GetId(slot.crop),
+                count = slot.IsEmpty ? 0 : slot.count
+            };
+        }
+
+        var unlocked = new List<string>(unlockedSeeds.Count);
+        foreach (CropGrowthSO crop in unlockedSeeds)
+        {
+            string id = SaveIdLookup.GetId(crop);
+            if (!string.IsNullOrEmpty(id))
+                unlocked.Add(id);
+        }
+        data.unlockedCropIds = unlocked.ToArray();
+
+        data.ownedRelicIds = new string[ownedRelics.Count];
+        for (int i = 0; i < ownedRelics.Count; i++)
+            data.ownedRelicIds[i] = SaveIdLookup.GetId(ownedRelics[i]);
+    }
+
+    /// <summary>
+    /// Restores gold, hotbar, unlocks, and owned relics from <paramref name="data"/>.
+    /// </summary>
+    public void ApplyFrom(GameSaveData data, SaveIdLookup lookup)
+    {
+        if (data == null || lookup == null)
+            return;
+
+        gold = data.gold;
+        OnGoldChanged?.Invoke(gold);
+
+        for (int i = 0; i < HotbarSlotCount; i++)
+        {
+            slots[i].Clear();
+            if (data.hotbar == null || i >= data.hotbar.Length)
+                continue;
+
+            HotbarSlotSaveData saved = data.hotbar[i];
+            if (saved.count <= 0 || !lookup.TryGetCrop(saved.cropId, out CropGrowthSO crop))
+                continue;
+
+            slots[i].crop = crop;
+            slots[i].count = Mathf.Clamp(saved.count, 1, SeedStack.MaxStackSize);
+        }
+        OnHotbarChanged?.Invoke();
+
+        unlockedSeeds.Clear();
+        if (data.unlockedCropIds != null)
+        {
+            for (int i = 0; i < data.unlockedCropIds.Length; i++)
+            {
+                if (lookup.TryGetCrop(data.unlockedCropIds[i], out CropGrowthSO crop))
+                    unlockedSeeds.Add(crop);
+            }
+        }
+        OnShopUnlocksChanged?.Invoke();
+
+        ownedRelics.Clear();
+        if (data.ownedRelicIds != null)
+        {
+            for (int i = 0; i < data.ownedRelicIds.Length; i++)
+            {
+                if (lookup.TryGetRelic(data.ownedRelicIds[i], out RelicSO relic))
+                    ownedRelics.Add(relic);
+            }
+        }
     }
 
     public bool IsUnlocked(CropGrowthSO crop) => crop != null && unlockedSeeds.Contains(crop);

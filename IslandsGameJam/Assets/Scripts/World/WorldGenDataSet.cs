@@ -1,5 +1,6 @@
 using ColorMak3r.Utility;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -54,5 +55,41 @@ public class WorldGenDataSet : ScriptableObject
 
         obstacleSprite = null;
         return false;
+    }
+
+    /// <summary>
+    /// Picks an obstacle sprite for a terrain without the random chance gate (save restore).
+    /// </summary>
+    public bool TryPickObstacleSprite(TerrainData data, out Sprite obstacleSprite)
+    {
+        foreach (var d in dataSet)
+        {
+            if (d.data != data)
+                continue;
+            if (d.obstacleSprites == null || d.obstacleSprites.Length == 0)
+            {
+                obstacleSprite = null;
+                return false;
+            }
+
+            obstacleSprite = d.obstacleSprites.Random();
+            return true;
+        }
+
+        obstacleSprite = null;
+        return false;
+    }
+
+    public void CollectTerrains(List<TerrainData> into)
+    {
+        if (into == null || dataSet == null)
+            return;
+
+        for (int i = 0; i < dataSet.Length; i++)
+        {
+            TerrainData terrain = dataSet[i].data;
+            if (terrain != null)
+                into.Add(terrain);
+        }
     }
 }

@@ -54,6 +54,7 @@ public class WorldManager : MonoBehaviour
     private Dictionary<Vector2Int, GameObject> obstacles = new Dictionary<Vector2Int, GameObject>();
     private Dictionary<Vector2Int, TerrainChunk> currentChunks = new Dictionary<Vector2Int, TerrainChunk>();
     private Dictionary<Vector2Int, TerrainChunk> availableChunks = new Dictionary<Vector2Int, TerrainChunk>();
+    private readonly Dictionary<Vector2Int, TerrainData> terrainOverrides = new Dictionary<Vector2Int, TerrainData>();
 
     public void Initialize()
     {
@@ -64,12 +65,217 @@ public class WorldManager : MonoBehaviour
         terrainUnits = new OffsetArray2D<TerrainUnit>(minX, maxX, minY, maxY);
         crops = new OffsetArray2D<CropCell>(minX, maxX, minY, maxY);
 
+        obstacles.Clear();
+        currentChunks.Clear();
+        availableChunks.Clear();
+        terrainOverrides.Clear();
+
         origin = randomizeOrigin ? UnityEngine.Random.insideUnitCircle * (worldHeight + worldWidth) / 2 : origin;
 
         var firstChunk = new TerrainChunk(Vector2Int.zero);
         currentChunks.Add(firstChunk.Position, firstChunk);
         GenerateAvailableChunksFromPosition(firstChunk.Position);
         BuildChunk(firstChunk.Position);
+    }
+
+    /// <summary>
+    /// Restores world arrays, unlocked chunks (no random obstacles), saved obstacles,
+    /// terrain overrides, and crop cells from save data.
+    /// </summary>
+    public void LoadFromSave(GameSaveData data, SaveIdLookup lookup)
+    {
+        if (data == null)
+            return;
+
+        int minX = -worldWidth / 2;
+        int maxX = worldWidth / 2;
+        int minY = -worldHeight / 2;
+        int maxY = worldHeight / 2;
+        terrainUnits = new OffsetArray2D<TerrainUnit>(minX, maxX, minY, maxY);
+        crops = new OffsetArray2D<CropCell>(minX, maxX, minY, maxY);
+
+        obstacles.Clear();
+        currentChunks.Clear();
+        availableChunks.Clear();
+        terrainOverrides.Clear();
+
+        origin = data.origin;
+
+        Vector2Int[] unlocked = data.unlockedChunks;
+        if (unlocked == null || unlocked.Length == 0)
+            unlocked = new[] { Vector2Int.zero };
+
+        for (int i = 0; i < unlocked.Length; i++)
+        {
+            Vector2Int chunkPos = unlocked[i];
+            if (currentChunks.ContainsKey(chunkPos))
+                continue;
+
+            BuildChunk(chunkPos, placeRandomObstacles: false);
+            currentChunks.Add(chunkPos, new TerrainChunk(chunkPos));
+        }
+
+        foreach (Vector2Int chunkPos in currentChunks.Keys)
+            GenerateAvailableChunksFromPosition(chunkPos);
+
+        if (data.obstacleCells != null)
+        {
+            for (int i = 0; i < data.obstacleCells.Length; i++)
+                PlaceObstacle(data.obstacleCells[i]);
+        }
+
+        if (data.terrainOverrides != null && lookup != null)
+        {
+            for (int i = 0; i < data.terrainOverrides.Length; i++)
+            {
+                TerrainOverrideSaveData ov = data.terrainOverrides[i];
+                if (!lookup.TryGetTerrain(ov.terrainId, out TerrainData terrain))
+                    continue;
+                ApplyTerrainOverride(ov.pos, terrain);
+            }
+        }
+
+        if (data.crops != null && lookup != null)
+        {
+            for (int i = 0; i < data.crops.Length; i++)
+                RestoreCrop(data.crops[i], lookup);
+        }
+    }
+
+    /// <summary>
+    /// Writes origin, unlocked chunks, obstacles, terrain overrides, and crops into <paramref name="data"/>.
+    /// </summary>
+    public void CaptureTo(GameSaveData data)
+    {
+        if (data == null)
+            return;
+
+        data.origin = origin;
+
+        if (currentChunks.Count == 0)
+        {
+            data.unlockedChunks = Array.Empty<Vector2Int>();
+        }
+        else
+        {
+            var chunks = new Vector2Int[currentChunks.Count];
+            int i = 0;
+            foreach (Vector2Int pos in currentChunks.Keys)
+                chunks[i++] = pos;
+            data.unlockedChunks = chunks;
+        }
+
+        if (obstacles.Count == 0)
+        {
+            data.obstacleCells = Array.Empty<Vector2Int>();
+        }
+        else
+        {
+            var cells = new Vector2Int[obstacles.Count];
+            int i = 0;
+            foreach (Vector2Int pos in obstacles.Keys)
+                cells[i++] = pos;
+            data.obstacleCells = cells;
+        }
+
+        if (terrainOverrides.Count == 0)
+        {
+            data.terrainOverrides = Array.Empty<TerrainOverrideSaveData>();
+        }
+        else
+        {
+            var overrides = new TerrainOverrideSaveData[terrainOverrides.Count];
+            int i = 0;
+            foreach (KeyValuePair<Vector2Int, TerrainData> pair in terrainOverrides)
+            {
+                overrides[i++] = new TerrainOverrideSaveData
+                {
+                    pos = pair.Key,
+                    terrainId = SaveIdLookup.GetId(pair.Value)
+                };
+            }
+            data.terrainOverrides = overrides;
+        }
+
+        var cropList = new List<CropSaveData>();
+        foreach (Vector2Int chunkPos in currentChunks.Keys)
+        {
+            ForEachCellInChunk(chunkPos, (x, y) =>
+            {
+                if (crops == null || !crops.Contains(x, y))
+                    return;
+                CropCell cell = crops[x, y];
+                if (cell == null || cell.crop == null)
+                    return;
+
+                cropList.Add(new CropSaveData
+                {
+                    pos = new Vector2Int(x, y),
+                    cropId = SaveIdLookup.GetId(cell.crop),
+                    stageIndex = cell.stageIndex,
+                    stageElapsed = cell.stageElapsed,
+                    isWatered = cell.isWatered,
+                    dryElapsed = cell.dryElapsed
+                });
+            });
+        }
+        data.crops = cropList.Count == 0 ? Array.Empty<CropSaveData>() : cropList.ToArray();
+    }
+
+    public void CollectTerrains(List<TerrainData> into)
+    {
+        if (into == null)
+            return;
+
+        if (voidTerrainData != null)
+            into.Add(voidTerrainData);
+
+        worldGenDataSet?.CollectTerrains(into);
+
+        foreach (TerrainData terrain in terrainOverrides.Values)
+        {
+            if (terrain != null)
+                into.Add(terrain);
+        }
+    }
+
+    /// <summary>
+    /// Fills <paramref name="into"/> with positions that currently have a planted crop.
+    /// </summary>
+    public void CollectPlantedPositions(List<Vector2Int> into)
+    {
+        if (into == null || crops == null)
+            return;
+
+        foreach (Vector2Int chunkPos in currentChunks.Keys)
+        {
+            ForEachCellInChunk(chunkPos, (x, y) =>
+            {
+                if (!crops.Contains(x, y))
+                    return;
+                if (crops[x, y] != null)
+                    into.Add(new Vector2Int(x, y));
+            });
+        }
+    }
+
+    /// <summary>
+    /// Re-initializes terrain at a cell and records an override when it differs from noise.
+    /// </summary>
+    public void ApplyTerrainOverride(Vector2Int position, TerrainData terrain)
+    {
+        if (terrain == null || !TryGetTerrainUnit(position, out TerrainUnit unit))
+            return;
+
+        unit.Initialize(terrain);
+
+        TerrainData raw = GeRawTerrainData(position);
+        if (terrain != raw)
+            terrainOverrides[position] = terrain;
+        else
+            terrainOverrides.Remove(position);
+
+        SaveGameService.NotifyChanged();
     }
 
     #region Crop Management
@@ -161,6 +367,53 @@ public class WorldManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Restores a planted crop with full saved growth/water state.
+    /// </summary>
+    public bool RestoreCrop(CropSaveData save, SaveIdLookup lookup)
+    {
+        if (lookup == null || cropPrefab == null || crops == null || terrainUnits == null)
+            return false;
+        if (!lookup.TryGetCrop(save.cropId, out CropGrowthSO crop) || crop == null)
+            return false;
+        if (!crops.Contains(save.pos.x, save.pos.y))
+            return false;
+        if (!terrainUnits.Contains(save.pos.x, save.pos.y) || terrainUnits[save.pos.x, save.pos.y] == null)
+            return false;
+        if (obstacles.ContainsKey(save.pos))
+            return false;
+        if (crops[save.pos.x, save.pos.y] != null)
+            return false;
+
+        int stageIndex = save.stageIndex;
+        if (crop.stages != null && crop.stages.Length > 0)
+            stageIndex = Mathf.Clamp(stageIndex, 0, crop.stages.Length - 1);
+        else
+            stageIndex = 0;
+
+        var cell = new CropCell
+        {
+            crop = crop,
+            stageIndex = stageIndex,
+            stageElapsed = Mathf.Max(0f, save.stageElapsed),
+            isWatered = save.isWatered,
+            dryElapsed = Mathf.Max(0f, save.dryElapsed)
+        };
+        crops[save.pos.x, save.pos.y] = cell;
+
+        var spawnPosition = new Vector2(save.pos.x, save.pos.y);
+        var cropObject = Instantiate(cropPrefab, spawnPosition, Quaternion.identity, transform);
+        var view = cropObject.GetComponent<CropView>();
+        var stage = cell.CurrentStage;
+        if (view != null)
+        {
+            view.SetVisual(stage != null ? stage.cropVisual : null);
+            view.SetWatered(cell.isWatered);
+        }
+        cell.view = view;
+        return true;
+    }
+
     #endregion
 
     #region Terrain Management
@@ -207,8 +460,10 @@ public class WorldManager : MonoBehaviour
 
         if (GameManager.Main != null && SeedUnlockService.TryUnlockRandom(GameManager.Main.Inventory, GameManager.Main.SeedShopCatalog))
         {
-            GameManager.Main.AudioService?.PlaySeedUnlock();
+            GameManager.Main?.AudioService?.PlaySeedUnlock();
         }
+
+        SaveGameService.NotifyChanged();
     }
 
     public bool IsInsideAvailableChunk(Vector2 position)
@@ -237,7 +492,9 @@ public class WorldManager : MonoBehaviour
     }
 
     [Button]
-    public void BuildChunk(Vector2Int position)
+    public void BuildChunk(Vector2Int position) => BuildChunk(position, placeRandomObstacles: true);
+
+    public void BuildChunk(Vector2Int position, bool placeRandomObstacles)
     {
         var halfChunk = Mathf.FloorToInt(chunkSize / 2);
 
@@ -259,17 +516,62 @@ public class WorldManager : MonoBehaviour
                 terrainUnit.Initialize(data);
                 terrainUnits[x, y] = terrainUnit;
 
+                if (!placeRandomObstacles)
+                    continue;
+
                 if (x < -noObstacleChunkZone.x || x > noObstacleChunkZone.x ||
                     y < -noObstacleChunkZone.y || y > noObstacleChunkZone.y)
                 {
                     if (worldGenDataSet.TryGetObstacleData(data, out var sprte))
                     {
-                        GameObject obstacleObject = Instantiate(obstaclePrefab, spawnPosition,
-                            Quaternion.identity, terrainUnit.transform);
-                        obstacleObject.GetComponentInChildren<SpriteRenderer>().sprite = sprte;
-                        obstacles.Add(new Vector2Int(x, y), obstacleObject);
+                        PlaceObstacleObject(new Vector2Int(x, y), terrainUnit, sprte);
                     }
                 }
+            }
+        }
+    }
+
+    void PlaceObstacle(Vector2Int position)
+    {
+        if (obstacles.ContainsKey(position))
+            return;
+        if (!TryGetTerrainUnit(position, out TerrainUnit terrainUnit))
+            return;
+
+        TerrainData data = terrainUnit.Data ?? GeRawTerrainData(position);
+        if (!worldGenDataSet.TryPickObstacleSprite(data, out Sprite sprite))
+            return;
+
+        PlaceObstacleObject(position, terrainUnit, sprite);
+    }
+
+    void PlaceObstacleObject(Vector2Int position, TerrainUnit terrainUnit, Sprite sprite)
+    {
+        if (obstaclePrefab == null || terrainUnit == null || obstacles.ContainsKey(position))
+            return;
+
+        var spawnPosition = new Vector2(position.x, position.y);
+        GameObject obstacleObject = Instantiate(obstaclePrefab, spawnPosition,
+            Quaternion.identity, terrainUnit.transform);
+        var renderer = obstacleObject.GetComponentInChildren<SpriteRenderer>();
+        if (renderer != null)
+            renderer.sprite = sprite;
+        obstacles.Add(position, obstacleObject);
+    }
+
+    void ForEachCellInChunk(Vector2Int chunkPosition, Action<int, int> action)
+    {
+        if (action == null)
+            return;
+
+        int halfChunk = Mathf.FloorToInt(chunkSize / 2);
+        for (int i = 0; i < chunkSize; i++)
+        {
+            for (int j = 0; j < chunkSize; j++)
+            {
+                int x = chunkPosition.x + i - halfChunk;
+                int y = chunkPosition.y + j - halfChunk;
+                action(x, y);
             }
         }
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -82,12 +83,13 @@ public class RelicShopService : MonoBehaviour
         int offerCount = Mathf.Min(OfferSlotCount, eligible.Count);
         for (int i = 0; i < offerCount; i++)
         {
-            int pick = Random.Range(i, eligible.Count);
+            int pick = UnityEngine.Random.Range(i, eligible.Count);
             (eligible[i], eligible[pick]) = (eligible[pick], eligible[i]);
             offers[i] = eligible[i];
         }
 
         rollActive = true;
+        SaveGameService.NotifyChanged();
         return true;
     }
 
@@ -144,6 +146,7 @@ public class RelicShopService : MonoBehaviour
         }
 
         ClearActiveRoll();
+        SaveGameService.NotifyChanged();
         return true;
     }
 
@@ -196,6 +199,66 @@ public class RelicShopService : MonoBehaviour
         rollActive = false;
         paidCost = 0;
         ClearOffers();
+    }
+
+    /// <summary>
+    /// Clears purchase/skip progress and any mid-roll UI state for a fresh game.
+    /// </summary>
+    public void ResetForNewGame()
+    {
+        purchaseCount = 0;
+        skipCounts.Clear();
+        ClearActiveRoll();
+    }
+
+    /// <summary>
+    /// Writes relic-shop economy fields into <paramref name="data"/>. Mid-roll UI is not saved.
+    /// </summary>
+    public void CaptureTo(GameSaveData data)
+    {
+        if (data == null)
+            return;
+
+        data.relicShopPurchaseCount = purchaseCount;
+
+        if (skipCounts.Count == 0)
+        {
+            data.relicSkipCounts = Array.Empty<RelicSkipCountSaveData>();
+            return;
+        }
+
+        var skips = new RelicSkipCountSaveData[skipCounts.Count];
+        int i = 0;
+        foreach (KeyValuePair<RelicSO, int> pair in skipCounts)
+        {
+            skips[i++] = new RelicSkipCountSaveData
+            {
+                relicId = SaveIdLookup.GetId(pair.Key),
+                count = pair.Value
+            };
+        }
+        data.relicSkipCounts = skips;
+    }
+
+    /// <summary>
+    /// Restores purchase count and skip credits. Active roll UI stays cleared.
+    /// </summary>
+    public void ApplySaveState(int savedPurchaseCount, RelicSkipCountSaveData[] skips, SaveIdLookup lookup)
+    {
+        ClearActiveRoll();
+        purchaseCount = Mathf.Max(0, savedPurchaseCount);
+        skipCounts.Clear();
+
+        if (skips == null || lookup == null)
+            return;
+
+        for (int i = 0; i < skips.Length; i++)
+        {
+            RelicSkipCountSaveData entry = skips[i];
+            if (entry.count <= 0 || !lookup.TryGetRelic(entry.relicId, out RelicSO relic))
+                continue;
+            skipCounts[relic] = entry.count;
+        }
     }
 
 #if UNITY_EDITOR

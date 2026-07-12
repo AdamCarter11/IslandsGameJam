@@ -39,6 +39,7 @@ public class CropSystem : MonoBehaviour
             plantedPositions.Add(position);
 
         GameManager.Main?.AudioService?.PlayPlant();
+        SaveGameService.NotifyChanged();
         return true;
     }
 
@@ -67,6 +68,7 @@ public class CropSystem : MonoBehaviour
 
         cell.Water();
         GameManager.Main?.AudioService?.PlayWater();
+        SaveGameService.NotifyChanged();
     }
 
     /// <summary>
@@ -84,6 +86,7 @@ public class CropSystem : MonoBehaviour
         world.ClearCrop(position);
         UnregisterPlanted(position);
         GameManager.Main?.AudioService?.PlayDestroy();
+        SaveGameService.NotifyChanged();
     }
 
     /// <summary>
@@ -109,6 +112,7 @@ public class CropSystem : MonoBehaviour
         UnregisterPlanted(position);
         ApplyCropDeathSpawnTile(position, crop, world);
         GameManager.Main?.AudioService?.PlayKill();
+        SaveGameService.NotifyChanged();
     }
 
     /// <summary>
@@ -231,6 +235,7 @@ public class CropSystem : MonoBehaviour
         world.ClearCrop(pos);
         UnregisterPlanted(pos);
         ApplyHarvestSpawnTile(pos, crop, world);
+        SaveGameService.NotifyChanged();
         return true;
     }
 
@@ -297,9 +302,6 @@ public class CropSystem : MonoBehaviour
         if (relics == null)
             return;
 
-        if (!world.TryGetTerrainUnit(pos, out TerrainUnit unit))
-            return;
-
         for (int r = 0; r < relics.Count; r++)
         {
             RelicSO relic = relics[r];
@@ -316,9 +318,26 @@ public class CropSystem : MonoBehaviour
                 if (effect.tileToSpawn == null)
                     continue;
 
-                unit.Initialize(effect.tileToSpawn);
+                world.ApplyTerrainOverride(pos, effect.tileToSpawn);
             }
         }
+    }
+
+    /// <summary>
+    /// Rebuilds the growth tracking list from crops currently in WorldManager (after load).
+    /// </summary>
+    public void RebuildPlantedFromWorld()
+    {
+        plantedPositions.Clear();
+        harvestQueue.Clear();
+        harvestVisited.Clear();
+        IsHarvestBusy = false;
+
+        var world = GameManager.Main?.WorldManager;
+        if (world == null)
+            return;
+
+        world.CollectPlantedPositions(plantedPositions);
     }
 
     void Update()

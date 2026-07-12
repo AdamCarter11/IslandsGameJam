@@ -45,16 +45,28 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        Initialize();
+        if (SaveGameService.BootMode == BootMode.Load && SaveGameService.HasSave)
+            SaveGameService.Load(this);
+        else
+            Initialize();
+
+        SaveGameService.BootMode = BootMode.None;
+        isInitialized = true;
+        SaveGameService.BindAutosave(this);
     }
 
     private void Initialize()
     {
         if (inventory != null)
+        {
+            inventory.ClearForNewGame();
             inventory.InitializeFromCatalog(seedShopCatalog);
+        }
+
+        if (relicShopService != null)
+            relicShopService.ResetForNewGame();
 
         worldManager.Initialize();
-        isInitialized = true;
     }
 
 #if UNITY_EDITOR

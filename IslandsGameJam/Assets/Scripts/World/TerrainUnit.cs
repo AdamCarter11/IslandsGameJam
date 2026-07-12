@@ -16,7 +16,8 @@ public class TerrainUnit : MonoBehaviour
     [SerializeField]
     private TerrainData mockData;
 
-    public TerrainType Type => terrainData.Type;
+    public TerrainType Type => terrainData != null ? terrainData.Type : default;
+    public TerrainData Data => terrainData;
 
     private Sprite terrainOverlaySprite;
 

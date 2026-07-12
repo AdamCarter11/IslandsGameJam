@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.LightTransport;
 
 public class Selector : MonoBehaviour
 {
@@ -12,7 +13,13 @@ public class Selector : MonoBehaviour
     [SerializeField]
     private SpriteRenderer selectorRenderer;
     [SerializeField]
+    private SpriteRenderer seedPreview;
+    [SerializeField]
     private CameraTarget cameraTarget;
+    [SerializeField]
+    private Sprite previewTile;
+    [SerializeField]
+    private Transform previewRoot;
 
     private void Awake()
     {
@@ -52,10 +59,14 @@ public class Selector : MonoBehaviour
             var cost = GameManager.Main.LandUnlockSystem.GetCurrentCost();
             GameManager.Main.LandCostUI.UpdateText($"Unlock for\n${cost.ToString("N0")}");
             GameManager.Main.LandCostUI.Show();
+            ClearPreview();
+            cachedPattern = null;
         }
         else
         {
             SetSize(1);
+            if (ToolModeController.Main.CurrentMode == ToolMode.None &&
+                GameManager.Main.WorldManager.TryGetTerrainUnit(worldPosition, out _)) TryPreviewCrop(worldPosition);
             GameManager.Main.LandCostUI.Hide();
         }
 
@@ -85,6 +96,98 @@ public class Selector : MonoBehaviour
     {
         selectorRenderer.size = new Vector2(size, size) + sizeOffset;
     }
+
+    private void TryPreviewCrop(Vector2Int worldPosition)
+    {
+        Vector2Int cell = worldPosition;
+        Vector2Int chunk = worldPosition.SnapToGrid(3, true).ToInt();
+        var cropSystem = GameManager.Main.CropSystem;
+        var world = GameManager.Main.WorldManager;
+        var landUnlocker = GameManager.Main.LandUnlockSystem;
+        var confirmPanel = GameManager.Main.ConfirmPanelUI;
+        var inventory = GameManager.Main.Inventory;
+
+        if (cropSystem == null || world == null)
+        {
+            return;
+        }
+
+        if (world.TryGetCrop(cell, out var cropCell) && cropCell.crop.TryGetHarvestPattern(out var pattern))
+        {
+            PreviewPattern(pattern, worldPosition);
+            seedPreview.sprite = null;
+        }
+        else if (inventory.GetCurrentHarvestPattern(out pattern, out var seedSprite))
+        {
+            seedPreview.sprite = seedSprite;
+            PreviewPattern(pattern, worldPosition);
+        }
+        else
+        {
+            ClearPreview();
+            cachedPattern = null;
+        }
+    }
+
+    private HarvestPattern cachedPattern;
+    private void PreviewPattern(HarvestPattern pattern, Vector2Int worldPosition)
+    {
+        previewRoot.transform.position = (Vector2)worldPosition;
+
+        if (cachedPattern == pattern)
+        {
+            return;
+        }
+        cachedPattern = pattern;
+
+        ClearPatternPreview();
+
+        if (pattern.kind == HarvestPatternKind.Offsets)
+        {
+            foreach (var offset in pattern.offsets)
+            {
+                SpawnPreviewTile(new Vector2Int(offset.x, offset.y));
+            }
+        }
+        else if (pattern.kind == HarvestPatternKind.Ray)
+        {
+            Vector2Int current = Vector2Int.zero;
+            for (int i = 0; i < pattern.maxSteps; i++)
+            {
+                current += pattern.direction;
+                SpawnPreviewTile(current);
+            }
+        }
+    }
+
+    private void ClearPreview()
+    {
+        seedPreview.sprite = null;
+        ClearPatternPreview();
+    }
+
+    private void ClearPatternPreview()
+    {
+        for (int i = previewRoot.transform.childCount - 1; i >= 0; i--)
+        {
+            GameObject child = previewRoot.transform.GetChild(i).gameObject;
+            Destroy(child);
+        }
+    }
+
+    private void SpawnPreviewTile(Vector2Int localEndPosition)
+    {
+        GameObject previewTileInstance = new GameObject("PreviewTile");
+        previewTileInstance.transform.SetParent(previewRoot, false);
+        previewTileInstance.transform.localPosition = Vector3.zero;
+        var spriteRenderer = previewTileInstance.AddComponent<SpriteRenderer>();
+        spriteRenderer.sprite = previewTile;
+        spriteRenderer.sortingOrder = 100;
+        previewTileInstance.AddComponent<SpriteRGB>();
+        previewTileInstance.AddComponent<AutoMove>().Initialize(localEndPosition);
+    }
+
+
 
     private void OnLeftClicked(Vector2Int worldPosition)
     {

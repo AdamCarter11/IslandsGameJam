@@ -17,6 +17,10 @@ public class Selector : MonoBehaviour
     [SerializeField]
     private CameraTarget cameraTarget;
 
+    [Header("UI")]
+    [SerializeField]
+    private ToolTipUI toolTipUI;
+
     [Header("Crop Preview")]
     [SerializeField]
     private Sprite previewTile;
@@ -33,28 +37,51 @@ public class Selector : MonoBehaviour
     [SerializeField]
     private Sprite fertilizeSprite;
 
+    private bool isMouseDown = false;
+    private Vector2Int lastMousePosition = Vector2Int.zero;
+
     private void Awake()
     {
         SetSize(1);
     }
 
+    private void OnDisable()
+    {
+        HideObstacleTooltip();
+    }
+
     private void Update()
     {
         if (GameManager.Main == null || !GameManager.Main.IsInitialized)
+        {
+            HideObstacleTooltip();
             return;
+        }
 
         if (GameManager.Main.IsGameOver)
+        {
+            HideObstacleTooltip();
             return;
+        }
 
         // Pause world interaction while the shop or options is open.
         if (ShopController.Main != null && (ShopController.Main.IsOpen || ShopController.Main.IsOptionsOpen))
+        {
+            HideObstacleTooltip();
             return;
+        }
 
         if (GameManager.Main.ConfirmPanelUI != null && GameManager.Main.ConfirmPanelUI.IsVisible)
+        {
+            HideObstacleTooltip();
             return;
+        }
 
         if (Mouse.current == null)
+        {
+            HideObstacleTooltip();
             return;
+        }
 
         Vector2 mousePosition = Mouse.current.position.ReadValue();
         var snappedPosition = Camera.main.ScreenToWorldPoint(mousePosition).SnapToGrid();
@@ -94,8 +121,11 @@ public class Selector : MonoBehaviour
                 break;
         }
 
+        var world = GameManager.Main.WorldManager;
+
         // Set selector size
-        if (GameManager.Main.WorldManager.IsInsideAvailableChunk(worldPosition))
+        bool isUnlockChunk = world.IsInsideAvailableChunk(worldPosition);
+        if (isUnlockChunk)
         {
             SetSize(3);
             transform.position = worldPosition.SnapToGrid(3, true);
@@ -108,18 +138,44 @@ public class Selector : MonoBehaviour
         else
         {
             SetSize(1);
-            if (ToolModeController.Main.CurrentMode == ToolMode.None &&
-                GameManager.Main.WorldManager.TryGetTerrainUnit(worldPosition, out _)) TryPreviewCrop(worldPosition);
+            if (ToolModeController.Main.CurrentMode == ToolMode.None)
+            {
+                if (world.HasObstacle(worldPosition))
+                {
+                    ClearPreview();
+                    cachedPattern = null;
+                }
+                else if (world.TryGetTerrainUnit(worldPosition, out _))
+                {
+                    TryPreviewCrop(worldPosition);
+                }
+            }
             GameManager.Main.LandCostUI.Hide();
         }
 
-        selectorRenderer.enabled = !IsPointerOverUi();
+        bool pointerOverUi = IsPointerOverUi();
+        selectorRenderer.enabled = !pointerOverUi;
+
+        if (world.TryGetCrop(worldPosition, out _))
+            HideObstacleTooltip();
+        else
+            UpdateObstacleTooltip(worldPosition, pointerOverUi || isUnlockChunk);
 
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
-            if (IsPointerOverUi())
+            isMouseDown = true;
+        }
+        else if (Mouse.current.leftButton.wasReleasedThisFrame)
+        {
+            isMouseDown = false;
+        }
+
+        if (isMouseDown && lastMousePosition != worldPosition)
+        {
+            if (pointerOverUi)
                 return;
             OnLeftClicked(worldPosition);
+            lastMousePosition = worldPosition;
         }
     }
 
@@ -133,6 +189,51 @@ public class Selector : MonoBehaviour
             return EventSystem.current.IsPointerOverGameObject(Pointer.current.deviceId);
 
         return EventSystem.current.IsPointerOverGameObject();
+    }
+
+    private void UpdateObstacleTooltip(Vector2Int worldPosition, bool shouldHide)
+    {
+        if (shouldHide)
+        {
+            HideObstacleTooltip();
+            return;
+        }
+
+        var world = GameManager.Main != null ? GameManager.Main.WorldManager : null;
+        if (world == null || !world.TryGetObstacle(worldPosition, out GameObject obstacle))
+        {
+            HideObstacleTooltip();
+            return;
+        }
+
+        ToolTipObject toolTipObject = obstacle.GetComponent<ToolTipObject>();
+        if (toolTipObject == null)
+            toolTipObject = obstacle.GetComponentInChildren<ToolTipObject>(true);
+
+        if (toolTipObject == null || !toolTipObject.HasToolTip)
+        {
+            HideObstacleTooltip();
+            return;
+        }
+
+        ToolTipUI ui = ResolveToolTipUI();
+        if (ui == null)
+            return;
+
+        ui.Show(toolTipObject, transform);
+    }
+
+    private ToolTipUI ResolveToolTipUI()
+    {
+        if (toolTipUI == null)
+            toolTipUI = ToolTipUI.GetOrCreate();
+
+        return toolTipUI;
+    }
+
+    private void HideObstacleTooltip()
+    {
+        toolTipUI?.Hide();
     }
 
     private void SetSize(int size)

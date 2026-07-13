@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4334484963162583681}
   - component: {fileID: 1900432807519246447}
+  - component: {fileID: 1540080576079886340}
   m_Layer: 0
   m_Name: Sprinkler
   m_TagString: Untagged
@@ -46,6 +47,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sprinkler
   waterInterval: 5
+--- !u!114 &1540080576079886340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 309402531185767681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c4c1866abceefe409306bc483e4fd2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ToolTipObject
+  toolTip: Water the surrounding crops automatically.
 --- !u!1 &4375983445550030953
 GameObject:
   m_ObjectHideFlags: 0

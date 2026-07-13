@@ -22,6 +22,7 @@ public class ShopController : MonoBehaviour
     [SerializeField] RelicInventoryPanelUI relicInventoryPanelUi;
     [SerializeField] Button relicsOpenButton;
     [SerializeField] OptionsPanelUI optionsPanel;
+    [SerializeField] Button optionButton;
 
     public bool IsOpen { get; private set; }
 
@@ -61,6 +62,15 @@ public class ShopController : MonoBehaviour
         {
             relicsOpenButton.onClick.RemoveAllListeners();
             relicsOpenButton.onClick.AddListener(ToggleRelicInventory);
+        }
+
+        if (optionButton == null)
+            optionButton = FindButtonByName("OptionButton");
+
+        if (optionButton != null)
+        {
+            optionButton.onClick.RemoveAllListeners();
+            optionButton.onClick.AddListener(OpenOptions);
         }
 
         goldHud?.Initialize(inventory);
@@ -230,6 +240,17 @@ public class ShopController : MonoBehaviour
     static bool IsGameOverBlocked() =>
         GameManager.Main != null && GameManager.Main.IsGameOver;
 
+    Button FindButtonByName(string buttonName)
+    {
+        foreach (var button in GetComponentsInChildren<Button>(true))
+        {
+            if (button.gameObject.name == buttonName)
+                return button;
+        }
+
+        return null;
+    }
+
     static void EnsureEventSystem()
     {
         if (EventSystem.current != null)
@@ -257,7 +278,8 @@ public class ShopController : MonoBehaviour
         Button relicsButton = null,
         HighestGoldUI highestGold = null,
         TimerUI timer = null,
-        OptionsPanelUI options = null)
+        OptionsPanelUI options = null,
+        Button optionsButton = null)
     {
         shopPanelRoot = panelRoot;
         shopOpenButton = openButton;
@@ -270,6 +292,7 @@ public class ShopController : MonoBehaviour
         relicInventoryPanelUi = relicInventoryPanel;
         relicsOpenButton = relicsButton;
         optionsPanel = options;
+        optionButton = optionsButton;
     }
 #endif
 }

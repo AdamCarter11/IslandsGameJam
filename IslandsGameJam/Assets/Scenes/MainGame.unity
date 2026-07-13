@@ -1515,8 +1515,8 @@ Camera:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 0.6770834
-    height: 0.35185185
+    width: 1
+    height: 1
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
@@ -2802,7 +2802,7 @@ MonoBehaviour:
   worldWidth: 500
   worldHeight: 500
   chunkSize: 3
-  noObstacleChunkZone: {x: 3, y: 3}
+  noObstacleChunkZone: {x: 1, y: 1}
   randomizeOrigin: 1
   origin: {x: 0, y: 0}
   dimension: {x: 50, y: 50}

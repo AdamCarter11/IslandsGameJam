@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: Sungourd_Baby
   m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
-  cropVisual: {fileID: 5043513965374360250, guid: 2eac74dff1e0d95408fb5849d0957df9, type: 3}
+  cropVisual: {fileID: 21300000, guid: 2f07b0d7317515d4e82edc5b13c1b3de, type: 3}
   growthTime: 10.5
   dryGrowthMultiplier: 0.5
   goldGain: 165

@@ -8,11 +8,13 @@ using UnityEngine;
 public static class CoinBatcher
 {
     const float SplitChance = 0.25f;
+    const int MaxAmountForSplit = 1024;
 
     /// <summary>
     /// Walks denominations high to low and emits one entry per coin to spawn.
     /// Each time a denomination would be used, there is a SplitChance
     /// to instead fill that value with smaller denominations (ie, one 8 coin splits into two 4s).
+    /// Split is disabled when amount exceeds MaxAmountForSplit to avoid spawning too many coins.
     /// </summary>
     public static List<int> Decompose(int amount, IReadOnlyList<CoinDenomination> dens)
     {
@@ -31,6 +33,7 @@ public static class CoinBatcher
         sorted.Sort((a, b) => b.amount.CompareTo(a.amount));
         #endregion
 
+        bool allowSplit = amount <= MaxAmountForSplit;
         int remaining = amount;
         for (int i = 0; i < sorted.Count; i++)
         {
@@ -38,7 +41,7 @@ public static class CoinBatcher
             while (remaining >= denom)
             {
                 // random chance to split into smaller denominations for some variance
-                if (Random.value < SplitChance && TryAppendSplit(result, denom, sorted, i + 1))
+                if (allowSplit && Random.value < SplitChance && TryAppendSplit(result, denom, sorted, i + 1))
                 {
                     remaining -= denom;
                     continue;

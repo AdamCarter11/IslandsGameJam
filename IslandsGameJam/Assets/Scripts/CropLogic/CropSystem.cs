@@ -245,7 +245,7 @@ public class CropSystem : MonoBehaviour
 
             Sprite originSprite = null;
             if (world.TryGetCrop(origin, out CropCell originCell) && originCell?.crop != null)
-                originSprite = originCell.crop.GetHarvestBounceVisual();
+                originSprite = originCell.CurrentStage?.cropVisual;
 
             flyer = HarvestHopVisual.Spawn(
                 transform,
@@ -274,7 +274,7 @@ public class CropSystem : MonoBehaviour
                 if (cell.crop == null || cell.CurrentStage == null)
                     continue;
 
-                flyer.SetSprite(cell.crop.GetHarvestBounceVisual());
+                flyer.SetSprite(cell.CurrentStage.cropVisual);
                 yield return flyer.Hop(CellToWorld(current), CellToWorld(pos), hopDuration, hopHeight);
 
                 if (!HarvestOneCell(pos, world, resolver, ref multi, ref comboIndex))

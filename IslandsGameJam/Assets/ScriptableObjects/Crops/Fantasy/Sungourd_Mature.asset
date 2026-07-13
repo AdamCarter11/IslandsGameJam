@@ -16,7 +16,7 @@ MonoBehaviour:
   growthTime: 14
   dryGrowthMultiplier: 1
   goldGain: 1100
-  multiBonus: 1.35
+  multiBonus: 0.85
   harvestPattern:
     kind: 0
     offsets:

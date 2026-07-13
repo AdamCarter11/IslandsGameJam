@@ -10,8 +10,8 @@ public class CropPropertiesSO : ScriptableObject
 
     // I think we will pull this info into the UI (ie, don't put it in the desc)
     public int goldGain = 10;
-    [Tooltip("1 means default factorial growth (prob want to keep this between .5 and 2)")] 
-    public float multiBonus = 1;
+    [Tooltip("0.5 is baseline chain growth (prob want to keep this between .25 and 1.5)")] 
+    public float multiBonus = 0.5f;
 
     public HarvestPattern harvestPattern;
 

@@ -83,10 +83,13 @@ public class Inventory : MonoBehaviour
 
     // --- Shop unlocks ---
     readonly HashSet<CropGrowthSO> unlockedSeeds = new();
+    readonly List<CropGrowthSO> unlockOrder = new();
 
     public event Action OnShopUnlocksChanged;
 
     public IReadOnlyCollection<CropGrowthSO> UnlockedSeeds => unlockedSeeds;
+    /// <summary>Unlock sequence: catalog defaults first (oldest), then island unlocks (newest at end).</summary>
+    public IReadOnlyList<CropGrowthSO> UnlockOrder => unlockOrder;
 
     void Awake()
     {
@@ -107,6 +110,7 @@ public class Inventory : MonoBehaviour
         ownedRelics.Clear();
 
         unlockedSeeds.Clear();
+        unlockOrder.Clear();
         OnShopUnlocksChanged?.Invoke();
     }
 
@@ -124,12 +128,13 @@ public class Inventory : MonoBehaviour
         OnGoldChanged?.Invoke(gold);
 
         unlockedSeeds.Clear();
+        unlockOrder.Clear();
         if (catalog.allSeeds != null)
         {
             foreach (var seed in catalog.allSeeds)
             {
-                if (seed != null && seed.unlockedByDefault)
-                    unlockedSeeds.Add(seed);
+                if (seed != null && seed.unlockedByDefault && unlockedSeeds.Add(seed))
+                    unlockOrder.Add(seed);
             }
         }
 
@@ -158,10 +163,10 @@ public class Inventory : MonoBehaviour
             };
         }
 
-        var unlocked = new List<string>(unlockedSeeds.Count);
-        foreach (CropGrowthSO crop in unlockedSeeds)
+        var unlocked = new List<string>(unlockOrder.Count);
+        for (int i = 0; i < unlockOrder.Count; i++)
         {
-            string id = SaveIdLookup.GetId(crop);
+            string id = SaveIdLookup.GetId(unlockOrder[i]);
             if (!string.IsNullOrEmpty(id))
                 unlocked.Add(id);
         }
@@ -200,12 +205,14 @@ public class Inventory : MonoBehaviour
         OnHotbarChanged?.Invoke();
 
         unlockedSeeds.Clear();
+        unlockOrder.Clear();
         if (data.unlockedCropIds != null)
         {
             for (int i = 0; i < data.unlockedCropIds.Length; i++)
             {
-                if (lookup.TryGetCrop(data.unlockedCropIds[i], out CropGrowthSO crop))
-                    unlockedSeeds.Add(crop);
+                if (lookup.TryGetCrop(data.unlockedCropIds[i], out CropGrowthSO crop)
+                    && unlockedSeeds.Add(crop))
+                    unlockOrder.Add(crop);
             }
         }
         OnShopUnlocksChanged?.Invoke();
@@ -226,9 +233,9 @@ public class Inventory : MonoBehaviour
 
     public bool TryUnlock(CropGrowthSO crop)
     {
-        if (crop == null || unlockedSeeds.Contains(crop))
+        if (crop == null || !unlockedSeeds.Add(crop))
             return false;
-        unlockedSeeds.Add(crop);
+        unlockOrder.Add(crop);
         OnShopUnlocksChanged?.Invoke();
         return true;
     }

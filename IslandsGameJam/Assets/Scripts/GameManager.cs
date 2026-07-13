@@ -78,7 +78,7 @@ public class GameManager : MonoBehaviour
         SaveGameService.BindAutosave(this);
 
         if (timerStarted && playTime >= gameDurationSeconds)
-            EndGame();
+            TryEndGame();
     }
 
     private void OnDestroy()
@@ -131,9 +131,26 @@ public class GameManager : MonoBehaviour
         if (!timerStarted || isGameOver)
             return;
 
-        playTime += Time.deltaTime;
+        if (playTime < gameDurationSeconds)
+        {
+            playTime += Time.deltaTime;
+            if (playTime > gameDurationSeconds)
+                playTime = gameDurationSeconds;
+        }
+
         if (playTime >= gameDurationSeconds)
-            EndGame();
+            TryEndGame();
+    }
+
+    /// <summary>
+    /// Ends the run once any in-progress harvest has finished (so payouts/anims aren't cut off by timeScale).
+    /// </summary>
+    void TryEndGame()
+    {
+        if (cropSystem != null && cropSystem.IsHarvestBusy)
+            return;
+
+        EndGame();
     }
 
     /// <summary>
@@ -199,7 +216,7 @@ public class GameManager : MonoBehaviour
         playTime = Mathf.Max(0f, data.playTime);
 
         if (timerStarted && playTime >= gameDurationSeconds)
-            EndGame();
+            TryEndGame();
     }
 
 #if UNITY_EDITOR

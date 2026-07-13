@@ -105,6 +105,9 @@ public class ShopController : MonoBehaviour
         if (Keyboard.current == null)
             return;
 
+        if (GameManager.Main != null && GameManager.Main.IsGameOver)
+            return;
+
         // Options eats Escape (close) and blocks shop / relic shortcuts while open.
         if (IsOptionsOpen)
         {
@@ -156,7 +159,7 @@ public class ShopController : MonoBehaviour
 
     public void ToggleShop()
     {
-        if (IsRelicChoiceOpen || IsOptionsOpen)
+        if (IsGameOverBlocked() || IsRelicChoiceOpen || IsOptionsOpen)
             return;
 
         if (IsOpen)
@@ -167,7 +170,7 @@ public class ShopController : MonoBehaviour
 
     public void ToggleRelicInventory()
     {
-        if (IsRelicChoiceOpen || IsOptionsOpen)
+        if (IsGameOverBlocked() || IsRelicChoiceOpen || IsOptionsOpen)
             return;
 
         relicInventoryPanelUi?.Toggle();
@@ -175,7 +178,7 @@ public class ShopController : MonoBehaviour
 
     public void OpenShop()
     {
-        if (IsOpen || IsOptionsOpen)
+        if (IsGameOverBlocked() || IsOpen || IsOptionsOpen)
             return;
 
         if (ToolModeController.Main != null)
@@ -201,7 +204,7 @@ public class ShopController : MonoBehaviour
 
     public void OpenOptions()
     {
-        if (optionsPanel == null || IsOptionsOpen || IsRelicChoiceOpen)
+        if (IsGameOverBlocked() || optionsPanel == null || IsOptionsOpen || IsRelicChoiceOpen)
             return;
 
         if (IsOpen)
@@ -223,6 +226,9 @@ public class ShopController : MonoBehaviour
             return;
         optionsPanel.Close();
     }
+
+    static bool IsGameOverBlocked() =>
+        GameManager.Main != null && GameManager.Main.IsGameOver;
 
     static void EnsureEventSystem()
     {

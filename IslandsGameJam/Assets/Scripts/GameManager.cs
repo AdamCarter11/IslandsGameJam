@@ -37,6 +37,8 @@ public class GameManager : MonoBehaviour
     public ConfirmPanelUI ConfirmPanelUI => confirmPanelUI;
     [SerializeField] private LandCostUI landCostUI;
     public LandCostUI LandCostUI => landCostUI;
+    [SerializeField] private GameOverUI gameOverUI;
+    public GameOverUI GameOverUI => gameOverUI;
 
     [Header("Shop")]
     [SerializeField] private SeedShopCatalog seedShopCatalog;
@@ -82,12 +84,17 @@ public class GameManager : MonoBehaviour
     private void OnDestroy()
     {
         if (Main == this)
+        {
+            Main = null;
             Time.timeScale = 1f;
+        }
     }
 
     private void Initialize()
     {
         ResetTimer();
+        isGameOver = false;
+        Time.timeScale = 1f;
 
         if (inventory != null)
         {
@@ -106,7 +113,7 @@ public class GameManager : MonoBehaviour
     // Start timer on the first crop planted
     public void StartTimer()
     {
-        if (timerStarted)
+        if (timerStarted || isGameOver)
             return;
 
         timerStarted = true;
@@ -130,7 +137,8 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Ends the timed run: freezes gameplay and deletes the mid-run save. Idempotent.
+    /// Ends the timed run: freezes gameplay, updates highscore, deletes the mid-run save, shows UI.
+    /// Idempotent.
     /// </summary>
     public void EndGame()
     {
@@ -140,10 +148,37 @@ public class GameManager : MonoBehaviour
         isGameOver = true;
 
         int score = inventory != null ? inventory.HighestGold : 0;
-        HighscoreSettings.TrySetIfHigher(score);
+        bool isNewRecord = HighscoreSettings.TrySetIfHigher(score);
+        int highscore = HighscoreSettings.Get();
 
         SaveGameService.DeleteSave();
         Time.timeScale = 0f;
+
+        EnsureGameOverUI();
+        gameOverUI?.Show(score, highscore, isNewRecord);
+    }
+
+    public void PlayAgain()
+    {
+        GameOverUI.ReloadNewGame();
+    }
+
+    public void ReturnToMainMenu()
+    {
+        GameOverUI.LoadMainMenu();
+    }
+
+    void EnsureGameOverUI()
+    {
+        if (gameOverUI != null)
+            return;
+
+        gameOverUI = FindFirstObjectByType<GameOverUI>(FindObjectsInactive.Include);
+        if (gameOverUI != null)
+            return;
+
+        var go = new GameObject("GameOverUI");
+        gameOverUI = go.AddComponent<GameOverUI>();
     }
 
     public void CaptureTo(GameSaveData data)

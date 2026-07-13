@@ -63,4 +63,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: afe7203b725feb846abdb7327ee93aa7, type: 2}
   - {fileID: 11400000, guid: bd4fc640ff1e2a64ea33708984d85950, type: 2}
   - {fileID: 11400000, guid: a37d35387f02e114d8a073b9f872e587, type: 2}
-  startingGold: 9999
+  startingGold: 30

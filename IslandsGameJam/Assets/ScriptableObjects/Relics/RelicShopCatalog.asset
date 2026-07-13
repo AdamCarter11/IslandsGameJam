@@ -44,8 +44,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e27f68c755a34692a922eef1f0c51b17, type: 2}
   - {fileID: 11400000, guid: efa9b87580dd407987bbbbdd09912e69, type: 2}
   - {fileID: 11400000, guid: d3647462a912496abdc546c39c74ec59, type: 2}
-  baseRollCost: 25
-  costMultiplierPerPurchase: 1.5
+  baseRollCost: 35
+  costMultiplierPerPurchase: 1.4
   skipRefundBasePercent: 0.1
   skipRefundIncreasePerSkip: 0.05
   skipRefundMaxPercent: 0.5

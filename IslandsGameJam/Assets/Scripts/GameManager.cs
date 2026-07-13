@@ -46,6 +46,10 @@ public class GameManager : MonoBehaviour
     public RelicShopCatalog RelicShopCatalog => relicShopCatalog;
 
 
+    [Header("Timed Run")]
+    [SerializeField] private float gameDurationSeconds = 20f * 60f; // 20 minutes
+    public float GameDurationSeconds => gameDurationSeconds;
+
     [Header("Runtime")]
     [SerializeField]
     private bool isInitialized = false;
@@ -57,6 +61,9 @@ public class GameManager : MonoBehaviour
     private float playTime = 0f;
     public float PlayTime => playTime;
 
+    private bool isGameOver;
+    public bool IsGameOver => isGameOver;
+
     private void Start()
     {
         if (SaveGameService.BootMode == BootMode.Load && SaveGameService.HasSave)
@@ -67,6 +74,15 @@ public class GameManager : MonoBehaviour
         SaveGameService.BootMode = BootMode.None;
         isInitialized = true;
         SaveGameService.BindAutosave(this);
+
+        if (timerStarted && playTime >= gameDurationSeconds)
+            EndGame();
+    }
+
+    private void OnDestroy()
+    {
+        if (Main == this)
+            Time.timeScale = 1f;
     }
 
     private void Initialize()
@@ -105,7 +121,29 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (timerStarted) playTime += Time.deltaTime;
+        if (!timerStarted || isGameOver)
+            return;
+
+        playTime += Time.deltaTime;
+        if (playTime >= gameDurationSeconds)
+            EndGame();
+    }
+
+    /// <summary>
+    /// Ends the timed run: freezes gameplay and deletes the mid-run save. Idempotent.
+    /// </summary>
+    public void EndGame()
+    {
+        if (isGameOver)
+            return;
+
+        isGameOver = true;
+
+        int score = inventory != null ? inventory.HighestGold : 0;
+        HighscoreSettings.TrySetIfHigher(score);
+
+        SaveGameService.DeleteSave();
+        Time.timeScale = 0f;
     }
 
     public void CaptureTo(GameSaveData data)
@@ -124,6 +162,9 @@ public class GameManager : MonoBehaviour
 
         timerStarted = data.timerStarted;
         playTime = Mathf.Max(0f, data.playTime);
+
+        if (timerStarted && playTime >= gameDurationSeconds)
+            EndGame();
     }
 
 #if UNITY_EDITOR

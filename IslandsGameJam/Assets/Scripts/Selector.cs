@@ -16,10 +16,22 @@ public class Selector : MonoBehaviour
     private SpriteRenderer seedPreview;
     [SerializeField]
     private CameraTarget cameraTarget;
+
+    [Header("Crop Preview")]
     [SerializeField]
     private Sprite previewTile;
     [SerializeField]
     private Transform previewRoot;
+
+    [Header("Tool Preview")]
+    [SerializeField]
+    private Sprite harvestSprite;
+    [SerializeField]
+    private Sprite waterSprite;
+    [SerializeField]
+    private Sprite destroySprite;
+    [SerializeField]
+    private Sprite fertilizeSprite;
 
     private void Awake()
     {
@@ -50,6 +62,34 @@ public class Selector : MonoBehaviour
             cameraTarget.transform.position = transform.position;
         else
             transform.position = snappedPosition;
+
+        switch (ToolModeController.Main.CurrentMode)
+        {
+            case ToolMode.None:
+                seedPreview.enabled = true;
+                seedPreview.sprite = null;
+                break;
+            case ToolMode.Water:
+                seedPreview.sprite = waterSprite;
+                seedPreview.enabled = true;
+                ClearPatternPreview();
+                break;
+            case ToolMode.Harvest:
+                seedPreview.sprite = harvestSprite;
+                seedPreview.enabled = true;
+                ClearPatternPreview();
+                break;
+            case ToolMode.Destroy:
+                seedPreview.sprite = destroySprite;
+                seedPreview.enabled = true;
+                ClearPatternPreview();
+                break;
+            case ToolMode.Fertilize:
+                seedPreview.sprite = fertilizeSprite;
+                seedPreview.enabled = true;
+                ClearPatternPreview();
+                break;
+        }
 
         // Set selector size
         if (GameManager.Main.WorldManager.IsInsideAvailableChunk(worldPosition))

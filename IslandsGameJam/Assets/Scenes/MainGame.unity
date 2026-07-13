@@ -1702,6 +1702,10 @@ MonoBehaviour:
   cameraTarget: {fileID: 1953733759}
   previewTile: {fileID: 21300000, guid: 1c803a10913cf1b4a9d40e3bacf12755, type: 3}
   previewRoot: {fileID: 522493121}
+  harvestSprite: {fileID: 21300000, guid: 91374d2f1acc6884780e59db308a9b46, type: 3}
+  waterSprite: {fileID: 21300000, guid: 929136f5aa0540349b3e5e7f85b5d194, type: 3}
+  destroySprite: {fileID: 21300000, guid: 16e6fd8d64cc6014b8b5f84b86b1ef9f, type: 3}
+  fertilizeSprite: {fileID: 21300000, guid: e844d62f6294ade4e82658eb962934be, type: 3}
 --- !u!1001 &1387125597
 PrefabInstance:
   m_ObjectHideFlags: 0

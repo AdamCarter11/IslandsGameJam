@@ -159,6 +159,10 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 5fcb2e1f6e83fe9499e76e96f04772f2, type: 3}
   - amount: 256
     sprite: {fileID: 21300000, guid: 3d50ca548164cb2408cebb4bc90a6ead, type: 3}
+  - amount: 512
+    sprite: {fileID: 21300000, guid: 227e48fe2f81bca489d8d3b9572992ce, type: 3}
+  - amount: 1024
+    sprite: {fileID: 21300000, guid: 43f874d1de164944bb92ca3ee7470765, type: 3}
   spriteRenderer: {fileID: 4759555249257270335}
   attractRadius: 1.5
   collectRadius: 0.2

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: Goldengale_Mature
   m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
-  cropVisual: {fileID: -8670371468120161816, guid: 2eac74dff1e0d95408fb5849d0957df9, type: 3}
+  cropVisual: {fileID: 21300000, guid: 90f8f1a66f6f6d14ab7ce318a66fc77b, type: 3}
   growthTime: 17
   dryGrowthMultiplier: 1
   goldGain: 1900

@@ -19,7 +19,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0a3d77c08c3bb8a47b229febf7bb59a3, type: 2}
   dryDeathTime: 30
   deathGold: 3
-  shopIcon: {fileID: 7198516199790418987, guid: 9614e89f522c52a4fb305b3296a0928b, type: 3}
+  shopIcon: {fileID: 21300000, guid: 2dfe97006c70e5a4b8689abef8dfe1b3, type: 3}
   seedPrice: 95
   unlockedByDefault: 0
-  harvestBounceVisual: {fileID: 7198516199790418987, guid: 9614e89f522c52a4fb305b3296a0928b, type: 3}
+  harvestBounceVisual: {fileID: 21300000, guid: 2dfe97006c70e5a4b8689abef8dfe1b3, type: 3}

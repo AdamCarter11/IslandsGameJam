@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: Elderoot_Mature
   m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
-  cropVisual: {fileID: -8670371468120161816, guid: 2eac74dff1e0d95408fb5849d0957df9, type: 3}
+  cropVisual: {fileID: 21300000, guid: 3c8ab35de39f22a448eff80e965d41f4, type: 3}
   growthTime: 18
   dryGrowthMultiplier: 1
   goldGain: 2000

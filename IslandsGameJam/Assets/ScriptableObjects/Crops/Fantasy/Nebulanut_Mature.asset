@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: Nebulanut_Mature
   m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
-  cropVisual: {fileID: 8314729164969292333, guid: ca1198b4615873243a397a318166be00, type: 3}
+  cropVisual: {fileID: 21300000, guid: 4b35eeca7812d004594381342368ddf6, type: 3}
   growthTime: 14
   dryGrowthMultiplier: 1
   goldGain: 1200

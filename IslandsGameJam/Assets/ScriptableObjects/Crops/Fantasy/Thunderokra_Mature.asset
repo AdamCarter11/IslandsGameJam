@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: Thunderokra_Mature
   m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
-  cropVisual: {fileID: 737859076552439139, guid: 63e6d16f530d3964990375bd24726b25, type: 3}
+  cropVisual: {fileID: 21300000, guid: 0aa89d0f16d3978448199b0235b03e20, type: 3}
   growthTime: 7.5
   dryGrowthMultiplier: 1
   goldGain: 105

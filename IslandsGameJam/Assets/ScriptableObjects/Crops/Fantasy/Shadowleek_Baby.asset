@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: Shadowleek_Baby
   m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
-  cropVisual: {fileID: -2094157912208876536, guid: 5796c103ba91c5a478df01bc02442ab0, type: 3}
+  cropVisual: {fileID: 21300000, guid: 7a5cbb8580fd7f949bdd67a6c16ac946, type: 3}
   growthTime: 5.5
   dryGrowthMultiplier: 0.5
   goldGain: 22

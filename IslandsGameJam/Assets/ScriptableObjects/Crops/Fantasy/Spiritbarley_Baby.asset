@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: Spiritbarley_Baby
   m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
-  cropVisual: {fileID: 554072705901678547, guid: 63e6d16f530d3964990375bd24726b25, type: 3}
+  cropVisual: {fileID: 21300000, guid: 649f86576f83a484387c7bb24bff4a1e, type: 3}
   growthTime: 7
   dryGrowthMultiplier: 0.5
   goldGain: 52

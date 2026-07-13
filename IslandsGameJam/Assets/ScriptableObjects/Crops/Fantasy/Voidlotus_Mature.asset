@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: Voidlotus_Mature
   m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
-  cropVisual: {fileID: 7198516199790418987, guid: 9614e89f522c52a4fb305b3296a0928b, type: 3}
+  cropVisual: {fileID: 21300000, guid: b279fe58d7e6f894cbd78f28e749e9c0, type: 3}
   growthTime: 7
   dryGrowthMultiplier: 1.25
   goldGain: 35

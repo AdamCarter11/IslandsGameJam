@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: Blinkbean_Baby
   m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
-  cropVisual: {fileID: 554072705901678547, guid: 63e6d16f530d3964990375bd24726b25, type: 3}
+  cropVisual: {fileID: 21300000, guid: 716da9e4cd8fa624687015a8fcd5783d, type: 3}
   growthTime: 9.5
   dryGrowthMultiplier: 0.55
   goldGain: 115

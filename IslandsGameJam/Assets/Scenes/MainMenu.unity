@@ -736,6 +736,7 @@ MonoBehaviour:
   panel: {fileID: 769914262}
   sfxSlider: {fileID: 934091169}
   musicSlider: {fileID: 772968398}
+  hideCropStatusIconsToggle: {fileID: 0}
   closeButton: {fileID: 881503768}
 --- !u!224 &769914264
 RectTransform:
@@ -2080,7 +2081,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Islands
+  m_text: Crazy Crops
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cba6a72b43b8bdd43bce948d45b9271b, type: 2}
   m_sharedMaterial: {fileID: 3442904284425189328, guid: cba6a72b43b8bdd43bce948d45b9271b, type: 2}

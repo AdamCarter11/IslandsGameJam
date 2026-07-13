@@ -519,16 +519,31 @@ public class WorldManager : MonoBehaviour
             && SeedUnlockService.TryUnlockRandom(GameManager.Main.Inventory, GameManager.Main.SeedShopCatalog, out CropGrowthSO unlocked)
             && unlocked != null)
         {
+            int granted = GrantUnlockSeeds(GameManager.Main.Inventory, unlocked);
             GameManager.Main?.AudioService?.PlaySeedUnlock();
-            JuiceToast.SpawnScreenCenter(transform, BuildUnlockToastText(unlocked), 10);
+            JuiceToast.SpawnScreenCenter(transform, BuildUnlockToastText(unlocked, granted), 10);
         }
 
         SaveGameService.NotifyChanged();
     }
 
-    static string BuildUnlockToastText(CropGrowthSO crop)
+    /// <summary>Gives the player a random 1–3 of the newly unlocked seed (as many as the hotbar can fit).</summary>
+    static int GrantUnlockSeeds(Inventory inventory, CropGrowthSO crop)
+    {
+        if (inventory == null || crop == null)
+            return 0;
+
+        int amount = UnityEngine.Random.Range(1, 4); // 1–3 inclusive
+        while (amount > 0 && !inventory.TryAddSeeds(crop, amount))
+            amount--;
+        return amount;
+    }
+
+    static string BuildUnlockToastText(CropGrowthSO crop, int granted)
     {
         string name = !string.IsNullOrWhiteSpace(crop.cropName) ? crop.cropName.Trim() : crop.name;
+        if (granted > 0)
+            return $"Seed unlocked!\n+{granted} {name}";
         return $"Seed unlocked!\n{name}";
     }
 

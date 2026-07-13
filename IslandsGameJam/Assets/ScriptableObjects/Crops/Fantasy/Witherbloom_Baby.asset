@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: Witherbloom_Baby
   m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
-  cropVisual: {fileID: 1161407875479092622, guid: 9614e89f522c52a4fb305b3296a0928b, type: 3}
+  cropVisual: {fileID: 21300000, guid: 7811e52f2d576b047a503ddfbb89e066, type: 3}
   growthTime: 3
   dryGrowthMultiplier: 0.8
   goldGain: 2

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: Silvershallot_Baby
   m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
-  cropVisual: {fileID: 3994033136373939748, guid: bb24676aaf2a7b24ba5fa36fb356d5ad, type: 3}
+  cropVisual: {fileID: 21300000, guid: ae371bf95cab717439b574f91282e28f, type: 3}
   growthTime: 12.5
   dryGrowthMultiplier: 0.5
   goldGain: 280

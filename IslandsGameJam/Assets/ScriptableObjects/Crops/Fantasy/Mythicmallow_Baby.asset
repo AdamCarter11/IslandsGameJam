@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2037889bce594d84bb156921a45862e1, type: 3}
   m_Name: Mythicmallow_Baby
   m_EditorClassIdentifier: Assembly-CSharp::CropPropertiesSO
-  cropVisual: {fileID: 3994033136373939748, guid: bb24676aaf2a7b24ba5fa36fb356d5ad, type: 3}
+  cropVisual: {fileID: 21300000, guid: 35231650abaf91c4bba96da5638cb2ea, type: 3}
   growthTime: 11
   dryGrowthMultiplier: 0.5
   goldGain: 195

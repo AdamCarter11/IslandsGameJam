@@ -22,4 +22,5 @@ MonoBehaviour:
   shopIcon: {fileID: 21300000, guid: 3b050c33c0ba87d448dd021bbc17ff1b, type: 3}
   seedPrice: 1990
   unlockedByDefault: 0
+  rarity: 3
   harvestBounceVisual: {fileID: 21300000, guid: 3b050c33c0ba87d448dd021bbc17ff1b, type: 3}

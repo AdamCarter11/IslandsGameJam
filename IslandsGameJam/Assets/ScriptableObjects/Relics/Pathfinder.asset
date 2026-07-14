@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Pathfinder
   m_EditorClassIdentifier: Assembly-CSharp::RelicSO
   relicName: Pathfinder
-  desc: You can spend 10 gold to clear obstacles.
+  desc: Clear obstacles for gold. Starts at 10 gold; each clear doubles the next cost.
   effects:
   - type: 28
     amount: 10
@@ -31,6 +31,7 @@ MonoBehaviour:
     requireSingleOffset: 0
     chance: 1
     threshold: 0
+    costMultiplier: 2
   rarity: 3
   allowMultiplePurchases: 0
   shopIcon: {fileID: 0}

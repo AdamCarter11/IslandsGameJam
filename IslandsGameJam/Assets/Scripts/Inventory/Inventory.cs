@@ -269,6 +269,14 @@ public class Inventory : MonoBehaviour
         return slots[index];
     }
 
+    public bool HasAnySeeds()
+    {
+        for (int i = 0; i < slots.Length; i++)
+            if (!slots[i].IsEmpty)
+                return true;
+        return false;
+    }
+
     public bool CanFitSeed(CropGrowthSO crop, int count = 1)
     {
         if (crop == null || count <= 0)

@@ -22,3 +22,4 @@ MonoBehaviour:
   shopIcon: {fileID: 737859076552439139, guid: 63e6d16f530d3964990375bd24726b25, type: 3}
   seedPrice: 10
   unlockedByDefault: 1
+  rarity: 0

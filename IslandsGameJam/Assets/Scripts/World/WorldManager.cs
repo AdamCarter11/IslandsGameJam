@@ -516,7 +516,7 @@ public class WorldManager : MonoBehaviour
         GameManager.Main?.AudioService?.PlayChunkUnlock();
 
         if (GameManager.Main != null
-            && SeedUnlockService.TryUnlockRandom(GameManager.Main.Inventory, GameManager.Main.SeedShopCatalog, out CropGrowthSO unlocked)
+            && SeedUnlockService.TryUnlockForIsland(GameManager.Main.Inventory, GameManager.Main.SeedShopCatalog, out CropGrowthSO unlocked)
             && unlocked != null)
         {
             int granted = GrantUnlockSeeds(GameManager.Main.Inventory, unlocked);

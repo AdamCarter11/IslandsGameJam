@@ -98,4 +98,7 @@ public class RelicEffect
 
     [Tooltip("Combo / milestone value (every N, at N, end combo equals/less-than, persist-on-end-combo).")]
     public int threshold;
+
+    [Tooltip("EnableClearObstacles: cost grows as amount * costMultiplier^clears. Values <= 1 use the default (2).")]
+    public float costMultiplier = 2f;
 }

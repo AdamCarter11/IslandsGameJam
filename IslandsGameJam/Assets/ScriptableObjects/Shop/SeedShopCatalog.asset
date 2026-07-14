@@ -63,4 +63,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: afe7203b725feb846abdb7327ee93aa7, type: 2}
   - {fileID: 11400000, guid: bd4fc640ff1e2a64ea33708984d85950, type: 2}
   - {fileID: 11400000, guid: a37d35387f02e114d8a073b9f872e587, type: 2}
+  orderedUnlockSeeds:
+  - {fileID: 11400000, guid: e2c7f5f95a23acd468404d528ec23b4c, type: 2}
+  - {fileID: 11400000, guid: 3cc44e5bc5e7de049911e24403832c3f, type: 2}
+  - {fileID: 11400000, guid: f78d5b7be83b7144e85828347815f1bd, type: 2}
+  - {fileID: 11400000, guid: 1992e454453e9b840ac0211a4aca6c1a, type: 2}
   startingGold: 30
+  commonWeight: 60
+  rareWeight: 25
+  epicWeight: 12
+  legendaryWeight: 3

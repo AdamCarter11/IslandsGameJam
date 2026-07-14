@@ -69,6 +69,7 @@ public class ShopPanelUI : MonoBehaviour
         {
             relicRollButton.onClick.RemoveAllListeners();
             relicRollButton.onClick.AddListener(OnRelicRollClicked);
+            EnsureRelicRollHover(relicRollButton);
         }
 
         WireSortButton(sortPriceAscButton, SeedShopSortMode.PriceAsc);
@@ -261,6 +262,29 @@ public class ShopPanelUI : MonoBehaviour
         return row;
     }
 
+    void EnsureRelicRollHover(Button button)
+    {
+        var relay = button.GetComponent<UiPointerHoverRelay>();
+        if (relay == null)
+            relay = button.gameObject.AddComponent<UiPointerHoverRelay>();
+        relay.SetHandlers(OnRelicRollPointerEnter, OnRelicRollPointerExit);
+    }
+
+    void OnRelicRollPointerEnter()
+    {
+        if (relicShop == null || seedTooltip == null || IsRelicChoiceOpen)
+            return;
+        if (!relicShop.TryGetRollBlockedReason(out string reason))
+            return;
+
+        seedTooltip.ShowPlain("Buy Relic", reason, relicRollButton.transform as RectTransform);
+    }
+
+    void OnRelicRollPointerExit()
+    {
+        HideSeedTooltip();
+    }
+
     void ShowTooltipForRow(ShopRowView row, CropGrowthSO crop)
     {
         if (seedTooltip == null || crop == null || row == null)
@@ -295,6 +319,9 @@ public class ShopPanelUI : MonoBehaviour
                           && inventory.CanFitSeed(row.Crop, 1);
             row.SetBuyInteractable(canBuy);
         }
+
+        // Hotbar changes (e.g. planting the last seed) must disable Buy Relic immediately.
+        RefreshRelicRollButton();
     }
 
     public void RefreshRelicRollButton()

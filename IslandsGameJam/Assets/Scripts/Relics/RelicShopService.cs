@@ -60,9 +60,34 @@ public class RelicShopService : MonoBehaviour
         return Mathf.Max(1, Mathf.RoundToInt(baseCost * (1f - Mathf.Clamp01(discount))));
     }
 
+    public const string MissingSeedsRollBlockedReason =
+        "You need seeds in your inventory to buy a relic.";
+
+    public bool IsBlockedByMissingSeeds()
+    {
+        return Inventory == null || !Inventory.HasAnySeeds();
+    }
+
+    /// <summary>
+    /// When roll is blocked specifically by missing seeds, returns that reason for UI tooltips.
+    /// </summary>
+    public bool TryGetRollBlockedReason(out string reason)
+    {
+        if (IsBlockedByMissingSeeds())
+        {
+            reason = MissingSeedsRollBlockedReason;
+            return true;
+        }
+
+        reason = null;
+        return false;
+    }
+
     public bool CanRoll()
     {
         if (rollActive || Inventory == null || Catalog == null)
+            return false;
+        if (!Inventory.HasAnySeeds())
             return false;
         if (CountEligible() < 1)
             return false;
@@ -72,6 +97,8 @@ public class RelicShopService : MonoBehaviour
     public bool TryBeginRoll()
     {
         if (rollActive || Inventory == null || Catalog == null)
+            return false;
+        if (!Inventory.HasAnySeeds())
             return false;
 
         var eligible = BuildEligibleList();

@@ -684,6 +684,7 @@ public class CropSystem : MonoBehaviour
         data.deathGoldStreakMulti = deathGoldStreakMulti;
         data.relicRollDiscount = relicRollDiscount;
         data.everyOtherPersistToggle = everyOtherPersistToggle;
+        ObstacleClearTracker.CaptureTo(data);
     }
 
     /// <summary>
@@ -703,6 +704,7 @@ public class CropSystem : MonoBehaviour
         deathGoldStreakMulti = data.deathGoldStreakMulti > 0f ? data.deathGoldStreakMulti : 1f;
         relicRollDiscount = Mathf.Clamp(data.relicRollDiscount, 0f, 0.5f);
         everyOtherPersistToggle = data.everyOtherPersistToggle;
+        ObstacleClearTracker.ApplyFrom(data);
     }
 
     /// <summary>
@@ -715,6 +717,7 @@ public class CropSystem : MonoBehaviour
         deathGoldStreakMulti = 1f;
         relicRollDiscount = 0f;
         everyOtherPersistToggle = false;
+        ObstacleClearTracker.Reset();
     }
 
     void Update()

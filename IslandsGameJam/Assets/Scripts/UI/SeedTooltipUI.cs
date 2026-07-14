@@ -2,7 +2,8 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// Shared seed tooltip for shop rows and hotbar slots. Shows authored crop identity (not relic-resolved).
+/// Shared tooltip for shop rows, hotbar slots, and plain (non-crop) shop messages.
+/// Crop show path uses authored identity (not relic-resolved).
 /// </summary>
 public class SeedTooltipUI : MonoBehaviour
 {
@@ -19,11 +20,19 @@ public class SeedTooltipUI : MonoBehaviour
             return;
         }
 
+        ShowPlain(
+            string.IsNullOrEmpty(crop.cropName) ? crop.name : crop.cropName,
+            crop.BuildTooltipBody(),
+            near);
+    }
+
+    public void ShowPlain(string title, string body, RectTransform near)
+    {
         if (tooltipName != null)
-            tooltipName.text = string.IsNullOrEmpty(crop.cropName) ? crop.name : crop.cropName;
+            tooltipName.text = title ?? string.Empty;
 
         if (tooltipBody != null)
-            tooltipBody.text = crop.BuildTooltipBody();
+            tooltipBody.text = body ?? string.Empty;
 
         if (tooltipRoot != null)
             tooltipRoot.SetActive(true);

@@ -36,6 +36,7 @@ public class GameSaveData
     public float deathGoldStreakMulti;
     public float relicRollDiscount;
     public bool everyOtherPersistToggle;
+    public int obstaclesClearedCount;
 
     // --- Relic shop ---
     public int relicShopPurchaseCount;

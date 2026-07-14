@@ -1,6 +1,14 @@
 using System.Text;
 using UnityEngine;
 
+public enum SeedRarity
+{
+    Common,
+    Rare,
+    Epic,
+    Legendary,
+}
+
 [CreateAssetMenu(fileName = "CropGrowth", menuName = "Scriptable Objects/CropGrowthGroup")]
 public class CropGrowthSO : ScriptableObject
 {
@@ -19,6 +27,8 @@ public class CropGrowthSO : ScriptableObject
     public Sprite shopIcon;
     public int seedPrice = 10;
     public bool unlockedByDefault;
+    [Tooltip("Unlock roll rarity; higher rarities use lower catalog weights. Ordered unlocks ignore this.")]
+    public SeedRarity rarity = SeedRarity.Common;
 
     public bool TryGetHarvestPattern(out HarvestPattern pattern, int stage = -1)
     {

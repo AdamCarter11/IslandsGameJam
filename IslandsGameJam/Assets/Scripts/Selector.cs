@@ -206,6 +206,18 @@ public class Selector : MonoBehaviour
             return;
         }
 
+        ToolTipUI ui = ResolveToolTipUI();
+        if (ui == null)
+            return;
+
+        var toolMode = ToolModeController.Main;
+        bool inToolMode = toolMode != null && toolMode.CurrentMode != ToolMode.None;
+        if (!inToolMode && ObstacleClearTracker.TryGetCurrentCost(out int clearCost))
+        {
+            ui.Show($"Clear for ${clearCost.ToString("N0")}", transform);
+            return;
+        }
+
         ToolTipObject toolTipObject = obstacle.GetComponent<ToolTipObject>();
         if (toolTipObject == null)
             toolTipObject = obstacle.GetComponentInChildren<ToolTipObject>(true);
@@ -215,10 +227,6 @@ public class Selector : MonoBehaviour
             HideObstacleTooltip();
             return;
         }
-
-        ToolTipUI ui = ResolveToolTipUI();
-        if (ui == null)
-            return;
 
         ui.Show(toolTipObject, transform);
     }
@@ -425,34 +433,25 @@ public class Selector : MonoBehaviour
 
     /// <summary>
     /// If an <see cref="RelicEffectType.EnableClearObstacles"/> relic is owned and the cell has an
-    /// obstacle, spends the effect's gold cost and removes it. Uses the lowest cost among matching effects.
+    /// obstacle, spends the current escalating gold cost and removes it.
     /// </summary>
     static bool TryClearObstacleAt(Vector2Int cell, WorldManager world)
     {
         if (world == null || !world.HasObstacle(cell))
-            return false;
-        if (!RelicEffectUtility.HasEffect(RelicEffectType.EnableClearObstacles))
             return false;
 
         var inventory = GameManager.Main?.Inventory;
         if (inventory == null)
             return false;
 
-        float bestCost = float.PositiveInfinity;
-        RelicEffectUtility.ForEachEffect(RelicEffectType.EnableClearObstacles, effect =>
-        {
-            if (effect.amount < bestCost)
-                bestCost = effect.amount;
-        });
-
-        if (float.IsPositiveInfinity(bestCost))
+        if (!ObstacleClearTracker.TryGetCurrentCost(out int cost))
             return false;
 
-        int cost = Mathf.Max(0, Mathf.RoundToInt(bestCost));
         if (!inventory.TrySpendGold(cost))
             return false;
 
         world.RemoveObstacle(cell);
+        ObstacleClearTracker.RegisterClear();
         SaveGameService.NotifyChanged();
         return true;
     }

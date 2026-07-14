@@ -54,31 +54,37 @@ public class Selector : MonoBehaviour
     {
         if (GameManager.Main == null || !GameManager.Main.IsInitialized)
         {
+            isMouseDown = false;
             HideObstacleTooltip();
             return;
         }
 
         if (GameManager.Main.IsGameOver)
         {
+            isMouseDown = false;
             HideObstacleTooltip();
             return;
         }
 
         // Pause world interaction while the shop or options is open.
-        if (ShopController.Main != null && (ShopController.Main.IsOpen || ShopController.Main.IsOptionsOpen))
+        var shopController = ShopController.Main;
+        if (shopController != null && (shopController.IsOpen || shopController.IsOptionsOpen || shopController.IsRelicChoiceOpen))
         {
+            isMouseDown = false;
             HideObstacleTooltip();
             return;
         }
 
         if (GameManager.Main.ConfirmPanelUI != null && GameManager.Main.ConfirmPanelUI.IsVisible)
         {
+            isMouseDown = false;
             HideObstacleTooltip();
             return;
         }
 
         if (Mouse.current == null)
         {
+            isMouseDown = false;
             HideObstacleTooltip();
             return;
         }
@@ -161,9 +167,15 @@ public class Selector : MonoBehaviour
         else
             UpdateObstacleTooltip(worldPosition, pointerOverUi || isUnlockChunk);
 
+
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
-            isMouseDown = true;
+            if (!pointerOverUi)
+            {
+                isMouseDown = true;
+                OnLeftClicked(worldPosition);
+                lastMousePosition = worldPosition;
+            }
         }
         else if (Mouse.current.leftButton.wasReleasedThisFrame)
         {
@@ -172,8 +184,13 @@ public class Selector : MonoBehaviour
 
         if (isMouseDown && lastMousePosition != worldPosition)
         {
-            if (pointerOverUi)
+            // Prevent unlock chunk prompt on drag and stop drag on UI hover
+            if (pointerOverUi || isUnlockChunk)
+            {
+                isMouseDown = false;
                 return;
+            }
+
             OnLeftClicked(worldPosition);
             lastMousePosition = worldPosition;
         }
@@ -326,7 +343,7 @@ public class Selector : MonoBehaviour
         previewTileInstance.transform.localPosition = Vector3.zero;
         var spriteRenderer = previewTileInstance.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = previewTile;
-        spriteRenderer.sortingOrder = 100;
+        spriteRenderer.sortingOrder = -1;
         previewTileInstance.AddComponent<SpriteRGB>();
         previewTileInstance.AddComponent<AutoMove>().Initialize(localEndPosition);
     }

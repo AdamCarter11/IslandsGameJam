@@ -129,7 +129,7 @@ public class HotbarUI : MonoBehaviour
     static bool WasDigitPressed(int digit)
     {
         var kb = Keyboard.current;
-        return digit switch
+        var wasDigitPressed = digit switch
         {
             0 => kb.digit0Key.wasPressedThisFrame || kb.numpad0Key.wasPressedThisFrame,
             1 => kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame,
@@ -143,6 +143,8 @@ public class HotbarUI : MonoBehaviour
             9 => kb.digit9Key.wasPressedThisFrame || kb.numpad9Key.wasPressedThisFrame,
             _ => false
         };
+        if (wasDigitPressed) ToolModeController.Main.SetMode(ToolMode.None);
+        return wasDigitPressed;
     }
 
     void OnSelectedChanged(int index)

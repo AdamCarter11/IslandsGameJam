@@ -21,6 +21,5 @@ MonoBehaviour:
   deathGold: 50
   shopIcon: {fileID: 21300000, guid: f267afc43e27d3f4d85314c3b299812f, type: 3}
   seedPrice: 25
-  unlockedByDefault: 1
+  unlockedByDefault: 0
   rarity: 0
-  harvestBounceVisual: {fileID: 21300000, guid: f267afc43e27d3f4d85314c3b299812f, type: 3}

@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Shared tooltip for shop rows, hotbar slots, and plain (non-crop) shop messages.
@@ -7,10 +8,13 @@ using UnityEngine;
 /// </summary>
 public class SeedTooltipUI : MonoBehaviour
 {
+    public static bool IsCropPreviewActive { get; private set; }
+
     [SerializeField] GameObject tooltipRoot;
     [SerializeField] TextMeshProUGUI tooltipName;
     [SerializeField] TextMeshProUGUI tooltipBody;
     [SerializeField] RectTransform tooltipFollowRoot;
+    [SerializeField] RawImage previewRawImage;
 
     public void Show(CropGrowthSO crop, RectTransform near)
     {
@@ -20,13 +24,40 @@ public class SeedTooltipUI : MonoBehaviour
             return;
         }
 
-        ShowPlain(
+        ShowContent(
             string.IsNullOrEmpty(crop.cropName) ? crop.name : crop.cropName,
             crop.BuildTooltipBody(),
             near);
+
+        var previewSystem = ShopPreviewSystem.Instance;
+        var previewService = GameManager.Main?.SeedPreviewService;
+        if (previewSystem == null || previewService == null)
+        {
+            SetPreviewVisible(false);
+            return;
+        }
+
+        previewService.PreviewCrop(crop, previewSystem.CenterTile);
+        previewSystem.SetCameraActive(true);
+        IsCropPreviewActive = true;
+        SetPreviewVisible(true);
     }
 
     public void ShowPlain(string title, string body, RectTransform near)
+    {
+        StopPreview();
+        ShowContent(title, body, near);
+    }
+
+    public void Hide()
+    {
+        if (tooltipRoot != null)
+            tooltipRoot.SetActive(false);
+
+        StopPreview();
+    }
+
+    void ShowContent(string title, string body, RectTransform near)
     {
         if (tooltipName != null)
             tooltipName.text = title ?? string.Empty;
@@ -40,10 +71,23 @@ public class SeedTooltipUI : MonoBehaviour
         PositionNear(near);
     }
 
-    public void Hide()
+    void StopPreview()
     {
-        if (tooltipRoot != null)
-            tooltipRoot.SetActive(false);
+        IsCropPreviewActive = false;
+        GameManager.Main?.SeedPreviewService?.Clear();
+        ShopPreviewSystem.Instance?.SetCameraActive(false);
+        SetPreviewVisible(false);
+    }
+
+    void OnDisable()
+    {
+        StopPreview();
+    }
+
+    void SetPreviewVisible(bool visible)
+    {
+        if (previewRawImage != null)
+            previewRawImage.enabled = visible;
     }
 
     void PositionNear(RectTransform near)

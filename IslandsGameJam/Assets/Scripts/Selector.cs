@@ -1,9 +1,7 @@
 using ColorMak3r.Utility;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.LightTransport;
 
 public class Selector : MonoBehaviour
 {
@@ -13,19 +11,13 @@ public class Selector : MonoBehaviour
     [SerializeField]
     private SpriteRenderer selectorRenderer;
     [SerializeField]
-    private SpriteRenderer seedPreview;
+    private SpriteRenderer toolPreview;
     [SerializeField]
     private CameraTarget cameraTarget;
 
     [Header("UI")]
     [SerializeField]
     private ToolTipUI toolTipUI;
-
-    [Header("Crop Preview")]
-    [SerializeField]
-    private Sprite previewTile;
-    [SerializeField]
-    private Transform previewRoot;
 
     [Header("Tool Preview")]
     [SerializeField]
@@ -55,6 +47,8 @@ public class Selector : MonoBehaviour
         if (GameManager.Main == null || !GameManager.Main.IsInitialized)
         {
             isMouseDown = false;
+            ClearCropPreview();
+            ClearToolPreview();
             HideObstacleTooltip();
             return;
         }
@@ -62,6 +56,8 @@ public class Selector : MonoBehaviour
         if (GameManager.Main.IsGameOver)
         {
             isMouseDown = false;
+            ClearCropPreview();
+            ClearToolPreview();
             HideObstacleTooltip();
             return;
         }
@@ -71,6 +67,8 @@ public class Selector : MonoBehaviour
         if (shopController != null && (shopController.IsOpen || shopController.IsOptionsOpen || shopController.IsRelicChoiceOpen))
         {
             isMouseDown = false;
+            ClearCropPreview();
+            ClearToolPreview();
             HideObstacleTooltip();
             return;
         }
@@ -78,6 +76,8 @@ public class Selector : MonoBehaviour
         if (GameManager.Main.ConfirmPanelUI != null && GameManager.Main.ConfirmPanelUI.IsVisible)
         {
             isMouseDown = false;
+            ClearCropPreview();
+            ClearToolPreview();
             HideObstacleTooltip();
             return;
         }
@@ -85,6 +85,8 @@ public class Selector : MonoBehaviour
         if (Mouse.current == null)
         {
             isMouseDown = false;
+            ClearCropPreview();
+            ClearToolPreview();
             HideObstacleTooltip();
             return;
         }
@@ -102,28 +104,23 @@ public class Selector : MonoBehaviour
         switch (ToolModeController.Main.CurrentMode)
         {
             case ToolMode.None:
-                seedPreview.enabled = true;
-                seedPreview.sprite = null;
+                ClearToolPreview();
                 break;
             case ToolMode.Water:
-                seedPreview.sprite = waterSprite;
-                seedPreview.enabled = true;
-                ClearPatternPreview();
+                ShowToolPreview(waterSprite);
+                ClearCropPreview();
                 break;
             case ToolMode.Harvest:
-                seedPreview.sprite = harvestSprite;
-                seedPreview.enabled = true;
-                ClearPatternPreview();
+                ShowToolPreview(harvestSprite);
+                ClearCropPreview();
                 break;
             case ToolMode.Destroy:
-                seedPreview.sprite = destroySprite;
-                seedPreview.enabled = true;
-                ClearPatternPreview();
+                ShowToolPreview(destroySprite);
+                ClearCropPreview();
                 break;
             case ToolMode.Fertilize:
-                seedPreview.sprite = fertilizeSprite;
-                seedPreview.enabled = true;
-                ClearPatternPreview();
+                ShowToolPreview(fertilizeSprite);
+                ClearCropPreview();
                 break;
         }
 
@@ -138,8 +135,7 @@ public class Selector : MonoBehaviour
             var cost = GameManager.Main.LandUnlockSystem.GetCurrentCost();
             GameManager.Main.LandCostUI.UpdateText($"Unlock for\n${cost.ToString("N0")}");
             GameManager.Main.LandCostUI.Show();
-            ClearPreview();
-            cachedPattern = null;
+            ClearCropPreview();
         }
         else
         {
@@ -148,12 +144,15 @@ public class Selector : MonoBehaviour
             {
                 if (world.HasObstacle(worldPosition))
                 {
-                    ClearPreview();
-                    cachedPattern = null;
+                    ClearCropPreview();
                 }
                 else if (world.TryGetTerrainUnit(worldPosition, out _))
                 {
                     TryPreviewCrop(worldPosition);
+                }
+                else
+                {
+                    ClearCropPreview();
                 }
             }
             GameManager.Main.LandCostUI.Hide();
@@ -269,94 +268,67 @@ public class Selector : MonoBehaviour
     private void TryPreviewCrop(Vector2Int worldPosition)
     {
         Vector2Int cell = worldPosition;
-        Vector2Int chunk = worldPosition.SnapToGrid(3, true).ToInt();
         var cropSystem = GameManager.Main.CropSystem;
         var world = GameManager.Main.WorldManager;
-        var landUnlocker = GameManager.Main.LandUnlockSystem;
-        var confirmPanel = GameManager.Main.ConfirmPanelUI;
         var inventory = GameManager.Main.Inventory;
+        var previewService = GameManager.Main.SeedPreviewService;
 
-        if (cropSystem == null || world == null)
+        if (cropSystem == null || world == null || previewService == null)
         {
+            ClearCropPreview();
             return;
         }
 
-        if (world.TryGetCrop(cell, out var cropCell) && cropCell.crop.TryGetHarvestPattern(out var pattern))
+        if (world.TryGetCrop(cell, out var cropCell) && cropCell?.crop != null)
         {
-            PreviewPattern(pattern, worldPosition);
-            seedPreview.sprite = null;
+            previewService.PreviewCrop(cropCell.crop, worldPosition);
         }
-        else if (inventory.GetCurrentHarvestPattern(out pattern, out var seedSprite))
+        else if (TryGetSelectedCrop(inventory, out CropGrowthSO selectedCrop))
         {
-            seedPreview.sprite = seedSprite;
-            PreviewPattern(pattern, worldPosition);
+            previewService.PreviewCrop(selectedCrop, worldPosition);
         }
         else
         {
-            ClearPreview();
-            cachedPattern = null;
+            ClearCropPreview();
         }
     }
 
-    private HarvestPattern cachedPattern;
-    private void PreviewPattern(HarvestPattern pattern, Vector2Int worldPosition)
+    static bool TryGetSelectedCrop(Inventory inventory, out CropGrowthSO crop)
     {
-        previewRoot.transform.position = (Vector2)worldPosition;
+        crop = null;
+        if (inventory == null)
+            return false;
 
-        if (cachedPattern == pattern)
-        {
+        var selected = inventory.GetSlot(inventory.SelectedSlot);
+        if (selected == null || selected.IsEmpty)
+            return false;
+
+        crop = selected.crop;
+        return crop != null;
+    }
+
+    private void ClearCropPreview()
+    {
+        if (SeedTooltipUI.IsCropPreviewActive)
             return;
-        }
-        cachedPattern = pattern;
 
-        ClearPatternPreview();
-
-        if (pattern.kind == HarvestPatternKind.Offsets)
-        {
-            foreach (var offset in pattern.offsets)
-            {
-                SpawnPreviewTile(new Vector2Int(offset.x, offset.y));
-            }
-        }
-        else if (pattern.kind == HarvestPatternKind.Ray)
-        {
-            Vector2Int current = Vector2Int.zero;
-            for (int i = 0; i < pattern.maxSteps; i++)
-            {
-                current += pattern.direction;
-                SpawnPreviewTile(current);
-            }
-        }
+        GameManager.Main?.SeedPreviewService?.Clear();
     }
 
-    private void ClearPreview()
+    private void ShowToolPreview(Sprite sprite)
     {
-        seedPreview.sprite = null;
-        ClearPatternPreview();
+        if (toolPreview == null)
+            return;
+
+        toolPreview.enabled = true;
+        toolPreview.sprite = sprite;
     }
 
-    private void ClearPatternPreview()
+    private void ClearToolPreview()
     {
-        for (int i = previewRoot.transform.childCount - 1; i >= 0; i--)
-        {
-            GameObject child = previewRoot.transform.GetChild(i).gameObject;
-            Destroy(child);
-        }
+        if (toolPreview != null)
+            toolPreview.sprite = null;
     }
-
-    private void SpawnPreviewTile(Vector2Int localEndPosition)
-    {
-        GameObject previewTileInstance = new GameObject("PreviewTile");
-        previewTileInstance.transform.SetParent(previewRoot, false);
-        previewTileInstance.transform.localPosition = Vector3.zero;
-        var spriteRenderer = previewTileInstance.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = previewTile;
-        spriteRenderer.sortingOrder = -1;
-        previewTileInstance.AddComponent<SpriteRGB>();
-        previewTileInstance.AddComponent<AutoMove>().Initialize(localEndPosition);
-    }
-
-
 
     private void OnLeftClicked(Vector2Int worldPosition)
     {

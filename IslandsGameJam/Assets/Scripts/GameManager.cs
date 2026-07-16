@@ -32,6 +32,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LandUnlockSystem landUnlockSystem;
     public LandUnlockSystem LandUnlockSystem => landUnlockSystem;
 
+    [SerializeField] private SeedPreviewService seedPreviewService;
+    public SeedPreviewService SeedPreviewService => seedPreviewService;
+
     [Header("UI")]
     [SerializeField] private ConfirmPanelUI confirmPanelUI;
     public ConfirmPanelUI ConfirmPanelUI => confirmPanelUI;
@@ -224,6 +227,11 @@ public class GameManager : MonoBehaviour
     {
         relicShopService = shopService;
         relicShopCatalog = shopCatalog;
+    }
+
+    public void EditorAssignSeedPreviewService(SeedPreviewService service)
+    {
+        seedPreviewService = service;
     }
 #endif
 }

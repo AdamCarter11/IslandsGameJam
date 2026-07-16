@@ -30,6 +30,10 @@ public class CropGrowthSO : ScriptableObject
     [Tooltip("Unlock roll rarity; higher rarities use lower catalog weights. Ordered unlocks ignore this.")]
     public SeedRarity rarity = SeedRarity.Common;
 
+    [Header("Chain harvest")]
+    [Tooltip("Distinct crops that must chain onto this crop in one harvest before it can be collected. 0 = normal.")]
+    public int requiredChainLinks = 0;
+
     public bool TryGetHarvestPattern(out HarvestPattern pattern, int stage = -1)
     {
         pattern = null;
@@ -85,6 +89,14 @@ public class CropGrowthSO : ScriptableObject
 
         sb.Append("Drought: dies in ").Append(FormatSeconds(dryDeathTime))
             .Append(" (").Append(deathGold).Append(" gold)");
+
+        if (requiredChainLinks > 0)
+        {
+            sb.AppendLine().Append("<b>Requires ")
+                .Append(requiredChainLinks)
+                .Append(requiredChainLinks == 1 ? " plant" : " plants")
+                .Append(" to chain onto this crop.</b>");
+        }
 
         return sb.ToString();
     }

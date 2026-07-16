@@ -28,6 +28,7 @@ public class CropSystem : MonoBehaviour
     readonly List<Vector2Int> plantedPositions = new List<Vector2Int>();
     readonly Queue<Vector2Int> harvestQueue = new Queue<Vector2Int>();
     readonly HashSet<Vector2Int> harvestVisited = new HashSet<Vector2Int>();
+    readonly Dictionary<Vector2Int, HashSet<Vector2Int>> chainLinkSources = new Dictionary<Vector2Int, HashSet<Vector2Int>>();
     readonly List<Vector2Int> patternBuffer = new List<Vector2Int>();
     readonly List<Vector2Int> fertilizedPos = new List<Vector2Int>();
 
@@ -218,6 +219,9 @@ public class CropSystem : MonoBehaviour
         if (!world.TryGetCrop(origin, out CropCell originCell) || originCell == null || !originCell.IsReady)
             return;
 
+        if (originCell.crop != null && originCell.crop.requiredChainLinks > 0)
+            return;
+
         StartCoroutine(HarvestChainRoutine(origin));
     }
 
@@ -242,6 +246,7 @@ public class CropSystem : MonoBehaviour
 
             harvestQueue.Clear();
             harvestVisited.Clear();
+            chainLinkSources.Clear();
 
             Sprite originSprite = null;
             if (world.TryGetCrop(origin, out CropCell originCell) && originCell?.crop != null)
@@ -348,7 +353,7 @@ public class CropSystem : MonoBehaviour
 
         EnqueuePattern(stage.harvestPattern, pos, world);
         EnqueueExtraPatternsFromRelics(pos, crop, world);
-        EnqueueMirrorOppositeFromRelics(pos, stage.harvestPattern, crop, context);
+        EnqueueMirrorOppositeFromRelics(pos, stage.harvestPattern, crop, context, world);
 
         world.ClearCrop(pos);
         UnregisterPlanted(pos);
@@ -562,19 +567,18 @@ public class CropSystem : MonoBehaviour
         patternBuffer.Clear();
         HarvestPatternResolver.Resolve(pattern, origin, world, patternBuffer);
         for (int i = 0; i < patternBuffer.Count; i++)
-        {
-            Vector2Int target = patternBuffer[i];
-            if (!harvestVisited.Contains(target))
-                harvestQueue.Enqueue(target);
-        }
+            TryEnqueueHarvestTarget(origin, patternBuffer[i], world);
     }
 
     void EnqueueMirrorOppositeFromRelics(
         Vector2Int origin,
         HarvestPattern pattern,
         CropGrowthSO harvestedCrop,
-        RelicEffectContext context)
+        RelicEffectContext context,
+        WorldManager world)
     {
+        if (world == null)
+            return;
         if (!RelicEffectUtility.IsSingleOffsetPattern(pattern))
             return;
         if (!RelicEffectUtility.HasEffect(RelicEffectType.OnHarvestMirrorOpposite, harvestedCrop, context))
@@ -582,8 +586,40 @@ public class CropSystem : MonoBehaviour
 
         cellOffset offset = pattern.offsets[0];
         Vector2Int opposite = new Vector2Int(origin.x - offset.x, origin.y - offset.y);
-        if (!harvestVisited.Contains(opposite))
-            harvestQueue.Enqueue(opposite);
+        TryEnqueueHarvestTarget(origin, opposite, world);
+    }
+
+    /// <summary>
+    /// Enqueues a harvest target, or accumulates distinct chain-link sources until the crop threshold is met.
+    /// </summary>
+    void TryEnqueueHarvestTarget(Vector2Int from, Vector2Int to, WorldManager world)
+    {
+        if (harvestVisited.Contains(to))
+            return;
+        if (!world.TryGetCrop(to, out CropCell cell) || cell == null || !cell.IsReady)
+            return;
+
+        CropGrowthSO crop = cell.crop;
+        if (crop == null)
+            return;
+
+        if (crop.requiredChainLinks <= 0)
+        {
+            harvestQueue.Enqueue(to);
+            return;
+        }
+
+        if (!chainLinkSources.TryGetValue(to, out HashSet<Vector2Int> sources))
+        {
+            sources = new HashSet<Vector2Int>();
+            chainLinkSources[to] = sources;
+        }
+
+        if (!sources.Add(from))
+            return;
+
+        if (sources.Count >= crop.requiredChainLinks)
+            harvestQueue.Enqueue(to);
     }
 
     /// <summary>
@@ -661,6 +697,7 @@ public class CropSystem : MonoBehaviour
         plantedPositions.Clear();
         harvestQueue.Clear();
         harvestVisited.Clear();
+        chainLinkSources.Clear();
         IsHarvestBusy = false;
 
         var world = GameManager.Main?.WorldManager;
